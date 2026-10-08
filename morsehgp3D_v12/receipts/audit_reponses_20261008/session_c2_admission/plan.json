@@ -1,0 +1,45 @@
+{
+ "schema": "ehgp.v12.session_plan.v1",
+ "note": "v12 session C2 (MES-C rejoue) : les 159 petits nuages de g4_small avec le Pool a equipe dimensionnee (5b3362bbd) et le lot T2-d-C (02b735d6b), voies CPU et appareil, K5 et K10, 4 et 48 fils, trois tours ; familles difficiles seules a 48 fils ; verdicts C1-C3 ecrits d'avance, cohorte C3 fermee (24dec7b85)",
+ "default_build": false,
+ "python_packages": "none",
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {
+   "name": "mes_c",
+   "timeout_seconds": 2150,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py",
+    "--src",
+    "{src}",
+    "--travail",
+    "{build}/c",
+    "--archive",
+    "{data}/g4_small.tar",
+    "--deballage",
+    "{build}/c_small",
+    "--sortie",
+    "{out}/c",
+    "--voies",
+    "cpu,appareil",
+    "--k",
+    "5,10",
+    "--fils",
+    "4,48",
+    "--tours",
+    "3",
+    "--tours-difficiles",
+    "2",
+    "--fils-difficiles",
+    "48",
+    "--delai-global",
+    "2050",
+    "--delai-cas",
+    "120",
+    "--jobs",
+    "44"
+   ]
+  }
+ ]
+}

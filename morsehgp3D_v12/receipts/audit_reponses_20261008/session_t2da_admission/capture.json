@@ -1,0 +1,225 @@
+{
+  "commit": "5f5c0c83fcb7df842996f584e3870bfbf3017d89",
+  "before_commit": "27eca166b9b678bd97c9469e7071823097fc0c0b",
+  "sources": {
+    "morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py": "ea9023cfbdd791b651e7b5f4299050bc0e6f9285c6901306b67b85805e335faa",
+    "morsehgp3D_v12/bench/full_probe.cpp": "e3a54104a2e0db3e669751ed407e0935f601a721ac702413eb206d3f597c3143",
+    "morsehgp3D_v12/src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/io/input.cpp": "36d842ec4e844d91d9fd29f17eeaeee2aaa4b99b7c59cdcc384631847db30f99",
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02",
+    "morsehgp3D_v12/src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+    "morsehgp3D_v12/src/tower/pipeline.hpp": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f"
+  },
+  "cohort_source": "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_full_contrelecture/capture.json",
+  "cohort_source_sha256": "295270d48d84efd9baa1ef6b2caf795a41c152ff7998e79c00c93fb93726c669",
+  "cohort": [
+    {
+      "name": "kitti_ng_00_000648",
+      "sites": 77965
+    },
+    {
+      "name": "kitti_ng_00_000660",
+      "sites": 71483
+    },
+    {
+      "name": "kitti_ng_00_001464",
+      "sites": 74736
+    },
+    {
+      "name": "kitti_ng_00_001502",
+      "sites": 64995
+    },
+    {
+      "name": "kitti_ng_00_001880",
+      "sites": 80607
+    },
+    {
+      "name": "kitti_ng_00_001896",
+      "sites": 95586
+    },
+    {
+      "name": "kitti_ng_00_003612",
+      "sites": 70537
+    },
+    {
+      "name": "kitti_ng_00_003624",
+      "sites": 72836
+    },
+    {
+      "name": "kitti_ng_02_000620",
+      "sites": 52403
+    },
+    {
+      "name": "kitti_ng_02_001600",
+      "sites": 67585
+    },
+    {
+      "name": "kitti_ng_02_001604",
+      "sites": 67805
+    },
+    {
+      "name": "kitti_ng_02_001606",
+      "sites": 64740
+    },
+    {
+      "name": "kitti_ng_02_001610",
+      "sites": 67864
+    },
+    {
+      "name": "kitti_ng_05_002060",
+      "sites": 66456
+    },
+    {
+      "name": "kitti_ng_05_002064",
+      "sites": 62859
+    },
+    {
+      "name": "kitti_ng_05_002748",
+      "sites": 50136
+    },
+    {
+      "name": "kitti_ng_06_000770",
+      "sites": 46561
+    },
+    {
+      "name": "kitti_ng_06_000772",
+      "sites": 49668
+    },
+    {
+      "name": "kitti_ng_06_000774",
+      "sites": 53754
+    },
+    {
+      "name": "kitti_ng_06_000780",
+      "sites": 49628
+    },
+    {
+      "name": "kitti_ng_06_000798",
+      "sites": 37543
+    },
+    {
+      "name": "kitti_ng_06_000800",
+      "sites": 38341
+    },
+    {
+      "name": "kitti_ng_06_000804",
+      "sites": 47658
+    },
+    {
+      "name": "kitti_ng_06_000806",
+      "sites": 50884
+    },
+    {
+      "name": "kitti_ng_08_000000",
+      "sites": 39885
+    },
+    {
+      "name": "kitti_ng_08_000100",
+      "sites": 35551
+    },
+    {
+      "name": "kitti_ng_08_000200",
+      "sites": 45845
+    },
+    {
+      "name": "kitti_ng_08_000246",
+      "sites": 41691
+    },
+    {
+      "name": "kitti_ng_08_000691",
+      "sites": 61198
+    },
+    {
+      "name": "kitti_ng_08_001176",
+      "sites": 67114
+    },
+    {
+      "name": "kitti_ng_08_001193",
+      "sites": 80433
+    },
+    {
+      "name": "kitti_ng_08_001302",
+      "sites": 48925
+    },
+    {
+      "name": "kitti_ng_08_001847",
+      "sites": 33179
+    },
+    {
+      "name": "kitti_ng_08_002119",
+      "sites": 99099
+    },
+    {
+      "name": "kitti_ng_08_002554",
+      "sites": 72426
+    },
+    {
+      "name": "kitti_ng_10_000424",
+      "sites": 69106
+    },
+    {
+      "name": "kitti_ng_10_000430",
+      "sites": 73576
+    }
+  ],
+  "ng_sites": {
+    "ng00": 39885,
+    "ng01": 35551,
+    "ng02": 45845
+  },
+  "returned_files": 73,
+  "returned_tree_sha256": "cb75e6fb7bd9530b92c5aaf30f7b69ab6b55140b1d5b60c561eb207224d528e2",
+  "report_sha256": "bb1f8d4d48f443b32100330c760a84e3ce5c7f7a84fd7931e60f984ad51f7037",
+  "archive_sha256": "ec185db3b8d89217844b85873c393422981dfd0b2e4be1f40cf7c498fbff127e",
+  "plan_sha256": "a94ec8d84cab8767fa716e71dc0b12325e3cd2c80ae7b12b7484a977fc0bd659",
+  "before_archive_sha256": "929c37449f727d38e5c6df325a9bb254d9eb7c0ca4f27d7991772df37a25110c",
+  "configuration": {
+    "threads": 48,
+    "rounds": 5,
+    "passes": 10,
+    "session_processes": 3,
+    "session_rounds": 2,
+    "budget_device": "partage"
+  },
+  "scope": "metadata and existing JSONL only; no native or payload reads",
+  "before_sources": {
+    "morsehgp3D_v12/bench/full_probe.cpp": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+  },
+  "plan_pilote": {
+    "name": "t2da_pilote",
+    "timeout_seconds": 1000,
+    "argv": [
+      "python3",
+      "{src}/morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py",
+      "tout",
+      "--src",
+      "{src}",
+      "--travail",
+      "{build}/t2da",
+      "--donnees",
+      "{data}",
+      "--sortie",
+      "{out}/t2da",
+      "--avant-archive",
+      "{data}/v12_src_27eca166b.tar.gz",
+      "--avant-sha256",
+      "929c37449f727d38e5c6df325a9bb254d9eb7c0ca4f27d7991772df37a25110c",
+      "--archive-v12set",
+      "{data}/g4_kitti_v12set_xyz.tar",
+      "--fils",
+      "48",
+      "--jobs",
+      "44",
+      "--processus",
+      "5",
+      "--passes",
+      "10",
+      "--processus-session",
+      "3",
+      "--delai",
+      "300"
+    ]
+  },
+  "captured_utc": "2026-10-08T08:00:26.902892+00:00"
+}

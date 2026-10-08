@@ -1,0 +1,22 @@
+{
+  "captured_utc": "2026-10-08T07:33:50.969795+00:00",
+  "commit": "bcd742c0517f38b33ef85e212c94414377998157",
+  "scope": "Lecture des blobs Git ; aucun corps natif ex\u00e9cut\u00e9 ; mod\u00e8le des d\u00e9pendances et des feuilles.",
+  "sources": {
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/tower/forest.hpp": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+    "morsehgp3D_v12/src/tower/forest_build.cpp": "4180abf4d6afa09cf7abd6a3c242c481c5a4f301fd8a6fcc9fc44feb24a16805",
+    "morsehgp3D_v12/src/tower/forest_contract.cpp": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+    "morsehgp3D_v12/src/tower/forest_internal.hpp": "455b3c98ac7e5f89af8041f33841f3904eaa0e3181f3d823bde3b60e55a3947c",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp": "2d12b4bd459a0c1ec710117bb94580f84f723ba7cf06d648e353613682c7fcf0",
+    "morsehgp3D_v12/src/tower/forest_stages.cpp": "5ed33d69bb63fcfa2a7c65c0a9fbed41dc00762e9052446fb9b6ef61f0eb2d6f",
+    "morsehgp3D_v12/src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+    "morsehgp3D_v12/src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+    "morsehgp3D_v12/src/tower/pipeline.hpp": "22247870f74e66814b9339c7977df58ff5510592803ed4995f38d02531ede99f",
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02",
+    "morsehgp3D_v12/src/tower/registry_branches.cpp": "b9063de6472f72761d8ec8b64ce84df955aa3858c3f0ae7cf2e8ceddbf7a0cf7",
+    "morsehgp3D_v12/src/tower/stage.cpp": "7ee10167640865594ecd02133b2e8f29f9c18ebdb850c83582cd875e8ca68b38",
+    "morsehgp3D_v12/src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+    "morsehgp3D_v12/tests/tower/pipeline_unit.cpp": "d87638c109aa19a45ec5f480e8c7e7ebb52e210d051cba8acc1615ff168f5647"
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "archive_files": {
+    "results/MANIFEST.sha256": {
+      "bytes": 14449,
+      "sha256": "0340c004bf520c655bd2272d1c9075cca3ba3b9c01ddaf5fad6396bee9c4bd80"
+    },
+    "results/cmd/001_t2da_pilote/files/t2da/rapport_t2d_a.json": {
+      "bytes": 783250,
+      "sha256": "bb1f8d4d48f443b32100330c760a84e3ce5c7f7a84fd7931e60f984ad51f7037"
+    },
+    "results/commands.tsv": {
+      "bytes": 231,
+      "sha256": "252d35a0ce05fdfff363f8a4a0306854fa138ac15320155eeeb638ba1ceb643c"
+    }
+  },
+  "before_archive_reported": "929c37449f727d38e5c6df325a9bb254d9eb7c0ca4f27d7991772df37a25110c",
+  "binary_hashes_declared": {
+    "apres": "f74f852e453ec8e75e58b69bfef4cd286b3f990a68031961d7f722c35b089f9f",
+    "avant": "20231e1b7897fd4aa741a9088e92abfed7c0280c530a35cbec80aa08376e7ea3"
+  },
+  "closure": {
+    "after_status": "TERMINATED",
+    "before_status": "RUNNING",
+    "closure": "stopped",
+    "done": 3,
+    "errors_count": 0,
+    "guest_guard_intact": true,
+    "reserve_released": true,
+    "results_bytes": 440058,
+    "results_sha256": "ec185db3b8d89217844b85873c393422981dfd0b2e4be1f40cf7c498fbff127e",
+    "results_verified": true,
+    "retrieval": "downloaded",
+    "status": "failed_remote",
+    "stop_attempts": 1,
+    "stop_exit_code": 0,
+    "targeted_shutdown_certified": true,
+    "worker_exit_code": 1
+  },
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "1062804",
+      "name": "socle_ctest",
+      "status": "ok",
+      "timeout_seconds": "300",
+      "wall_seconds": "141.465"
+    },
+    {
+      "exit_code": "0",
+      "index": "1",
+      "max_rss_kb": "2770100",
+      "name": "t2da_pilote",
+      "status": "ok",
+      "timeout_seconds": "1000",
+      "wall_seconds": "297.856"
+    },
+    {
+      "exit_code": "124",
+      "index": "2",
+      "max_rss_kb": "1079000",
+      "name": "lidar_ctest",
+      "status": "timeout",
+      "timeout_seconds": "180",
+      "wall_seconds": "180.003"
+    },
+    {
+      "exit_code": "0",
+      "index": "3",
+      "max_rss_kb": "350816",
+      "name": "mutants_tour",
+      "status": "ok",
+      "timeout_seconds": "180",
+      "wall_seconds": "96.721"
+    }
+  ],
+  "data_declared": [
+    {
+      "name": "g4_kitti_v12set_xyz.tar",
+      "sha256": "0f94df1969ebacbaa863367bff4b686487006c98a755cbfb3263d4968f369255",
+      "size": 36116480
+    },
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "size": 159540
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "size": 142204
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "size": 183380
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "v12_src_27eca166b.tar.gz",
+      "sha256": "929c37449f727d38e5c6df325a9bb254d9eb7c0ca4f27d7991772df37a25110c",
+      "size": 7144003
+    }
+  ],
+  "data_manifest_sha256": "2988e1bb426977df433d6299a1cdf50d8b9715a3f629b77a98d7f47c42de607d",
+  "gate_summaries": {
+    "lidar_ctest": {
+      "finished": 6,
+      "passed": 6,
+      "selected": 7,
+      "skipped": 0,
+      "started_without_finish": [
+        "mhgp12_tower_chain_m0"
+      ]
+    },
+    "mutants_tour": {
+      "finished": 1,
+      "passed": 1,
+      "selected": 1,
+      "skipped": 0,
+      "started_without_finish": []
+    },
+    "socle_ctest": {
+      "finished": 719,
+      "passed": 719,
+      "selected": 719,
+      "skipped": 0,
+      "started_without_finish": []
+    }
+  },
+  "helpers": {
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_l1_recuperation/check.py": {
+      "bytes": 4311,
+      "sha256": "8a80b809106399443ab6dce697e62c083e59241f6a6d1908b36bf087e755d30b"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_mes_c_provenance/source_check.py": {
+      "bytes": 2964,
+      "sha256": "1d863609d8f6b019cb39753232cf34e0bc3facb7e1ee27971c5941773ba4e070"
+    }
+  },
+  "launch_started_utc": "2026-10-08T07:26:35Z",
+  "licensed_payload_read": false,
+  "local_files": {
+    "DONE": {
+      "bytes": 2,
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    "package/data/SHA256SUMS": {
+      "bytes": 691,
+      "sha256": "2988e1bb426977df433d6299a1cdf50d8b9715a3f629b77a98d7f47c42de607d"
+    },
+    "package/package.tar.gz": {
+      "bytes": 7216943,
+      "sha256": "8cd6e5facefc6a1ef0ffbaa2a4593f2e3ca573f669dcc5d36ef6bcecaec1e8d5"
+    },
+    "package/plan.json": {
+      "bytes": 3340,
+      "sha256": "a94ec8d84cab8767fa716e71dc0b12325e3cd2c80ae7b12b7484a977fc0bd659"
+    },
+    "package/plan.sh": {
+      "bytes": 981,
+      "sha256": "bf0c537422b7255c68b557948ed73964e0756c879478c6f30067b2e1f06154a0"
+    },
+    "receipt.json": {
+      "bytes": 34441,
+      "sha256": "975b8649c05ff74c6ae7bb0b3cc52ba4213287127518347ea0931170751b7fec"
+    },
+    "results/results.tar.gz": {
+      "bytes": 440058,
+      "sha256": "ec185db3b8d89217844b85873c393422981dfd0b2e4be1f40cf7c498fbff127e"
+    }
+  },
+  "manifest_count": 128,
+  "native_delta": [
+    "morsehgp3D_v12/src/sched/pool.cpp",
+    "morsehgp3D_v12/src/tower/forest_build.cpp",
+    "morsehgp3D_v12/src/tower/forest_internal.hpp",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp",
+    "morsehgp3D_v12/src/tower/forest_stages.cpp",
+    "morsehgp3D_v12/src/tower/module.cmake",
+    "morsehgp3D_v12/src/tower/passes.cpp",
+    "morsehgp3D_v12/src/tower/pipeline.cpp",
+    "morsehgp3D_v12/src/tower/pipeline.hpp",
+    "morsehgp3D_v12/src/tower/pipeline_run.cpp",
+    "morsehgp3D_v12/src/tower/registry_branches.cpp",
+    "morsehgp3D_v12/src/tower/stage.cpp",
+    "morsehgp3D_v12/src/tower/stage.hpp",
+    "morsehgp3D_v12/src/tower/tower.hpp"
+  ],
+  "native_execution": false,
+  "pilot_report_verdict": "adopte",
+  "pilot_source": {
+    "bytes": 43214,
+    "path": "morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py",
+    "sha256": "ea9023cfbdd791b651e7b5f4299050bc0e6f9285c6901306b67b85805e335faa"
+  },
+  "raw_jsonl_count": 61,
+  "remote_access": false,
+  "source_archives": {
+    "apres": {
+      "files_exact": 356,
+      "package_bytes": 7216943,
+      "package_sha256": "8cd6e5facefc6a1ef0ffbaa2a4593f2e3ca573f669dcc5d36ef6bcecaec1e8d5",
+      "plan_sha256": "a94ec8d84cab8767fa716e71dc0b12325e3cd2c80ae7b12b7484a977fc0bd659",
+      "scopes": [
+        "morsehgp3D_v12/src/",
+        "morsehgp3D_v12/bench/",
+        "morsehgp3D_v12/tests/",
+        "morsehgp3D_v12/cmake/",
+        "morsehgp3D_v12/CMakeLists.txt"
+      ],
+      "source_git": "5f5c0c83fcb7df842996f584e3870bfbf3017d89",
+      "source_inventory_sha256": "3d57df5af90d10320cd4eb92d2546ecd78e6b328f2a231fe1650ab00d9cdb27c"
+    },
+    "avant": {
+      "files_exact": 351,
+      "package_bytes": 7144003,
+      "package_sha256": "929c37449f727d38e5c6df325a9bb254d9eb7c0ca4f27d7991772df37a25110c",
+      "plan_sha256": "a94ec8d84cab8767fa716e71dc0b12325e3cd2c80ae7b12b7484a977fc0bd659",
+      "scopes": [
+        "morsehgp3D_v12/src/",
+        "morsehgp3D_v12/bench/",
+        "morsehgp3D_v12/tests/",
+        "morsehgp3D_v12/cmake/",
+        "morsehgp3D_v12/CMakeLists.txt"
+      ],
+      "source_git": "27eca166b9b678bd97c9469e7071823097fc0c0b",
+      "source_inventory_sha256": "52670594dc7eb1b8bfaa4f062cb0a53573aa84a69748b8c37168c37b9bdc1841"
+    }
+  }
+}

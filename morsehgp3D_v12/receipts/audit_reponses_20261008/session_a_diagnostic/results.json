@@ -1,0 +1,874 @@
+{
+  "journaux": 36,
+  "native_calls": 0,
+  "ng": {
+    "ng00": {
+      "apres": {
+        "diagnostic": {
+          "derniers_marqueurs": {
+            "1:R": 1,
+            "2:R": 42,
+            "3:R": 1,
+            "4:R": 1
+          },
+          "fins_medianes_ns": [
+            [
+              61997794,
+              63177193,
+              63980003,
+              0,
+              65094123
+            ],
+            [
+              61849814,
+              62708664,
+              64190863,
+              65370653,
+              66258522
+            ],
+            [
+              57495895,
+              58990065,
+              61438514,
+              65764712,
+              65213332
+            ],
+            [
+              50012678,
+              52622146,
+              56537957,
+              63721353,
+              62508403
+            ],
+            [
+              38979434,
+              44504171,
+              48402329,
+              59762593,
+              56737826
+            ]
+          ],
+          "passes": 45,
+          "sous_100ms": 26,
+          "stats": {
+            "G_ns": {
+              "maximum": 63642253,
+              "mediane": 61997794,
+              "minimum": 57863585
+            },
+            "dernier_moins_noyau5_ns": {
+              "maximum": 23198309,
+              "mediane": 21901871,
+              "minimum": 15491533
+            },
+            "fin_moins_dernier_marqueur_ns": {
+              "maximum": 1564490,
+              "mediane": 1464539,
+              "minimum": 1395329
+            },
+            "mur_ns": {
+              "maximum": 108236421,
+              "mediane": 99743798,
+              "minimum": 97117479
+            },
+            "noyau5_moins_g5_ns": {
+              "maximum": 13016975,
+              "mediane": 5568388,
+              "minimum": 4532919
+            },
+            "queue_ns": {
+              "maximum": 15048584,
+              "mediane": 5531917,
+              "minimum": 4607878
+            },
+            "residu_ns": {
+              "maximum": 2987859,
+              "mediane": 2387539,
+              "minimum": 34620
+            },
+            "tour_moins_fin_ns": {
+              "maximum": 2987659,
+              "mediane": 2387329,
+              "minimum": 34520
+            },
+            "transitions_ns": {
+              "maximum": 390,
+              "mediane": 200,
+              "minimum": 90
+            }
+          }
+        },
+        "medianes_processus_ns": [
+          101677604,
+          99478108,
+          99743798,
+          100047887,
+          98304128
+        ],
+        "mur_ns": {
+          "maximum": 108236421,
+          "mediane": 99743798,
+          "minimum": 97117479
+        }
+      },
+      "avant": {
+        "medianes_processus_ns": [
+          147114964,
+          148176278,
+          148360048,
+          147466298,
+          147387998
+        ],
+        "mur_ns": {
+          "maximum": 150379906,
+          "mediane": 147387998,
+          "minimum": 145407354
+        }
+      }
+    },
+    "ng01": {
+      "apres": {
+        "diagnostic": {
+          "derniers_marqueurs": {
+            "1:R": 1,
+            "2:R": 29,
+            "2:V": 3,
+            "3:R": 6,
+            "4:R": 5,
+            "5:R": 1
+          },
+          "fins_medianes_ns": [
+            [
+              48136430,
+              49184470,
+              50021938,
+              0,
+              51192596
+            ],
+            [
+              47734980,
+              48860280,
+              49839259,
+              51181778,
+              52034938
+            ],
+            [
+              43636411,
+              46225799,
+              48362320,
+              51560269,
+              51504099
+            ],
+            [
+              38905884,
+              41374572,
+              44771041,
+              50224159,
+              49287780
+            ],
+            [
+              30876227,
+              35804975,
+              39186993,
+              47262100,
+              45238701
+            ]
+          ],
+          "passes": 45,
+          "sous_100ms": 45,
+          "stats": {
+            "G_ns": {
+              "maximum": 58009216,
+              "mediane": 48204220,
+              "minimum": 45436321
+            },
+            "dernier_moins_noyau5_ns": {
+              "maximum": 23301440,
+              "mediane": 16194343,
+              "minimum": 11364885
+            },
+            "fin_moins_dernier_marqueur_ns": {
+              "maximum": 1653450,
+              "mediane": 1239940,
+              "minimum": 1178160
+            },
+            "mur_ns": {
+              "maximum": 98040149,
+              "mediane": 81008256,
+              "minimum": 78972997
+            },
+            "noyau5_moins_g5_ns": {
+              "maximum": 11367755,
+              "mediane": 5088248,
+              "minimum": 568350
+            },
+            "queue_ns": {
+              "maximum": 14371984,
+              "mediane": 5163098,
+              "minimum": 4080728
+            },
+            "residu_ns": {
+              "maximum": 2645749,
+              "mediane": 50000,
+              "minimum": 35710
+            },
+            "tour_moins_fin_ns": {
+              "maximum": 2645569,
+              "mediane": 49910,
+              "minimum": 35430
+            },
+            "transitions_ns": {
+              "maximum": 400,
+              "mediane": 190,
+              "minimum": 80
+            }
+          }
+        },
+        "medianes_processus_ns": [
+          82602073,
+          81042676,
+          80648086,
+          80660606,
+          81028536
+        ],
+        "mur_ns": {
+          "maximum": 98040149,
+          "mediane": 81008256,
+          "minimum": 78972997
+        }
+      },
+      "avant": {
+        "medianes_processus_ns": [
+          117493057,
+          116166921,
+          115889531,
+          117213180,
+          118466160
+        ],
+        "mur_ns": {
+          "maximum": 120565379,
+          "mediane": 117342940,
+          "minimum": 114746572
+        }
+      }
+    },
+    "ng02": {
+      "apres": {
+        "diagnostic": {
+          "derniers_marqueurs": {
+            "3:R": 2,
+            "5:R": 43
+          },
+          "fins_medianes_ns": [
+            [
+              51902778,
+              53487677,
+              54182498,
+              0,
+              55377747
+            ],
+            [
+              51934429,
+              54342267,
+              56122726,
+              56962146,
+              60282145
+            ],
+            [
+              49154519,
+              53943977,
+              56075346,
+              59023615,
+              61582214
+            ],
+            [
+              44075671,
+              49162529,
+              52168908,
+              59038825,
+              59020775
+            ],
+            [
+              35256356,
+              51582849,
+              55263877,
+              57471285,
+              64175233
+            ]
+          ],
+          "passes": 45,
+          "sous_100ms": 35,
+          "stats": {
+            "G_ns": {
+              "maximum": 52998418,
+              "mediane": 51963158,
+              "minimum": 51391168
+            },
+            "dernier_moins_noyau5_ns": {
+              "maximum": 13981074,
+              "mediane": 11985675,
+              "minimum": 10206566
+            },
+            "fin_moins_dernier_marqueur_ns": {
+              "maximum": 1630320,
+              "mediane": 1512629,
+              "minimum": 1439229
+            },
+            "mur_ns": {
+              "maximum": 104325206,
+              "mediane": 97800319,
+              "minimum": 93176960
+            },
+            "noyau5_moins_g5_ns": {
+              "maximum": 23544620,
+              "mediane": 16508433,
+              "minimum": 15231064
+            },
+            "queue_ns": {
+              "maximum": 19031262,
+              "mediane": 13736065,
+              "minimum": 10473875
+            },
+            "residu_ns": {
+              "maximum": 3123659,
+              "mediane": 1784379,
+              "minimum": 36490
+            },
+            "tour_moins_fin_ns": {
+              "maximum": 3123459,
+              "mediane": 1784169,
+              "minimum": 36270
+            },
+            "transitions_ns": {
+              "maximum": 320,
+              "mediane": 200,
+              "minimum": 80
+            }
+          }
+        },
+        "medianes_processus_ns": [
+          97818158,
+          95303570,
+          99448898,
+          97800319,
+          96724600
+        ],
+        "mur_ns": {
+          "maximum": 104325206,
+          "mediane": 97800319,
+          "minimum": 93176960
+        }
+      },
+      "avant": {
+        "medianes_processus_ns": [
+          151113417,
+          151609096,
+          149299627,
+          150412697,
+          149935837
+        ],
+        "mur_ns": {
+          "maximum": 156382754,
+          "mediane": 150499947,
+          "minimum": 147967178
+        }
+      }
+    }
+  },
+  "source_pin": "5f5c0c83fcb7df842996f584e3870bfbf3017d89",
+  "v12set": {
+    "apres": {
+      "diagnostic": {
+        "derniers_marqueurs": {
+          "1:R": 1,
+          "2:R": 10,
+          "2:V": 1,
+          "3:R": 5,
+          "5:R": 94
+        },
+        "fins_medianes_ns": [
+          [
+            72230398,
+            74734136,
+            75627425,
+            0,
+            76951664
+          ],
+          [
+            72353557,
+            77690245,
+            78962073,
+            79830232,
+            83449531
+          ],
+          [
+            68828297,
+            76904524,
+            78859153,
+            82112002,
+            85717269
+          ],
+          [
+            61044172,
+            78977833,
+            81796463,
+            92471066,
+            92091207
+          ],
+          [
+            48082378,
+            95203495,
+            98178173,
+            100151953,
+            111277238
+          ]
+        ],
+        "passes": 111,
+        "sous_100ms": 32,
+        "stats": {
+          "G_ns": {
+            "maximum": 173529739,
+            "mediane": 72353557,
+            "minimum": 32559751
+          },
+          "dernier_moins_noyau5_ns": {
+            "maximum": 32045432,
+            "mediane": 15615613,
+            "minimum": 8109766
+          },
+          "fin_moins_dernier_marqueur_ns": {
+            "maximum": 3872867,
+            "mediane": 2147339,
+            "minimum": 1067860
+          },
+          "mur_ns": {
+            "maximum": 327273110,
+            "mediane": 161179414,
+            "minimum": 62730443
+          },
+          "noyau5_moins_g5_ns": {
+            "maximum": 99506142,
+            "mediane": 37807428,
+            "minimum": 3298218
+          },
+          "queue_ns": {
+            "maximum": 77119195,
+            "mediane": 25874575,
+            "minimum": 3950148
+          },
+          "residu_ns": {
+            "maximum": 6443147,
+            "mediane": 864610,
+            "minimum": 36760
+          },
+          "tour_moins_fin_ns": {
+            "maximum": 6442737,
+            "mediane": 864260,
+            "minimum": 36480
+          },
+          "transitions_ns": {
+            "maximum": 530,
+            "mediane": 330,
+            "minimum": 240
+          }
+        }
+      },
+      "medianes_trames_ns": {
+        "maximum": 319740140,
+        "mediane": 160567405,
+        "minimum": 63114330
+      },
+      "medianes_trames_sous_100ms": 11,
+      "par_trame": {
+        "kitti_ng_00_000648": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 170380910,
+            "mediane": 166066384,
+            "minimum": 165486913
+          }
+        },
+        "kitti_ng_00_000660": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 171641229,
+            "mediane": 165718343,
+            "minimum": 163798533
+          }
+        },
+        "kitti_ng_00_001464": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 177688917,
+            "mediane": 176747967,
+            "minimum": 176050727
+          }
+        },
+        "kitti_ng_00_001502": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 149114940,
+            "mediane": 148986944,
+            "minimum": 145074211
+          }
+        },
+        "kitti_ng_00_001880": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 230195437,
+            "mediane": 228878053,
+            "minimum": 223388756
+          }
+        },
+        "kitti_ng_00_001896": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 327273110,
+            "mediane": 319740140,
+            "minimum": 318358321
+          }
+        },
+        "kitti_ng_00_003612": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 163433895,
+            "mediane": 159469415,
+            "minimum": 158187515
+          }
+        },
+        "kitti_ng_00_003624": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 161797896,
+            "mediane": 160567405,
+            "minimum": 160338774
+          }
+        },
+        "kitti_ng_02_000620": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 142489113,
+            "mediane": 141918627,
+            "minimum": 137991175
+          }
+        },
+        "kitti_ng_02_001600": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 169369602,
+            "mediane": 164817823,
+            "minimum": 164301133
+          }
+        },
+        "kitti_ng_02_001604": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 175829117,
+            "mediane": 171898890,
+            "minimum": 169682411
+          }
+        },
+        "kitti_ng_02_001606": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 165979242,
+            "mediane": 164766324,
+            "minimum": 161179414
+          }
+        },
+        "kitti_ng_02_001610": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 168885371,
+            "mediane": 165776982,
+            "minimum": 164897264
+          }
+        },
+        "kitti_ng_05_002060": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 193062259,
+            "mediane": 191894000,
+            "minimum": 187670861
+          }
+        },
+        "kitti_ng_05_002064": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 187630410,
+            "mediane": 181285785,
+            "minimum": 177254047
+          }
+        },
+        "kitti_ng_05_002748": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 111615998,
+            "mediane": 110292818,
+            "minimum": 109912876
+          }
+        },
+        "kitti_ng_06_000770": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 86819569,
+            "mediane": 85496110,
+            "minimum": 85366421
+          }
+        },
+        "kitti_ng_06_000772": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 96628775,
+            "mediane": 92973886,
+            "minimum": 92729187
+          }
+        },
+        "kitti_ng_06_000774": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 107923269,
+            "mediane": 107236158,
+            "minimum": 102598441
+          }
+        },
+        "kitti_ng_06_000780": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 94095025,
+            "mediane": 91373027,
+            "minimum": 91233526
+          }
+        },
+        "kitti_ng_06_000798": {
+          "derniers_marqueurs": {
+            "3:R": 3
+          },
+          "mur_ns": {
+            "maximum": 63386270,
+            "mediane": 63114330,
+            "minimum": 62730443
+          }
+        },
+        "kitti_ng_06_000800": {
+          "derniers_marqueurs": {
+            "2:R": 1,
+            "5:R": 2
+          },
+          "mur_ns": {
+            "maximum": 66658479,
+            "mediane": 66401959,
+            "minimum": 66256791
+          }
+        },
+        "kitti_ng_06_000804": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 90518088,
+            "mediane": 87750239,
+            "minimum": 87396599
+          }
+        },
+        "kitti_ng_06_000806": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 101149922,
+            "mediane": 99911642,
+            "minimum": 95927655
+          }
+        },
+        "kitti_ng_08_000000": {
+          "derniers_marqueurs": {
+            "2:R": 3
+          },
+          "mur_ns": {
+            "maximum": 100626223,
+            "mediane": 100428892,
+            "minimum": 97473173
+          }
+        },
+        "kitti_ng_08_000100": {
+          "derniers_marqueurs": {
+            "1:R": 1,
+            "2:R": 1,
+            "3:R": 1
+          },
+          "mur_ns": {
+            "maximum": 79323523,
+            "mediane": 79320294,
+            "minimum": 78948613
+          }
+        },
+        "kitti_ng_08_000200": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 100562513,
+            "mediane": 99706494,
+            "minimum": 98488613
+          }
+        },
+        "kitti_ng_08_000246": {
+          "derniers_marqueurs": {
+            "2:R": 1,
+            "2:V": 1,
+            "3:R": 1
+          },
+          "mur_ns": {
+            "maximum": 99215054,
+            "mediane": 98746603,
+            "minimum": 98493453
+          }
+        },
+        "kitti_ng_08_000691": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 170285750,
+            "mediane": 169492151,
+            "minimum": 166647142
+          }
+        },
+        "kitti_ng_08_001176": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 194342359,
+            "mediane": 191628200,
+            "minimum": 191269439
+          }
+        },
+        "kitti_ng_08_001193": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 250349182,
+            "mediane": 247562904,
+            "minimum": 243274468
+          }
+        },
+        "kitti_ng_08_001302": {
+          "derniers_marqueurs": {
+            "2:R": 1,
+            "5:R": 2
+          },
+          "mur_ns": {
+            "maximum": 116613896,
+            "mediane": 114881324,
+            "minimum": 114588796
+          }
+        },
+        "kitti_ng_08_001847": {
+          "derniers_marqueurs": {
+            "2:R": 3
+          },
+          "mur_ns": {
+            "maximum": 66669698,
+            "mediane": 64126220,
+            "minimum": 63937893
+          }
+        },
+        "kitti_ng_08_002119": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 327031129,
+            "mediane": 317425201,
+            "minimum": 316633972
+          }
+        },
+        "kitti_ng_08_002554": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 174773888,
+            "mediane": 173441519,
+            "minimum": 172399139
+          }
+        },
+        "kitti_ng_10_000424": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 178911066,
+            "mediane": 176820107,
+            "minimum": 176221407
+          }
+        },
+        "kitti_ng_10_000430": {
+          "derniers_marqueurs": {
+            "5:R": 3
+          },
+          "mur_ns": {
+            "maximum": 206762120,
+            "mediane": 205632313,
+            "minimum": 205069123
+          }
+        }
+      },
+      "passes": 111,
+      "toutes_passes_sous_100ms": 9
+    },
+    "avant": {
+      "medianes_trames_ns": {
+        "maximum": 440291424,
+        "mediane": 230786066,
+        "minimum": 97735144
+      },
+      "medianes_trames_sous_100ms": 2,
+      "passes": 111,
+      "toutes_passes_sous_100ms": 2
+    }
+  }
+}

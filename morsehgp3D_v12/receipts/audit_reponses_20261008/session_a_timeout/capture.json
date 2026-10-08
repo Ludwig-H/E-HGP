@@ -1,0 +1,43 @@
+{
+  "commit": "5f5c0c83fcb7df842996f584e3870bfbf3017d89",
+  "sources": {
+    "morsehgp3D_v12/tests/tower/tests.cmake": "36f7372d5be359736b03fcd0aca84b7a3b42cecde3a005efc5f5d40ef925709d",
+    "morsehgp3D_v12/tests/tower/mes_m0.py": "65cfc64c4f06110ffd2bdd0139c98c8e01a0a4d6f6472a09c3dd2b0683026132",
+    "morsehgp3D_v12/tests/tower/tower_chain.cpp": "37c014369c5c5b046cd006c7ec0cbabd7b4d5dd4ec5cbc23e4e57bc29152010a",
+    "morsehgp3D_v12/tests/tower/full_reader.py": "af451c9cd0e1a45ac49a291704afe00747f34e2eb289223ced7de5c45b53e197",
+    "morsehgp3D_v12/cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d",
+    "morsehgp3D_v12/cmake/run_expect.cmake": "82be01f59abc38b2448cbe6844e02f4b0fa8d981497d57cc01c98bbc5b4e2b8b",
+    "morsehgp3D_v12/src/tower/forest_build.cpp": "4180abf4d6afa09cf7abd6a3c242c481c5a4f301fd8a6fcc9fc44feb24a16805",
+    "morsehgp3D_v12/src/tower/forest_kernel.cpp": "2d12b4bd459a0c1ec710117bb94580f84f723ba7cf06d648e353613682c7fcf0",
+    "morsehgp3D_v12/src/sched/pool.cpp": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368"
+  },
+  "plan_sha256": "a94ec8d84cab8767fa716e71dc0b12325e3cd2c80ae7b12b7484a977fc0bd659",
+  "command": {
+    "name": "lidar_ctest",
+    "timeout_seconds": 180,
+    "argv": [
+      "ctest",
+      "--no-tests=error",
+      "-L",
+      "lidar",
+      "--output-on-failure",
+      "-j",
+      "6"
+    ]
+  },
+  "archive_sha256": "ec185db3b8d89217844b85873c393422981dfd0b2e4be1f40cf7c498fbff127e",
+  "meta_member": "results/cmd/002_lidar_ctest/meta.txt",
+  "meta_sha256": "3a87fbb8f6d6b53c43e605f3bc96bc186d81cb29c9de3235de7c473da01f3a55",
+  "log_member": "results/cmd/002_lidar_ctest/stdout",
+  "log_sha256": "e8e4ad0d4f45c7aea1098cd493643c8cff64f970c5b8bc1ae790d9ad417807d4",
+  "metadata": {
+    "status": "timeout",
+    "exit_code": "124",
+    "requested_timeout_seconds": "180",
+    "effective_timeout_seconds": "180",
+    "wall_seconds": "180.003",
+    "group_closed": "1",
+    "residual_group_killed": "1",
+    "streams_truncated": "0"
+  }
+}

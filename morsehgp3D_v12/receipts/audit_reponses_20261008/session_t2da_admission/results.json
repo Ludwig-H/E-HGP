@@ -1,0 +1,656 @@
+{
+  "admission": "conforme",
+  "chrono_chaudes": 270,
+  "chrono_processus": 30,
+  "codes_processus": "entiers 0 archivés dans le rapport du pilote, pas reçus externes individuels",
+  "contre_flux_refuses": [
+    "exit_absent",
+    "open_reason_invalide",
+    "threads_bool",
+    "liberation_bool",
+    "queue_incoherente",
+    "memoire_absente",
+    "pic_entree_trop_bas",
+    "pic_device_partage",
+    "schema_sequentiel_a_la_place",
+    "trame_etrangere",
+    "fins_hors_tour"
+  ],
+  "cpu_ns_manquants": 0,
+  "ecarts_flottants": [
+    {
+      "absolute": 1.1102230246251565e-16,
+      "archived": 0.6994456713433369,
+      "field": "juge/cas/ng01/ic95/1",
+      "local": 0.6994456713433368
+    },
+    {
+      "absolute": 1.1102230246251565e-16,
+      "archived": 0.6994456713433369,
+      "field": "recalcul/ng01/2",
+      "local": 0.6994456713433368
+    }
+  ],
+  "empreintes_distinctes_par_objet": 46,
+  "identites_passes": 106,
+  "identites_processus": 25,
+  "limites": [
+    "pas de nouvelle exécution native",
+    "sources/binaires liés par provenance séparée",
+    "identités dans processus distincts des chronos sans digest",
+    "prise K10 identité seule, pas campagne chaude K10",
+    "gain du lot27eca→5f5, pas gain causal du seul recouvrement",
+    "fenêtres chevauchantes non additionnées au mur ni nommées CPU·s"
+  ],
+  "ng_k5": {
+    "ng00": {
+      "arms": {
+        "apres": {
+          "above_100ms": 19,
+          "cpu_s_median": 3.015525,
+          "cpu_s_sum": 135.68153,
+          "etapes_median_ms": {
+            "C": 28.418488,
+            "G": 61.997794,
+            "P": 2.202059,
+            "TMVR": 5.531917,
+            "raccord": 0.0
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 1199932306,
+          "queue_median_ms": 5.531917,
+          "rss_max_octets": 1019252736,
+          "tour_median_ms": 69.616181,
+          "wall_max_ms": 108.236421,
+          "wall_median_ms": 99.743798
+        },
+        "avant": {
+          "above_100ms": 45,
+          "cpu_s_median": 2.895029,
+          "cpu_s_sum": 130.006221,
+          "etapes_median_ms": {
+            "C": 28.388838,
+            "G": 56.694796,
+            "M": 11.197995,
+            "P": 1.859989,
+            "R": 14.157834,
+            "T": 28.885657,
+            "TMVR": 60.616915,
+            "V": 2.222079,
+            "raccord": 0.00149
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 1123501140,
+          "rss_max_octets": 552394752,
+          "wall_max_ms": 150.379906,
+          "wall_median_ms": 147.387998
+        }
+      },
+      "ic95": [
+        0.6697877115278582,
+        0.683700705381304
+      ],
+      "max_process_medians_ms": {
+        "apres": 101.677604,
+        "avant": 148.360048
+      },
+      "median_process_medians_ms": {
+        "apres": 99.743798,
+        "avant": 147.466298
+      },
+      "ratio_gm": 0.6759930028684786
+    },
+    "ng01": {
+      "arms": {
+        "apres": {
+          "above_100ms": 0,
+          "cpu_s_median": 2.314613,
+          "cpu_s_sum": 103.822096,
+          "etapes_median_ms": {
+            "C": 24.7107,
+            "G": 48.20422,
+            "P": 1.896459,
+            "TMVR": 5.163098,
+            "raccord": 0.0
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 1001404270,
+          "queue_median_ms": 5.163098,
+          "rss_max_octets": 912953344,
+          "tour_median_ms": 54.744617,
+          "wall_max_ms": 98.040149,
+          "wall_median_ms": 81.008256
+        },
+        "avant": {
+          "above_100ms": 45,
+          "cpu_s_median": 2.189359,
+          "cpu_s_sum": 98.391605,
+          "etapes_median_ms": {
+            "C": 24.63951,
+            "G": 42.418001,
+            "M": 8.306267,
+            "P": 1.699629,
+            "R": 11.891965,
+            "T": 22.800161,
+            "TMVR": 48.41302,
+            "V": 1.954139,
+            "raccord": 0.00137
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 936763534,
+          "rss_max_octets": 496095232,
+          "wall_max_ms": 120.565379,
+          "wall_median_ms": 117.34294
+        }
+      },
+      "ic95": [
+        0.6877501493097321,
+        0.6994456713433368
+      ],
+      "max_process_medians_ms": {
+        "apres": 82.602073,
+        "avant": 118.46616
+      },
+      "median_process_medians_ms": {
+        "apres": 81.028536,
+        "avant": 117.21318
+      },
+      "ratio_gm": 0.6937096277213637
+    },
+    "ng02": {
+      "arms": {
+        "apres": {
+          "above_100ms": 10,
+          "cpu_s_median": 2.786771,
+          "cpu_s_sum": 125.245327,
+          "etapes_median_ms": {
+            "C": 28.528988,
+            "G": 51.963158,
+            "P": 1.900739,
+            "TMVR": 13.736065,
+            "raccord": 0.0
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 1242516267,
+          "queue_median_ms": 13.736065,
+          "rss_max_octets": 1087913984,
+          "tour_median_ms": 67.174792,
+          "wall_max_ms": 104.325206,
+          "wall_median_ms": 97.800319
+        },
+        "avant": {
+          "above_100ms": 45,
+          "cpu_s_median": 2.675219,
+          "cpu_s_sum": 120.296176,
+          "etapes_median_ms": {
+            "C": 28.499848,
+            "G": 51.395948,
+            "M": 12.068295,
+            "P": 1.933299,
+            "R": 15.377693,
+            "T": 34.129466,
+            "TMVR": 68.509871,
+            "V": 2.342749,
+            "raccord": 0.00145
+          },
+          "passes": 45,
+          "pic_budget_max_octets": 1156435106,
+          "rss_max_octets": 579915776,
+          "wall_max_ms": 156.382754,
+          "wall_median_ms": 150.499947
+        }
+      },
+      "ic95": [
+        0.6361621117447016,
+        0.6585235839953032
+      ],
+      "max_process_medians_ms": {
+        "apres": 99.448898,
+        "avant": 151.609096
+      },
+      "median_process_medians_ms": {
+        "apres": 97.800319,
+        "avant": 150.412697
+      },
+      "ratio_gm": 0.6473598745513994
+    }
+  },
+  "passes": 850,
+  "processus": 61,
+  "recouvert_passes": 422,
+  "regle_inchangee": true,
+  "rss_manquants": 0,
+  "session_37_k5": {
+    "apres": {
+      "chaudes_reunies": {
+        "above_100ms": 79,
+        "cpu_s_median": 4.229214,
+        "cpu_s_sum": 475.097308,
+        "etapes_median_ms": {
+          "C": 43.32334,
+          "G": 72.353557,
+          "P": 2.798138,
+          "TMVR": 25.874575,
+          "raccord": 0.0
+        },
+        "passes": 111,
+        "pic_budget_max_octets": 3338874772,
+        "queue_median_ms": 25.874575,
+        "rss_max_octets": 2836582400,
+        "tour_median_ms": 114.312226,
+        "wall_max_ms": 327.27311,
+        "wall_median_ms": 161.179414
+      },
+      "max_111_passes_ms": 327.27311,
+      "max_37_medianes_ms": 319.74014,
+      "mediane_37_medianes_ms": 160.567405,
+      "passes_above_100ms": 79,
+      "trames": {
+        "kitti_ng_00_000648": {
+          "above_100ms": 3,
+          "wall_max_ms": 170.38091,
+          "wall_median_ms": 166.066384
+        },
+        "kitti_ng_00_000660": {
+          "above_100ms": 3,
+          "wall_max_ms": 171.641229,
+          "wall_median_ms": 165.718343
+        },
+        "kitti_ng_00_001464": {
+          "above_100ms": 3,
+          "wall_max_ms": 177.688917,
+          "wall_median_ms": 176.747967
+        },
+        "kitti_ng_00_001502": {
+          "above_100ms": 3,
+          "wall_max_ms": 149.11494,
+          "wall_median_ms": 148.986944
+        },
+        "kitti_ng_00_001880": {
+          "above_100ms": 3,
+          "wall_max_ms": 230.195437,
+          "wall_median_ms": 228.878053
+        },
+        "kitti_ng_00_001896": {
+          "above_100ms": 3,
+          "wall_max_ms": 327.27311,
+          "wall_median_ms": 319.74014
+        },
+        "kitti_ng_00_003612": {
+          "above_100ms": 3,
+          "wall_max_ms": 163.433895,
+          "wall_median_ms": 159.469415
+        },
+        "kitti_ng_00_003624": {
+          "above_100ms": 3,
+          "wall_max_ms": 161.797896,
+          "wall_median_ms": 160.567405
+        },
+        "kitti_ng_02_000620": {
+          "above_100ms": 3,
+          "wall_max_ms": 142.489113,
+          "wall_median_ms": 141.918627
+        },
+        "kitti_ng_02_001600": {
+          "above_100ms": 3,
+          "wall_max_ms": 169.369602,
+          "wall_median_ms": 164.817823
+        },
+        "kitti_ng_02_001604": {
+          "above_100ms": 3,
+          "wall_max_ms": 175.829117,
+          "wall_median_ms": 171.89889
+        },
+        "kitti_ng_02_001606": {
+          "above_100ms": 3,
+          "wall_max_ms": 165.979242,
+          "wall_median_ms": 164.766324
+        },
+        "kitti_ng_02_001610": {
+          "above_100ms": 3,
+          "wall_max_ms": 168.885371,
+          "wall_median_ms": 165.776982
+        },
+        "kitti_ng_05_002060": {
+          "above_100ms": 3,
+          "wall_max_ms": 193.062259,
+          "wall_median_ms": 191.894
+        },
+        "kitti_ng_05_002064": {
+          "above_100ms": 3,
+          "wall_max_ms": 187.63041,
+          "wall_median_ms": 181.285785
+        },
+        "kitti_ng_05_002748": {
+          "above_100ms": 3,
+          "wall_max_ms": 111.615998,
+          "wall_median_ms": 110.292818
+        },
+        "kitti_ng_06_000770": {
+          "above_100ms": 0,
+          "wall_max_ms": 86.819569,
+          "wall_median_ms": 85.49611
+        },
+        "kitti_ng_06_000772": {
+          "above_100ms": 0,
+          "wall_max_ms": 96.628775,
+          "wall_median_ms": 92.973886
+        },
+        "kitti_ng_06_000774": {
+          "above_100ms": 3,
+          "wall_max_ms": 107.923269,
+          "wall_median_ms": 107.236158
+        },
+        "kitti_ng_06_000780": {
+          "above_100ms": 0,
+          "wall_max_ms": 94.095025,
+          "wall_median_ms": 91.373027
+        },
+        "kitti_ng_06_000798": {
+          "above_100ms": 0,
+          "wall_max_ms": 63.38627,
+          "wall_median_ms": 63.11433
+        },
+        "kitti_ng_06_000800": {
+          "above_100ms": 0,
+          "wall_max_ms": 66.658479,
+          "wall_median_ms": 66.401959
+        },
+        "kitti_ng_06_000804": {
+          "above_100ms": 0,
+          "wall_max_ms": 90.518088,
+          "wall_median_ms": 87.750239
+        },
+        "kitti_ng_06_000806": {
+          "above_100ms": 1,
+          "wall_max_ms": 101.149922,
+          "wall_median_ms": 99.911642
+        },
+        "kitti_ng_08_000000": {
+          "above_100ms": 2,
+          "wall_max_ms": 100.626223,
+          "wall_median_ms": 100.428892
+        },
+        "kitti_ng_08_000100": {
+          "above_100ms": 0,
+          "wall_max_ms": 79.323523,
+          "wall_median_ms": 79.320294
+        },
+        "kitti_ng_08_000200": {
+          "above_100ms": 1,
+          "wall_max_ms": 100.562513,
+          "wall_median_ms": 99.706494
+        },
+        "kitti_ng_08_000246": {
+          "above_100ms": 0,
+          "wall_max_ms": 99.215054,
+          "wall_median_ms": 98.746603
+        },
+        "kitti_ng_08_000691": {
+          "above_100ms": 3,
+          "wall_max_ms": 170.28575,
+          "wall_median_ms": 169.492151
+        },
+        "kitti_ng_08_001176": {
+          "above_100ms": 3,
+          "wall_max_ms": 194.342359,
+          "wall_median_ms": 191.6282
+        },
+        "kitti_ng_08_001193": {
+          "above_100ms": 3,
+          "wall_max_ms": 250.349182,
+          "wall_median_ms": 247.562904
+        },
+        "kitti_ng_08_001302": {
+          "above_100ms": 3,
+          "wall_max_ms": 116.613896,
+          "wall_median_ms": 114.881324
+        },
+        "kitti_ng_08_001847": {
+          "above_100ms": 0,
+          "wall_max_ms": 66.669698,
+          "wall_median_ms": 64.12622
+        },
+        "kitti_ng_08_002119": {
+          "above_100ms": 3,
+          "wall_max_ms": 327.031129,
+          "wall_median_ms": 317.425201
+        },
+        "kitti_ng_08_002554": {
+          "above_100ms": 3,
+          "wall_max_ms": 174.773888,
+          "wall_median_ms": 173.441519
+        },
+        "kitti_ng_10_000424": {
+          "above_100ms": 3,
+          "wall_max_ms": 178.911066,
+          "wall_median_ms": 176.820107
+        },
+        "kitti_ng_10_000430": {
+          "above_100ms": 3,
+          "wall_max_ms": 206.76212,
+          "wall_median_ms": 205.632313
+        }
+      },
+      "trames_mediane_above_100ms": 26
+    },
+    "avant": {
+      "chaudes_reunies": {
+        "above_100ms": 105,
+        "cpu_s_median": 4.059276,
+        "cpu_s_sum": 453.809294,
+        "etapes_median_ms": {
+          "C": 43.296555,
+          "G": 70.472919,
+          "M": 16.438441,
+          "P": 2.789008,
+          "R": 22.875681,
+          "T": 58.947282,
+          "TMVR": 109.371619,
+          "V": 3.370338,
+          "raccord": 0.00141
+        },
+        "passes": 111,
+        "pic_budget_max_octets": 3132250335,
+        "rss_max_octets": 1375133696,
+        "wall_max_ms": 448.210899,
+        "wall_median_ms": 230.786066
+      },
+      "max_111_passes_ms": 448.210899,
+      "max_37_medianes_ms": 440.291424,
+      "mediane_37_medianes_ms": 230.786066,
+      "passes_above_100ms": 105,
+      "trames": {
+        "kitti_ng_00_000648": {
+          "above_100ms": 3,
+          "wall_max_ms": 240.015569,
+          "wall_median_ms": 235.795859
+        },
+        "kitti_ng_00_000660": {
+          "above_100ms": 3,
+          "wall_max_ms": 234.66158,
+          "wall_median_ms": 234.347601
+        },
+        "kitti_ng_00_001464": {
+          "above_100ms": 3,
+          "wall_max_ms": 245.113897,
+          "wall_median_ms": 245.103804
+        },
+        "kitti_ng_00_001502": {
+          "above_100ms": 3,
+          "wall_max_ms": 201.781515,
+          "wall_median_ms": 201.550645
+        },
+        "kitti_ng_00_001880": {
+          "above_100ms": 3,
+          "wall_max_ms": 320.455529,
+          "wall_median_ms": 319.143576
+        },
+        "kitti_ng_00_001896": {
+          "above_100ms": 3,
+          "wall_max_ms": 442.430652,
+          "wall_median_ms": 440.291424
+        },
+        "kitti_ng_00_003612": {
+          "above_100ms": 3,
+          "wall_max_ms": 229.161983,
+          "wall_median_ms": 222.279636
+        },
+        "kitti_ng_00_003624": {
+          "above_100ms": 3,
+          "wall_max_ms": 231.678653,
+          "wall_median_ms": 230.786066
+        },
+        "kitti_ng_02_000620": {
+          "above_100ms": 3,
+          "wall_max_ms": 207.211003,
+          "wall_median_ms": 206.02441
+        },
+        "kitti_ng_02_001600": {
+          "above_100ms": 3,
+          "wall_max_ms": 239.95782,
+          "wall_median_ms": 238.724828
+        },
+        "kitti_ng_02_001604": {
+          "above_100ms": 3,
+          "wall_max_ms": 252.533341,
+          "wall_median_ms": 251.948544
+        },
+        "kitti_ng_02_001606": {
+          "above_100ms": 3,
+          "wall_max_ms": 235.273819,
+          "wall_median_ms": 234.366454
+        },
+        "kitti_ng_02_001610": {
+          "above_100ms": 3,
+          "wall_max_ms": 240.360609,
+          "wall_median_ms": 240.189957
+        },
+        "kitti_ng_05_002060": {
+          "above_100ms": 3,
+          "wall_max_ms": 276.850419,
+          "wall_median_ms": 276.381291
+        },
+        "kitti_ng_05_002064": {
+          "above_100ms": 3,
+          "wall_max_ms": 264.751026,
+          "wall_median_ms": 264.490446
+        },
+        "kitti_ng_05_002748": {
+          "above_100ms": 3,
+          "wall_max_ms": 160.332685,
+          "wall_median_ms": 159.201475
+        },
+        "kitti_ng_06_000770": {
+          "above_100ms": 3,
+          "wall_max_ms": 131.695948,
+          "wall_median_ms": 131.428798
+        },
+        "kitti_ng_06_000772": {
+          "above_100ms": 3,
+          "wall_max_ms": 141.690073,
+          "wall_median_ms": 139.191659
+        },
+        "kitti_ng_06_000774": {
+          "above_100ms": 3,
+          "wall_max_ms": 157.371856,
+          "wall_median_ms": 155.80024
+        },
+        "kitti_ng_06_000780": {
+          "above_100ms": 3,
+          "wall_max_ms": 138.401535,
+          "wall_median_ms": 138.340575
+        },
+        "kitti_ng_06_000798": {
+          "above_100ms": 0,
+          "wall_max_ms": 98.810004,
+          "wall_median_ms": 98.246714
+        },
+        "kitti_ng_06_000800": {
+          "above_100ms": 3,
+          "wall_max_ms": 103.928201,
+          "wall_median_ms": 103.660571
+        },
+        "kitti_ng_06_000804": {
+          "above_100ms": 3,
+          "wall_max_ms": 133.926467,
+          "wall_median_ms": 133.279918
+        },
+        "kitti_ng_06_000806": {
+          "above_100ms": 3,
+          "wall_max_ms": 148.313931,
+          "wall_median_ms": 146.921651
+        },
+        "kitti_ng_08_000000": {
+          "above_100ms": 3,
+          "wall_max_ms": 142.556053,
+          "wall_median_ms": 141.652387
+        },
+        "kitti_ng_08_000100": {
+          "above_100ms": 3,
+          "wall_max_ms": 117.939044,
+          "wall_median_ms": 116.024505
+        },
+        "kitti_ng_08_000200": {
+          "above_100ms": 3,
+          "wall_max_ms": 145.100122,
+          "wall_median_ms": 143.842873
+        },
+        "kitti_ng_08_000246": {
+          "above_100ms": 3,
+          "wall_max_ms": 142.433303,
+          "wall_median_ms": 141.360707
+        },
+        "kitti_ng_08_000691": {
+          "above_100ms": 3,
+          "wall_max_ms": 251.986821,
+          "wall_median_ms": 249.620082
+        },
+        "kitti_ng_08_001176": {
+          "above_100ms": 3,
+          "wall_max_ms": 272.059222,
+          "wall_median_ms": 269.512113
+        },
+        "kitti_ng_08_001193": {
+          "above_100ms": 3,
+          "wall_max_ms": 345.403788,
+          "wall_median_ms": 341.906159
+        },
+        "kitti_ng_08_001302": {
+          "above_100ms": 3,
+          "wall_max_ms": 172.618009,
+          "wall_median_ms": 171.26213
+        },
+        "kitti_ng_08_001847": {
+          "above_100ms": 0,
+          "wall_max_ms": 98.415314,
+          "wall_median_ms": 97.735144
+        },
+        "kitti_ng_08_002119": {
+          "above_100ms": 3,
+          "wall_max_ms": 448.210899,
+          "wall_median_ms": 438.697993
+        },
+        "kitti_ng_08_002554": {
+          "above_100ms": 3,
+          "wall_max_ms": 247.812534,
+          "wall_median_ms": 246.832204
+        },
+        "kitti_ng_10_000424": {
+          "above_100ms": 3,
+          "wall_max_ms": 254.557821,
+          "wall_median_ms": 254.254341
+        },
+        "kitti_ng_10_000430": {
+          "above_100ms": 3,
+          "wall_max_ms": 296.944311,
+          "wall_median_ms": 295.989721
+        }
+      },
+      "trames_mediane_above_100ms": 35
+    }
+  },
+  "sessions_chaudes": 222,
+  "sessions_processus": 6,
+  "verdict_lot": "adopte"
+}

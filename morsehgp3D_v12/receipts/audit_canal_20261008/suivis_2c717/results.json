@@ -1,0 +1,16 @@
+{
+  "first_nine_columns_unchanged": true,
+  "historical_followup_links_preserved": 47,
+  "isolated_patch_applies": true,
+  "product_or_main_changes": false,
+  "proposed_channel_bytes": 62163,
+  "rows": [
+    "CST-0018",
+    "CST-0207",
+    "CST-0233",
+    "CST-0234"
+  ],
+  "saved_bytes": 2977,
+  "source_channel_bytes": 65140,
+  "state_changes": 0
+}

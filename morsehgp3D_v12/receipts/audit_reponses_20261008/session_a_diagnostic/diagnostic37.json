@@ -1,0 +1,119 @@
+{
+  "au_dessus_100ms": {
+    "medianes_trames": 26,
+    "passes": 79,
+    "trames_avec_depassement": 28
+  },
+  "dernier_marqueur_global": {
+    "1:R": 1,
+    "2:R": 10,
+    "2:V": 1,
+    "3:R": 5,
+    "5:R": 94
+  },
+  "derniers_ordres_par_phase": {
+    "G": {
+      "1": 28,
+      "2": 83
+    },
+    "M": {
+      "1": 10,
+      "2": 19,
+      "3": 2,
+      "5": 80
+    },
+    "R": {
+      "1": 2,
+      "2": 10,
+      "3": 5,
+      "5": 94
+    },
+    "V": {
+      "2": 5,
+      "3": 15,
+      "4": 25,
+      "5": 66
+    },
+    "noyau": {
+      "1": 11,
+      "2": 27,
+      "3": 1,
+      "5": 72
+    }
+  },
+  "execution_native": false,
+  "pins": {
+    "journaux/v12set/apres_r0.jsonl": "12ec9f78635334ea02e0df160b53a97caf627fa5b7834ce034bb767da2c48a1f",
+    "journaux/v12set/apres_r1.jsonl": "7ca55b086a01a9ff1531f14b7e01778957e23d69eba28b793b90520d3d654c18",
+    "journaux/v12set/apres_r2.jsonl": "29950857e4f198a859e7899ccf307d5e4ec2a06832b601f873e276d940fbadd2"
+  },
+  "scope": "37 trames, 3 processus, seconde visite seule : 111 chaudes apres",
+  "statistiques_ns": {
+    "C": {
+      "maximum_111_ns": 78928824,
+      "maximum_37_medianes_ns": 77704583,
+      "mediane_111_ns": 43323340,
+      "mediane_37_medianes_ns": 43291285
+    },
+    "G": {
+      "maximum_111_ns": 173529739,
+      "maximum_37_medianes_ns": 171792950,
+      "mediane_111_ns": 72353557,
+      "mediane_37_medianes_ns": 72353557
+    },
+    "P": {
+      "maximum_111_ns": 4858948,
+      "maximum_37_medianes_ns": 4802347,
+      "mediane_111_ns": 2798138,
+      "mediane_37_medianes_ns": 2833659
+    },
+    "fin_moins_dernier_marqueur": {
+      "maximum_111_ns": 3872867,
+      "maximum_37_medianes_ns": 3823468,
+      "mediane_111_ns": 2147339,
+      "mediane_37_medianes_ns": 2132308
+    },
+    "ouverture": {
+      "maximum_111_ns": 32385095,
+      "maximum_37_medianes_ns": 31814952,
+      "mediane_111_ns": 19677121,
+      "mediane_37_medianes_ns": 19695491
+    },
+    "queue": {
+      "maximum_111_ns": 77119195,
+      "maximum_37_medianes_ns": 71874536,
+      "mediane_111_ns": 25874575,
+      "mediane_37_medianes_ns": 25737088
+    },
+    "reste_mur": {
+      "maximum_111_ns": 530,
+      "maximum_37_medianes_ns": 470,
+      "mediane_111_ns": 330,
+      "mediane_37_medianes_ns": 330
+    },
+    "reste_partition": {
+      "maximum_111_ns": 6443147,
+      "maximum_37_medianes_ns": 5775047,
+      "mediane_111_ns": 864610,
+      "mediane_37_medianes_ns": 1246769
+    },
+    "tour": {
+      "maximum_111_ns": 250285315,
+      "maximum_37_medianes_ns": 244705995,
+      "mediane_111_ns": 114312226,
+      "mediane_37_medianes_ns": 114312226
+    },
+    "tour_moins_fin": {
+      "maximum_111_ns": 6442737,
+      "maximum_37_medianes_ns": 5774727,
+      "mediane_111_ns": 864260,
+      "mediane_37_medianes_ns": 1246399
+    },
+    "wall": {
+      "maximum_111_ns": 327273110,
+      "maximum_37_medianes_ns": 319740140,
+      "mediane_111_ns": 161179414,
+      "mediane_37_medianes_ns": 160567405
+    }
+  }
+}

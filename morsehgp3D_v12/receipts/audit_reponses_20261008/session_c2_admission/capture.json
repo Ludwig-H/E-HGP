@@ -1,0 +1,61 @@
+{
+  "captured_utc": "2026-10-08T07:40:28.462033+00:00",
+  "source_commit": "27eca166b9b678bd97c9469e7071823097fc0c0b",
+  "archive_sha256": "c88472e0a5eb64f15ad3dc09855f18bcec66159648eed549956efa7bd4e089d9",
+  "plan_sha256": "bb93c86bba3fad8394b51e37470e949601624dfa3db94417d547d33256d61eb5",
+  "sources": {
+    "microbancs/mes_c_petits/pilote_c.py": "a0b3e9b916a62f4f6c1c6acfb46c3eeff48e66cd963559656edff7800cb94c7d",
+    "microbancs/outils/lecteur_full.py": "3594c5d36ed831b39d679b504234505d5b4b0a5b08e85cc55a21c9af74c621a4",
+    "microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "bench/full_probe.cpp": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+    "src/core/reasons.def": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd",
+    "microbancs/outils/test_lecteur_full.py": "27918fdb1d03af75c3e7833ee4a97dfe060b137885e8d3225920b6156d9bc44c",
+    "src/io/input.cpp": "36d842ec4e844d91d9fd29f17eeaeee2aaa4b99b7c59cdcc384631847db30f99",
+    "src/core/types.hpp": "c6d91808b0fa82364a48bc049b2097b31db7bd46cae0b4ca7d313b4e3f7d0835",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "src/io/io.hpp": "452917c7aa7a54244502934bb6c06f6ae65064232714b99356748ddaabc5660f"
+  },
+  "configuration": {
+    "voies": [
+      "cpu",
+      "appareil"
+    ],
+    "ks": [
+      5,
+      10
+    ],
+    "threads": [
+      4,
+      48
+    ],
+    "rounds": 3,
+    "hard_rounds": 2,
+    "hard_threads": 48,
+    "budget_octets": 68719476736,
+    "coord_bits": 21
+  },
+  "command_options": {
+    "--src": null,
+    "--travail": null,
+    "--archive": null,
+    "--deballage": null,
+    "--sortie": null,
+    "--voies": "cpu,appareil",
+    "--k": "5,10",
+    "--fils": "4,48",
+    "--tours": "3",
+    "--tours-difficiles": "2",
+    "--fils-difficiles": "48",
+    "--delai-global": "2050",
+    "--delai-cas": "120",
+    "--jobs": "44"
+  },
+  "reader_sha256": "55ca24fe400954e24062fc8b9c0c0bf7968fc624f7a34104007600c9535c4dc2",
+  "base_capture_sha256": "affc23170740e06b099202a30646d7d250ff5b48bd1d3fb96e10efa697a01c42",
+  "report_sha256": "040b5ec5fa828ffcd04d744e305f50ed94446ff94c26bf34d99d84c8ffe570a4",
+  "old_report_sha256": "14f421338943c8877d7b3a74d441bbf6f0bcea4a6cae7b717fbc51bf0d14e628",
+  "returned_files": 59,
+  "returned_tree_sha256": "f161d8ae60ea87bb481013d7ff109df10f1c87c4d48e882462ecf56db434f6b0",
+  "old_admission_sha256": "5c06ba624f37eae7f8a764553848e7666897fe02e77d3112417c0b05e02aa50d",
+  "provenance": "../session_c2_provenance/README.md"
+}

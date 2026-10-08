@@ -1,0 +1,59 @@
+{
+  "leaves": {
+    "0": {
+      "states": 3,
+      "terminal_states": 1,
+      "violations": []
+    },
+    "1": {
+      "states": 14,
+      "terminal_states": 2,
+      "violations": []
+    },
+    "2": {
+      "states": 66,
+      "terminal_states": 4,
+      "violations": []
+    },
+    "3": {
+      "states": 316,
+      "terminal_states": 8,
+      "violations": []
+    }
+  },
+  "model_mutations": {
+    "fusion_verticale_sans_historique_bas": "CSR basse pr\u00eate",
+    "liberation_premiere_tranche": [
+      "lib\u00e9ration avant dernier lecteur/auteur",
+      "pr\u00e9-passe apr\u00e8s lib\u00e9ration"
+    ],
+    "liberer_events_sans_historique": "events vivants",
+    "naissance_verticale_sans_contraction_basse": "forme basse pr\u00eate",
+    "prefetch_tranche_suivante": [
+      "pr\u00e9chargement hors tranche pr\u00eate"
+    ],
+    "publication_avant_prepasse": [
+      "deux auteurs de feuilles possibles",
+      "lib\u00e9ration avant dernier lecteur/auteur",
+      "pr\u00e9-passe apr\u00e8s lib\u00e9ration"
+    ],
+    "registre_sans_contraction": "events vivants"
+  },
+  "native_execution": false,
+  "orders_tested": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "resource_requirements": 1578,
+  "sources": 15
+}

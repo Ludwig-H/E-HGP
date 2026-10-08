@@ -1,0 +1,52 @@
+{
+  "commit": "2c717b124950abd8e6e11b2a631d8f4e4d31943c",
+  "source": "morsehgp3D_v12/audits/CONSTATS.md",
+  "source_sha256": "d4670a83dabd8d9f760d0eb9e5f7e65e43bbe8e74369cef4d351c0ca4c89454e",
+  "proposed_sha256": "d4c4f90f38822f3c9ef19fd334daa8a2944cfcc0a3323270f41c75403b86a9e6",
+  "source_channel_bytes": 65140,
+  "proposed_channel_bytes": 62163,
+  "saved_bytes": 2977,
+  "rows": [
+    {
+      "id": "CST-0018",
+      "source_line": 26,
+      "anchor": "README.md#cst-0018",
+      "row_sha256": "bb493af820969b92cf399521cd2f740ccfa5d090b360793c0f136e6f94cc3948",
+      "followup_sha256": "3543fb3824bf4e6c2cf88234b3c82e9042dc79d2cab7bb2f9ab6757ad508881a",
+      "old_row_bytes": 3466,
+      "new_row_bytes": 1516,
+      "preserved_links": 28
+    },
+    {
+      "id": "CST-0207",
+      "source_line": 52,
+      "anchor": "README.md#cst-0207",
+      "row_sha256": "df9baf48efb37fa608f6b84b6468c4e03575d00cc4806e9ab4f17af519290128",
+      "followup_sha256": "3ff7f8b8b0171370944bf172698d90d6e6d72de96556dd99daa24f6547fb4cb7",
+      "old_row_bytes": 1201,
+      "new_row_bytes": 777,
+      "preserved_links": 6
+    },
+    {
+      "id": "CST-0233",
+      "source_line": 76,
+      "anchor": "README.md#cst-0233",
+      "row_sha256": "b37c5ae577c892191e6f355d3bef5d54957e4199f9d246ffeb4e862a9710ab37",
+      "followup_sha256": "ab8ffc71f64c9d0d527bf764c7dd7efc5d0e0a0457639b980fec72e689ea9a59",
+      "old_row_bytes": 1586,
+      "new_row_bytes": 1186,
+      "preserved_links": 7
+    },
+    {
+      "id": "CST-0234",
+      "source_line": 77,
+      "anchor": "README.md#cst-0234",
+      "row_sha256": "94a56a8ffaa740fbd124b2bbf503db58b0c4bf7714d97ba994edd68931055d70",
+      "followup_sha256": "50790110fb16ea5c55ea69de991ac0cb3a4496457c9253a6798cddbe920113d6",
+      "old_row_bytes": 1358,
+      "new_row_bytes": 1155,
+      "preserved_links": 6
+    }
+  ],
+  "captured_utc": "2026-10-08T07:41:56.085595+00:00"
+}
