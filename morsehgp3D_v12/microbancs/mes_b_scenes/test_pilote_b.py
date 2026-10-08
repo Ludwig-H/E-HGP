@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-"""Porte de MES-B (lecteur, verdicts et pilote), sans sonde ni donnees reelles. Python 3.10 nu, aucun assert (tient
-sous -O).
+"""Porte de MES-B (verdicts et pilote), sans sonde ni donnees reelles ; la lecture stricte des sorties est celle du
+lecteur partage, eprouve par microbancs/outils/test_lecteur_full.py. Python 3.10 nu, aucun assert (tient sous -O).
 
-  lecture        une sortie appareil conforme est admise ; vingt-deux mutations du schema (dont quatre de la
-                 memoire par etage : etage absent, pic incoherent avec pic_octets, usage au-dela du pic, booleen ;
-                 et le mur nul de la contrelecture de livraison, refuse avant toute statistique) et
-                 les cinq corruptions de la contrelecture de l'auditeur (cle repetee, booleen, ouverture, 2^64, NaN)
-                 sont refusees comme sorties illisibles (controle manquant), jamais comme resultats ;
-  issues         refus de la sonde (code 2, ressources ou degenerescence) publie comme resultat, avec ses passes deja
-                 jouees ; invariant viole (codes 2 et 3), signal et expiration publies comme echecs du cas ;
   verdicts       B1 a B4 aux seuils ecrits d'avance (2 s par million, refus sous 10 millions, pente 1,1, 10 s par
                  million a K10), « non evalue » sans donnee ; un echec compte a toute taille, un refus a K5 seulement
                  sous 10 millions (au-dela tolere), tout refus a K10 ;
   empreintes     une empreinte differente d'une voie a l'autre est un controle manquant ;
+  attendu        le pilote demande au lecteur partage la trame, les sites, K, les fils, l'empreinte et un budget de
+                 l'appareil separe ;
   etiquettes     un meme nom long repete rend des etiquettes distinctes d'au plus 23 octets (boucle sans fin corrigee) ;
   pilote         le pilote complet sur une sonde simulee : verdict d'essai, un cas non joue faute de delai, empreinte
                  calculee seulement sous le seuil de sites.
@@ -27,9 +22,10 @@ import tempfile
 from contextlib import redirect_stderr, redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'outils'))
+import lecteur_full as lf  # noqa: E402
 import pilote_b  # noqa: E402
 
-CASE = dict(nom='scene', k=5, voie='appareil', passes=2, fils=48, empreinte=True)
 SITES = 2_000_000
 LABEL = 'scene'
 SHA = 'ab' * 32
@@ -39,106 +35,10 @@ def full_row(i, wall=4_000_000_000):
     return dict(phase='full', pass_=i, trame=LABEL, voie='device', status='ok', coord_bits=21, kmax=5, threads=48,
                 sites=SITES, wall_ns=wall,
                 etapes_ns=dict(P=1, C=wall // 4, G=wall // 4, raccord=1, TMVR=wall // 4, T=wall // 8, M=1, V=1, R=1),
-                c_ns={k: 1 for k in pilote_b.C_KEYS}, g_ns=dict(tables=1, resolution=wall // 8),
+                c_ns={k: 1 for k in lf.C_KEYS}, g_ns=dict(tables=1, resolution=wall // 8),
                 hors_mur_ns=dict(validation=1, empreinte=1), pic_octets=10, cpu_ns=5, rss_max_octets=10,
                 appareil_octets=7, epinglee_octets=3, pic_appareil_octets=8, full_sha256=SHA,
                 memoire_octets=dict(P=[1, 2], C=[4, 10], G=[6, 7], raccord=[6, 6], TMVR=[8, 9]))
-
-
-def dump(rows):
-    lines = []
-    for row in rows:
-        row = dict(row)
-        if 'pass_' in row:
-            row = {('pass' if k == 'pass_' else k): v for k, v in row.items()}
-        lines.append(json.dumps(row, ensure_ascii=False))
-    return '\n'.join(lines) + '\n'
-
-
-def device_output(passes=2, end=None, open_row=None, mutate=None):
-    rows = [open_row or dict(phase='open', status='ok', reason='none', wall_ns=5, budget_appareil='separe')]
-    for i in range(passes):
-        row = full_row(i)
-        if mutate is not None and i == passes - 1:
-            mutate(row)
-        rows += [row, dict(phase='liberation', pass_=i, liberation_ns=3)]
-    rows.append(end or dict(phase='exit', status='ok', reason='none'))
-    return dump(rows)
-
-
-def check_reading(errors):
-    state = pilote_b.parse_output(0, device_output(), CASE, SITES, LABEL)
-    if state['etat'] != 'ok' or len(state['passes']) != 2:
-        errors.append('lecture : sortie conforme refusee (%s)' % state['raison'])
-    mutations = {
-        'cle_en_trop': lambda r: r.update(extra=1),
-        'cle_absente': lambda r: r.pop('cpu_ns'),
-        'booleen': lambda r: r.update(pic_octets=True),
-        'negatif': lambda r: r.update(cpu_ns=-1),
-        'sites': lambda r: r.update(sites=SITES - 1),
-        'voie': lambda r: r.update(voie='cpu'),
-        'fils': lambda r: r.update(threads=47),
-        'profil': lambda r: r.update(coord_bits=24),
-        'trame': lambda r: r.update(trame='autre'),
-        'empreinte': lambda r: r.update(full_sha256='AB' * 32),
-        'mur': lambda r: r['etapes_ns'].update(P=r['wall_ns']),
-        'tmvr': lambda r: r['etapes_ns'].update(T=r['etapes_ns']['TMVR'] + 1),
-        'g': lambda r: r['g_ns'].update(tables=r['etapes_ns']['G']),
-        'ascii': lambda r: r.update(trame='scène'),
-        'memoire_etage_absent': lambda r: r['memoire_octets'].pop('G'),
-        'memoire_pic_incoherent': lambda r: r['memoire_octets'].update(C=[4, 9]),
-        'memoire_usage_sup_pic': lambda r: r['memoire_octets'].update(TMVR=[9, 8]),
-        'memoire_booleen': lambda r: r['memoire_octets'].update(P=[True, 2]),
-        'mur_nul': lambda r: (r.update(wall_ns=0), r['etapes_ns'].update({k: 0 for k in r['etapes_ns']}),
-                              r['g_ns'].update(tables=0, resolution=0)),
-    }
-    for name, mutate in mutations.items():
-        state = pilote_b.parse_output(0, device_output(mutate=mutate), CASE, SITES, LABEL)
-        if state['etat'] != 'illisible':
-            errors.append('lecture : mutation %s rendue %s' % (name, state['etat']))
-    text = device_output().replace('{"phase": "liberation", "pass": 1, "liberation_ns": 3}\n', '')
-    if pilote_b.parse_output(0, text, CASE, SITES, LABEL)['etat'] != 'illisible':
-        errors.append('lecture : liberation absente admise')
-    shared = dict(phase='open', status='ok', reason='none', wall_ns=5, budget_appareil='partage')
-    if pilote_b.parse_output(0, device_output(open_row=shared), CASE, SITES, LABEL)['etat'] != 'illisible':
-        errors.append('lecture : budget de l\'appareil partage admis')
-    cpu_case = dict(CASE, voie='cpu')
-    text = device_output().replace('"voie": "device"', '"voie": "cpu"').split('\n', 1)[1]
-    if pilote_b.parse_output(0, text, cpu_case, SITES, LABEL)['etat'] != 'illisible':
-        errors.append('lecture : memoire de l\'appareil admise sur la voie CPU')
-    # Corruptions de la contrelecture de l'auditeur Codex (mes_b_prelecture) : cle repetee, booleen comme rang de
-    # liberation, ouverture ok avec une raison, entier hors de u64, constante non finie.
-    good = device_output()
-    corrupt = {
-        'cle_repetee': good.replace('"cpu_ns": 5,', '"cpu_ns": 5, "cpu_ns": 5,', 1),
-        'liberation_booleenne': good.replace('{"phase": "liberation", "pass": 0,',
-                                             '{"phase": "liberation", "pass": false,'),
-        'ouverture_raison': good.replace('"reason": "none", "wall_ns": 5', '"reason": "device_fault", "wall_ns": 5'),
-        'entier_2_64': good.replace('"cpu_ns": 5,', '"cpu_ns": 18446744073709551616,', 1),
-        'constante_nan': good.replace('"cpu_ns": 5,', '"cpu_ns": NaN,', 1),
-    }
-    for name, text in corrupt.items():
-        if text == good or pilote_b.parse_output(0, text, CASE, SITES, LABEL)['etat'] != 'illisible':
-            errors.append('lecture : corruption %s admise' % name)
-
-
-def check_outcomes(errors):
-    refused = device_output(passes=1, end=dict(phase='exit', status='resource_exhausted', reason='memory_budget'))
-    state = pilote_b.parse_output(2, refused, CASE, SITES, LABEL)
-    if state['etat'] != 'refus' or state['raison'] != 'resource_exhausted/memory_budget' or len(state['passes']) != 1:
-        errors.append('issues : refus de ressources mal lu (%s)' % state)
-    degenerate = device_output(passes=0, end=dict(phase='exit', status='unsupported_degeneracy', reason='wide_leaf'))
-    if pilote_b.parse_output(2, degenerate, CASE, SITES, LABEL)['etat'] != 'refus':
-        errors.append('issues : refus de degenerescence mal lu')
-    broken = device_output(passes=0, end=dict(phase='exit', status='invariant_violated', reason='tower_invariant'))
-    for code in (3, 2):
-        if pilote_b.parse_output(code, broken, CASE, SITES, LABEL)['etat'] != 'echec':
-            errors.append('issues : invariant viole (code %d) non publie comme echec' % code)
-    for code, label in ((-9, 'signal'), ('expire', 'expiration')):
-        if pilote_b.parse_output(code, '', CASE, SITES, LABEL)['etat'] != 'echec':
-            errors.append('issues : %s non publie comme echec' % label)
-    if pilote_b.parse_output(0, device_output(passes=1), CASE, SITES, LABEL)['etat'] != 'echec':
-        errors.append('issues : passes manquantes avec sortie ok admises')
 
 
 def result(name, sites, wall_s, k=5, voie='appareil', etat='ok', passes=2):
@@ -195,6 +95,15 @@ def check_digests(errors):
     _table, bad = pilote_b.digest_controls([result('a', 1_000_000, 1.0), result('a', 1_000_000, 3.0, voie='cpu')])
     if bad:
         errors.append('empreintes : ecart invente %s' % bad)
+
+
+def check_expected(errors):
+    """Le pilote demande au lecteur un budget de l'appareil separe et la trame, les sites et K du cas."""
+    case = dict(nom='x', k=10, voie='appareil', passes=2, fils=48, empreinte=False)
+    want = dict(voie='appareil', k=10, fils=48, passes=2, empreinte=False, trames=[('lbl', 123)],
+                budget_appareil='separe', bits=21)
+    if pilote_b.expected(case, 'lbl', 123) != want:
+        errors.append('attendu : %s' % pilote_b.expected(case, 'lbl', 123))
 
 
 def check_labels(errors):
@@ -272,13 +181,13 @@ def check_pilot(errors):
 
 def main():
     errors = []
-    for check in (check_reading, check_outcomes, check_verdicts, check_digests, check_labels, check_pilot):
+    for check in (check_verdicts, check_digests, check_expected, check_labels, check_pilot):
         check(errors)
     for error in errors:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print('test_pilote_b_ok lecture=28 issues=7 verdicts=9 empreintes=3 etiquettes=12 pilote=2')
+    print('test_pilote_b_ok verdicts=9 empreintes=3 attendu=1 etiquettes=12 pilote=2')
     return 0
 
 

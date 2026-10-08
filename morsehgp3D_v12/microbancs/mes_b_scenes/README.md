@@ -94,20 +94,22 @@ python3 pilote_b.py --essai --sonde <mhgp12_full_probe> ...   # essai local, voi
 
 Sorties : `rapport_b.json`, `tableaux_b.md`, `brut/` (sorties de chaque cas), `construction.log`.
 
-**Porte** : [`test_pilote_b.py`](test_pilote_b.py) (Python 3.10 nu, aussi sous `-O`). Elle vérifie :
+**Portes.** La lecture stricte des sorties est celle du lecteur partagé avec `MES-FULL`,
+[`microbancs/outils/lecteur_full.py`](../outils/lecteur_full.py). Sa porte
+[`test_lecteur_full.py`](../outils/test_lecteur_full.py) (Python 3.10 nu, aussi sous `-O`) vérifie :
 
-- la lecture stricte : une sortie conforme admise ; vingt-deux mutations du schéma refusées, dont quatre de la
-  mémoire par étage et le mur nul de la
-  [contre-lecture de livraison](../../receipts/audit_reponses_20261008/mes_b_livraison/README.md) ; les cinq
-  corruptions de la [prélecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
+- une sortie conforme admise ; vingt-deux mutations du schéma refusées, dont quatre de la mémoire par étage et le mur
+  nul de la [contre-lecture de livraison](../../receipts/audit_reponses_20261008/mes_b_livraison/README.md) ; les
+  cinq corruptions de la [prélecture de l'auditeur](../../receipts/audit_reponses_20261008/mes_b_prelecture/README.md)
   refusées ;
 - les refus et échecs publiés comme résultats ;
-- les verdicts B1 à B4 aux seuils ;
-- les empreintes entre passes et entre voies, et les étiquettes uniques ;
-- le pilote complet sur une sonde simulée (délai et seuil d'empreinte).
+- les Sessions à plusieurs trames, le budget de l'appareil attendu et l'empreinte demandée ou non.
 
-[`mutants_pilote_b.py`](mutants_pilote_b.py) : vingt-quatre mutants du pilote, tous tués ; un mutant équivalent est
-écarté, et le fichier dit pourquoi.
+[`mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py) tue seize mutants du lecteur ; un mutant équivalent
+est écarté, et le fichier dit pourquoi. La porte du pilote, [`test_pilote_b.py`](test_pilote_b.py), vérifie les
+verdicts B1 à B4 aux seuils, les empreintes entre passes et entre voies, ce que le pilote demande au lecteur, les
+étiquettes uniques et le pilote complet sur une sonde simulée (délai et seuil d'empreinte) ;
+[`mutants_pilote_b.py`](mutants_pilote_b.py) tue douze mutants du pilote.
 
 ## Premier essai local (8 octobre, indicatif)
 

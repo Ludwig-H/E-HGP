@@ -22,9 +22,9 @@ Un refus de la sonde (code 2 : memory_budget, index_overflow_u32, ...) est un RE
 une mort par signal, une expiration ou un invariant viole est un ECHEC du cas, publie ; une sortie hors schema ou un
 appareil indisponible font manquer un controle.
 
-Lecture stricte de chaque sortie : objets JSON ASCII, cles exactes et entiers non booleens ; voie appareil : une ligne
-"open" reussie d'abord ; puis full(i) et liberation(i) pour chaque passe jouee, dans l'ordre ; la ligne de sortie en
-dernier ; sites = compte du manifeste ; P+C+G+raccord+TMVR <= mur, T+M+V+R <= TMVR, tables+resolution <= G.
+Lecture stricte de chaque sortie par le lecteur partage microbancs/outils/lecteur_full.py (schema exact, entiers u64
+non booleens, sequence open/full/liberation/sortie, etages inclus dans le mur, memoire par etage coherente avec
+pic_octets, mur non nul) ; sites = compte du manifeste ; budget de l'appareil « separe » attendu sur la voie appareil.
 Controles (refus d'ensemble si l'un manque) : environnement complet et GPU vide avant et apres (voie appareil) ; aucune
 sortie illisible ; empreinte FUL1 identique sur toutes les passes d'un meme (scene, K) et entre les deux voies, pour
 les cas qui la calculent.
@@ -62,21 +62,10 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'outils'))
+import lecteur_full as lf  # noqa: E402  lecteur strict partage avec MES-FULL
+
 GIB = 1 << 30
-STAGES = ('P', 'C', 'G', 'raccord', 'TMVR', 'T', 'M', 'V', 'R')
-C_KEYS = ('parcours', 'feuilles', 'emission', 'fin_etage', 'transferts', 'publication')
-G_KEYS = ('tables', 'resolution')
-OUT_KEYS = ('validation', 'empreinte')
-FULL_KEYS = frozenset(('phase', 'pass', 'trame', 'voie', 'status', 'coord_bits', 'kmax', 'threads', 'sites',
-                       'wall_ns', 'etapes_ns', 'c_ns', 'g_ns', 'hors_mur_ns', 'pic_octets', 'cpu_ns',
-                       'rss_max_octets', 'appareil_octets', 'epinglee_octets', 'pic_appareil_octets',
-                       'memoire_octets'))
-MEM_STAGES = ('P', 'C', 'G', 'raccord', 'TMVR')  # memoire_octets : [usage a la fin de l'etage, pic de l'etage]
-INT_KEYS = ('pass', 'coord_bits', 'kmax', 'threads', 'sites', 'wall_ns', 'pic_octets', 'cpu_ns', 'rss_max_octets',
-            'appareil_octets', 'epinglee_octets', 'pic_appareil_octets')
-OPEN_KEYS = frozenset(('phase', 'status', 'reason', 'wall_ns', 'budget_appareil'))
-VOIES = {'appareil': 'device', 'cpu': 'cpu'}
-REFUSALS = ('invalid_input', 'unsupported_degeneracy', 'resource_exhausted')  # code 2 de la sonde : refus publies
 # Debits par defaut prudents (secondes par million de sites et par passe, hors du mur compris), avant toute mesure.
 DEFAULT_RATE = {(5, 'appareil'): 15.0, (5, 'cpu'): 40.0, (10, 'appareil'): 80.0, (10, 'cpu'): 160.0}
 CMAKE_KEYS = re.compile(r'^(CMAKE_BUILD_TYPE|CMAKE_CXX_COMPILER|CMAKE_CUDA_COMPILER|CMAKE_CUDA_ARCHITECTURES|'
@@ -187,7 +176,7 @@ def parse_cases(text):
     cases, seen = [], set()
     for item in text.split(','):
         parts = item.split(':')
-        if len(parts) != 4 or parts[2] not in VOIES or not parts[1].isdigit() or not parts[3].isdigit():
+        if len(parts) != 4 or parts[2] not in lf.VOIES or not parts[1].isdigit() or not parts[3].isdigit():
             return None
         k, passes = int(parts[1]), int(parts[3])
         if not 1 <= k <= 12 or not 1 <= passes <= 20 or (parts[0], k, parts[2]) in seen:
@@ -209,116 +198,10 @@ def label_of(name, used):
     return label
 
 
-def is_int(value):
-    return type(value) is int and 0 <= value < (1 << 64)
-
-
-def unique_object(pairs):
-    """Objet JSON sans cle repetee (contrelecture de l'auditeur Codex, mes_b_prelecture)."""
-    row = {}
-    for key, value in pairs:
-        if key in row:
-            raise ValueError('cle JSON repetee')
-        row[key] = value
-    return row
-
-
-def reject_constant(value):
-    raise ValueError('constante JSON non finie : ' + value)
-
-
-def check_full(row, i, case, sites, label):
-    """'' si la ligne full de la passe i est conforme, sinon la raison."""
-    keys = FULL_KEYS | {'full_sha256'} if case['empreinte'] else FULL_KEYS
-    if set(row) != keys:
-        return 'cles de la passe %d : %s' % (i, sorted(set(row) ^ keys))
-    if any(not is_int(row[k]) for k in INT_KEYS):
-        return 'entier attendu (passe %d)' % i
-    if row['wall_ns'] == 0 or row['sites'] == 0:
-        return 'mur ou nombre de sites nul (passe %d)' % i  # mur nul : refuse avant toute statistique (auditeur)
-    if row['pass'] != i or row['status'] != 'ok' or row['trame'] != label or \
-            row['voie'] != VOIES[case['voie']] or row['kmax'] != case['k'] or row['threads'] != case['fils'] or \
-            row['coord_bits'] != BITS_EXPECTED or row['sites'] != sites:
-        return 'passe %d hors contrat (passe, statut, trame, voie, K, fils, profil ou sites)' % i
-    blocks = ((row['etapes_ns'], STAGES), (row['c_ns'], C_KEYS), (row['g_ns'], G_KEYS), (row['hors_mur_ns'], OUT_KEYS))
-    for block, keys in blocks:
-        if type(block) is not dict or set(block) != set(keys) or any(not is_int(block[k]) for k in keys):
-            return 'bloc de durees mal forme (passe %d)' % i
-    mem = row['memoire_octets']
-    if type(mem) is not dict or set(mem) != set(MEM_STAGES) or \
-            any(type(mem[k]) is not list or len(mem[k]) != 2 or not all(is_int(v) for v in mem[k]) or
-                mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != row['pic_octets']:
-        return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
-    st, g = row['etapes_ns'], row['g_ns']
-    if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
-            sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:
-        return 'etages non inclus dans le mur (passe %d)' % i
-    if case['empreinte'] and (type(row['full_sha256']) is not str or
-                              not re.fullmatch(r'[0-9a-f]{64}', row['full_sha256'])):
-        return 'empreinte FUL1 mal formee (passe %d)' % i
-    if case['voie'] == 'cpu' and (row['appareil_octets'] or row['epinglee_octets'] or row['pic_appareil_octets']):
-        return 'memoire de l\'appareil sur la voie CPU (passe %d)' % i
-    return ''
-
-
-def parse_output(code, text, case, sites, label):
-    """Rend dict(etat, raison, passes) : etat 'ok' ; 'refus' (code 2 de la sonde, ligne de sortie conforme : un
-    resultat) ; 'echec' (expiration, signal, invariant viole ou sortie inattendue : un resultat du cas) ; 'illisible'
-    (sortie hors schema ou appareil indisponible : un controle manque)."""
-    rows = []
-    if code == 'expire':
-        return dict(etat='echec', raison='expire', passes=[])
-    if type(code) is int and code < 0:
-        return dict(etat='echec', raison='signal %d' % -code, passes=[])
-    for raw in text.splitlines():
-        if not raw.isascii():
-            return dict(etat='illisible', raison='ligne non ASCII', passes=[])
-        try:
-            row = json.loads(raw, object_pairs_hook=unique_object, parse_constant=reject_constant)
-        except ValueError:
-            return dict(etat='illisible', raison='ligne illisible', passes=[])
-        if not isinstance(row, dict):
-            return dict(etat='illisible', raison='ligne non objet', passes=[])
-        rows.append(row)
-    if not rows or set(rows[-1]) != {'phase', 'status', 'reason'} or rows[-1]['phase'] != 'exit':
-        return dict(etat='illisible', raison='ligne de sortie absente (code %s)' % code, passes=[])
-    end, body = rows[-1], rows[:-1]
-    open_row = None
-    if case['voie'] == 'appareil':
-        if not body or body[0].get('phase') != 'open':
-            return dict(etat='illisible', raison='ligne open absente', passes=[])
-        open_row, body = body[0], body[1:]
-        if set(open_row) != OPEN_KEYS or not is_int(open_row['wall_ns']) or open_row['budget_appareil'] != 'separe':
-            return dict(etat='illisible', raison='ligne open hors schema', passes=[])
-        if open_row['status'] != 'ok' or open_row['reason'] != 'none':
-            return dict(etat='illisible', raison='appareil indisponible : %s' % open_row['reason'], passes=[])
-    if len(body) % 2 != 0:
-        return dict(etat='illisible', raison='passe sans liberation', passes=[])
-    passes = []
-    for i in range(len(body) // 2):
-        full, free = body[2 * i], body[2 * i + 1]
-        if full.get('phase') != 'full':
-            return dict(etat='illisible', raison='ligne full attendue (passe %d)' % i, passes=[])
-        reason = check_full(full, i, case, sites, label)
-        if reason:
-            return dict(etat='illisible', raison=reason, passes=[])
-        if set(free) != {'phase', 'pass', 'liberation_ns'} or free['phase'] != 'liberation' or \
-                not is_int(free['pass']) or free['pass'] != i or not is_int(free['liberation_ns']):
-            return dict(etat='illisible', raison='liberation hors schema (passe %d)' % i, passes=[])
-        passes.append(dict(full, liberation_ns=free['liberation_ns']))
-    if type(end['status']) is not str or type(end['reason']) is not str:
-        return dict(etat='illisible', raison='ligne de sortie hors schema', passes=[])
-    ok_end = end['status'] == 'ok' and end['reason'] == 'none'
-    if ok_end and code == 0 and len(passes) == case['passes']:
-        state = dict(etat='ok', raison='', passes=passes)
-    elif not ok_end and code == 2 and len(passes) < case['passes'] and end['status'] in REFUSALS:
-        state = dict(etat='refus', raison='%s/%s' % (end['status'], end['reason']), passes=passes)
-    else:
-        return dict(etat='echec', raison='sortie %s/%s, code %s, %d passes' % (end['status'], end['reason'], code,
-                                                                             len(passes)), passes=passes)
-    if open_row is not None:
-        state['open_ns'] = open_row['wall_ns']
-    return state
+def expected(case, label, sites):
+    """Ce que le lecteur partage doit trouver dans la sortie d'un cas : une trame, budget de l'appareil separe."""
+    return dict(voie=case['voie'], k=case['k'], fils=case['fils'], passes=case['passes'], empreinte=case['empreinte'],
+                trames=[(label, sites)], budget_appareil='separe', bits=BITS_EXPECTED)
 
 
 class GpuSampler:
@@ -455,15 +338,15 @@ def tables(report):
             ('`%s`' % warm['full_sha256'][:12]) if warm and 'full_sha256' in warm else '—'))
     lines += ['', 'Memoire du budget de l\'hote par etage, passe chaude (Ko par site : en usage a la fin de '
               'l\'etage / pic pendant l\'etage) :', '',
-              '| Scene | K | voie | ' + ' | '.join(MEM_STAGES) + ' |',
-              '| --- | ---: | --- |' + ' ---: |' * len(MEM_STAGES)]
+              '| Scene | K | voie | ' + ' | '.join(lf.MEM_STAGES) + ' |',
+              '| --- | ---: | --- |' + ' ---: |' * len(lf.MEM_STAGES)]
     for r in report['cas']:
         warm, _kind = warm_pass(r['passes'])
         if warm is None:
             continue
         mem = warm['memoire_octets']
         lines.append('| `%s` | %d | %s | %s |' % (r['nom'], r['k'], r['voie'], ' | '.join(
-            '%.2f / %.2f' % (mem[k][0] / r['sites'] / 1e3, mem[k][1] / r['sites'] / 1e3) for k in MEM_STAGES)))
+            '%.2f / %.2f' % (mem[k][0] / r['sites'] / 1e3, mem[k][1] / r['sites'] / 1e3) for k in lf.MEM_STAGES)))
     lines += ['', 'Etages de la passe chaude (secondes) :', '',
               '| Scene | K | voie | P | C | dont transferts | G | T | M | V | R | validation | empreinte '
               '| liberation |',
@@ -555,7 +438,7 @@ def main(argv):
         code, out, _err, seconds = run(cmd, min(remaining, max(60.0, 3 * forecast)),
                                        os.path.join(raw_dir, tag + '.jsonl'), os.path.join(raw_dir, tag + '.err'))
         smi = sampler.stop()
-        parsed = parse_output(code, out, c, sites, label)
+        parsed = lf.parse_output(code, out, expected(c, label, sites))
         entry.update(parsed, code=code, secondes=round(seconds, 1), pic_nvidia_smi_mio=smi)
         results.append(entry)
         if parsed['passes'] and sites >= 1_000_000 and not c['empreinte']:

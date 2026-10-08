@@ -45,7 +45,8 @@ def main(argv):
     archive = os.path.join(folder, 'results.tar.gz')
     sums = os.path.join(folder, 'SHA256SUMS')
     if not os.path.isfile(archive) or os.path.islink(archive) or not os.path.isfile(sums) or os.path.islink(sums):
-        print(json.dumps(dict(statut='refus', raison='results.tar.gz ou SHA256SUMS absent', repertoire=args.repertoire)))
+        print(json.dumps(dict(statut='refus', raison='results.tar.gz ou SHA256SUMS absent',
+                              repertoire=args.repertoire)))
         return 2
     os.makedirs(args.sortie, exist_ok=True)
     copied = {}

@@ -14,8 +14,13 @@ toutes passes avec --digest (empreinte FUL1 hors du mur) :
   C. bras CPU identifie : les memes a K5, voie CPU, 3 processus x 5 passes ;
   D. Session qui enchaine les 37 trames v12set a K5, voie appareil : --processus processus, deux tours chacun (le second
      fait foi), ordre des trames tourne d'un processus a l'autre.
-Controles (refus si l'un manque) : chaque processus rend 0 et toutes ses passes ; une empreinte par trame et par K,
-identique sur toutes les passes, tous les processus et les deux voies (appareil = CPU).
+Controles (refus si l'un manque) : chaque processus rend 0 et toutes ses passes, lues par le lecteur strict partage
+microbancs/outils/lecteur_full.py (schema exact, trame et sites attendus a chaque passe, budget de l'appareil
+« partage », memoire par etage, mur non nul) ; une empreinte par trame et par K, identique sur toutes les passes, tous
+les processus et les deux voies (appareil = CPU) ; environnement complet et GPU connu vide avant et apres (chaine vide,
+jamais absente ; contre-lecteur de l'auditeur, receipts/audit_reponses_20261008/mes_full_contrelecture).
+Provenance publiee : journal de construction, empreinte SHA-256 de la sonde, extrait du CMakeCache ; temps CPU par
+passe (cpu_ns) en mediane par trame.
 Statistiques (K5) : par trame, mediane des passes chaudes (passes 2..P d'un processus ; second tour en D) et maximum
 des medianes par processus ; sur les trames : mediane et maximum de ces valeurs ; etages en mediane.
 Verdict du contrat, ecrit d'avance : « tenu » si, sur ng00-02 ET sur les 37 trames v12set, la mediane et le maximum
@@ -30,6 +35,7 @@ Sorties : <sortie>/rapport_full.json, <sortie>/tableaux_full.md, sorties brutes 
 Codes : 0 rendu (quel que soit le verdict) ; 2 usage ou donnees ; 3 construction impossible. Python 3.10 nu.
 """
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -39,6 +45,9 @@ import subprocess
 import sys
 import tarfile
 import time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'outils'))
+import lecteur_full as lf  # noqa: E402  lecteur strict partage avec MES-B
 
 BUDGET_NS = 100_000_000
 FRAMES = ('ng00', 'ng01', 'ng02')
@@ -95,6 +104,27 @@ def build(src, folder, nvcc, jobs):
     return probe if os.path.isfile(probe) else None
 
 
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for block in iter(lambda: handle.read(1 << 22), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+CMAKE_KEYS = ('CMAKE_BUILD_TYPE', 'CMAKE_CXX_COMPILER', 'CMAKE_CUDA_COMPILER', 'CMAKE_CUDA_ARCHITECTURES',
+              'CMAKE_CXX_FLAGS', 'CMAKE_CUDA_FLAGS', 'MHGP12_')
+
+
+def cmake_extract(folder):
+    """Lignes du CMakeCache qui fixent compilateurs, options et profil ; None si le cache manque."""
+    try:
+        with open(os.path.join(folder, 'CMakeCache.txt'), encoding='utf-8', errors='replace') as handle:
+            return [line.rstrip('\n') for line in handle if line.startswith(CMAKE_KEYS)]
+    except OSError:
+        return None
+
+
 def unpack(archive, folder):
     """Archive tar plate (fichiers simples a nom simple) ; rend les trames du manifeste, ou None si refusee."""
     os.makedirs(folder, exist_ok=True)
@@ -118,31 +148,21 @@ def unpack(archive, folder):
     return names
 
 
-def parse_process(code, text, passes, kmax, device):
-    """Lignes d'un processus de la sonde ; rend (passes 'full', refus) ; refus non vide si le format manque."""
-    rows = []
-    for raw in text.splitlines():
-        try:
-            row = json.loads(raw)
-        except ValueError:
-            return [], 'ligne illisible'
-        if not isinstance(row, dict):
-            return [], 'ligne non objet'
-        rows.append(row)
-    if code != 0 or not rows or rows[-1] != {'phase': 'exit', 'status': 'ok', 'reason': 'none'}:
-        return [], 'processus en echec (code %s)' % code
-    if device and (rows[0].get('phase') != 'open' or rows[0].get('status') != 'ok'):
-        return [], 'ouverture de l\'appareil absente'
-    full = [r for r in rows if r.get('phase') == 'full']
-    if len(full) != passes or [r.get('pass') for r in full] != list(range(passes)):
-        return [], 'passes absentes ou desordonnees'
-    for r in full:
-        stages = r.get('etapes_ns')
-        if r.get('status') != 'ok' or r.get('kmax') != kmax or r.get('voie') != ('device' if device else 'cpu') or \
-                type(r.get('wall_ns')) is not int or type(stages) is not dict or \
-                any(type(stages.get(s)) is not int for s in STAGES) or len(r.get('full_sha256', '')) != 64:
-            return [], 'passe hors schema'
-    return full, ''
+def frame_sites(path):
+    """Sites d'une trame : taille du fichier de coordonnees u32le (trois mots par site, positions distinctes)."""
+    size = os.path.getsize(path)
+    return size // 12 if size % 12 == 0 else None
+
+
+def parse_process(code, text, passes, kmax, device, threads, frames):
+    """Passes 'full' d'un processus lues par le lecteur partage ; rend (passes, refus) ; refus non vide si un controle
+    manque ou si le processus n'aboutit pas (frames : [(etiquette, sites)], la passe p joue la trame p modulo n)."""
+    expected = dict(voie='appareil' if device else 'cpu', k=kmax, fils=threads, passes=passes, empreinte=True,
+                    trames=frames, budget_appareil='partage', bits=21)
+    state = lf.parse_output(code, text, expected)
+    if state['etat'] != 'ok':
+        return [], '%s : %s' % (state['etat'], state['raison'])
+    return state['passes'], ''
 
 
 def campaign_frames(probe, data, frames, kmax, processes, passes, threads, device, delay, raw_dir, tag):
@@ -156,7 +176,8 @@ def campaign_frames(probe, data, frames, kmax, processes, passes, threads, devic
             if device:
                 argv.append('--device')
             code, out, _err = run(argv, delay, os.path.join(raw_dir, '%s_%s_r%d.jsonl' % (tag, f, rep)))
-            full, refusal = parse_process(code, out, passes, kmax, device)
+            sites = frame_sites(os.path.join(data, 'lidar_%s.u32le' % f))
+            full, refusal = parse_process(code, out, passes, kmax, device, threads, [(f, sites)])
             if refusal:
                 refusals.append('%s %s r%d : %s' % (tag, f, rep, refusal))
             else:
@@ -175,7 +196,8 @@ def campaign_sequence(probe, folder, names, processes, threads, delay, raw_dir, 
         if device:
             argv.append('--device')
         code, out, _err = run(argv, delay, os.path.join(raw_dir, 'v12set_r%d.jsonl' % rep))
-        full, refusal = parse_process(code, out, 2 * len(order), 5, device)
+        frames = [(n[-23:], frame_sites(os.path.join(folder, n + '.u32le'))) for n in order]
+        full, refusal = parse_process(code, out, 2 * len(order), 5, device, threads, frames)
         if refusal:
             refusals.append('v12set r%d : %s' % (rep, refusal))
             continue
@@ -195,6 +217,8 @@ def frame_stats(runs, warm_from):
                 max_ns=max(p['wall_ns'] for p in warm), premiere_ns=statistics.median(r[0]['wall_ns'] for r in runs),
                 etapes_ns={s: statistics.median(p['etapes_ns'][s] for p in warm) for s in STAGES},
                 c_ns={k: statistics.median(p['c_ns'][k] for p in warm) for k in warm[0]['c_ns']},
+                cpu_ns=statistics.median(p['cpu_ns'] for p in warm) if all(type(p['cpu_ns']) is int for p in warm)
+                else None,
                 pic_octets=max(p['pic_octets'] for p in warm), sites=warm[0]['sites'], valeurs=len(warm))
 
 
@@ -264,8 +288,14 @@ def main(argv):
         probe = args.sonde if os.path.isfile(args.sonde) else None
     else:
         probe = build(args.src, os.path.join(args.travail, 'b21cuda'), nvcc, args.jobs) if nvcc else None
+        log = os.path.join(args.travail, 'b21cuda', 'construction.log')
+        if os.path.isfile(log):
+            shutil.copyfile(log, os.path.join(args.sortie, 'construction.log'))
     if probe is None:
         return 3
+    report['provenance'] = dict(sonde_sha256=sha256_file(probe), pilote_sha256=sha256_file(os.path.abspath(__file__)),
+                                lecteur_sha256=sha256_file(lf.__file__),
+                                cmake=None if args.essai else cmake_extract(os.path.join(args.travail, 'b21cuda')))
     t0 = time.time()
     small = (min(3, args.processus), min(5, args.passes))
     a, ra = campaign_frames(probe, args.donnees, FRAMES, 5, args.processus, args.passes, args.fils, device, args.delai,
@@ -278,8 +308,11 @@ def main(argv):
                               2 * args.delai, raw_dir, device)
     report['refus'] = ra + rb + rc + rd
     report['environnement_apres'] = environment(nvcc)
-    if report['environnement_avant'].get('gpu_apps') or report['environnement_apres'].get('gpu_apps'):
-        report['refus'].append('GPU non isole avant ou apres')
+    if not args.essai:
+        for when in ('avant', 'apres'):
+            env = report['environnement_' + when]
+            if env.get('gpu_apps') != '' or any(env.get(k) is None for k in ('nvcc', 'cmake', 'gpu')):
+                report['refus'].append('environnement %s incomplet ou GPU non connu vide' % when)
     report['empreintes'] = dict(k5=digests([a, c], report['refus'], 'k5 appareil = cpu'),
                                 k10=digests([b], report['refus'], 'k10'),
                                 v12set=digests([d], report['refus'], 'v12set'))

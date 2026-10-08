@@ -26,3 +26,23 @@ contrôle manque. Aucune règle d'adoption : c'est la mesure du contrat, publié
 
 Mode `--essai --sonde <binaire>` : logique jouée en local sur la voie CPU (minima relâchés, deux trames `v12set`),
 verdict « essai », jamais publié comme mesure. Essai du 8 octobre : aucun refus, empreintes identiques.
+
+**Lecture stricte et provenance (8 octobre, après la session K).** Chaque sortie de la sonde est lue par le lecteur
+partagé avec `MES-B`, [`microbancs/outils/lecteur_full.py`](../outils/lecteur_full.py), qui exige :
+
+- le schéma exact et des entiers u64 non booléens ;
+- la séquence `open` / `full` / `liberation` / sortie ;
+- à chaque passe, la trame et les sites attendus (taille du fichier / 12 ; la passe p joue la trame p modulo n) ;
+- le budget de l'appareil « partagé », des étages inclus dans le mur, une mémoire par étage cohérente avec `pic_octets`
+  et un mur non nul.
+
+Un processus non conforme est un refus. La campagne exige un environnement complet et un GPU connu vide avant et après
+(chaîne vide, jamais absente), comme le
+[contre-lecteur de l'auditeur](../../receipts/audit_reponses_20261008/mes_full_contrelecture/README.md). Le rapport
+publie le journal de construction, les empreintes SHA-256 de la sonde, du pilote et du lecteur, un extrait du
+`CMakeCache` et le temps CPU médian par trame (`cpu_ns`).
+
+**Portes** : [`test_pilote_full.py`](test_pilote_full.py) (sonde simulée : campagne d'essai conforme, sites faux sur
+une trame refusés, empreinte instable refusée) et [`../outils/test_lecteur_full.py`](../outils/test_lecteur_full.py)
+(lecture, issues, Session à plusieurs trames ; seize mutants du lecteur tués par
+[`../outils/mutants_lecteur_full.py`](../outils/mutants_lecteur_full.py)).
