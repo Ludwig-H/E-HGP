@@ -56,9 +56,10 @@ mhgp12_python_gate(mhgp12_catalogue_g4_flux_substitutions 0 ${PROJECT_SOURCE_DIR
                    --check-substitutions ${PROJECT_SOURCE_DIR} LINE "substitutions_ok bras=4 mutant=1" LABELS fast)
 
 # Session G4 de la tranche T1-d (bench/g4_catalogue_t1d.py, catalogue en flux) : juge a regle ecrite d'avance (A/A,
-# A/B de la trame, voie en flux sous budgets de l'appareil), auto-test par injections.
+# A/B de la trame, voie en flux sous budgets de l'appareil), auto-test par injections (36 depuis le port c31 de
+# l'auditeur : dix controles d'admission memoire, cohorte, refus et types).
 mhgp12_python_gate(mhgp12_catalogue_g4_t1d_judge 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_t1d.py --selftest-judge
-                   LINE "juge_g4_t1d_ok injections=15" LABELS fast)
+                   LINE "juge_g4_t1d_ok injections=36" LABELS fast)
 
 # Oracle borne : egalite avec l'etage B de reference/hgp12_ref sur la suite rapide (n <= 14) ; doublons refuses (D8).
 mhgp12_python_gate(mhgp12_catalogue_oracle 0 oracle.py ${catalogue_probe}
