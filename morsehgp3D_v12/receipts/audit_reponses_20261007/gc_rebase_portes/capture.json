@@ -1,0 +1,49 @@
+{
+  "artifact_hashes": {
+    "build_final.build.log": "259dc80ba18f6ba52862e467a258d0ae5ad1027d502d8f6ae57c7d6c605649bc",
+    "build_final.conf.log": "dd42c26862ac360b8df4cee03e292cf4729e9685739abe9289c5684ed66589cc",
+    "build_final/CMakeCache.txt": "0c21c22af03986fe6960797c3ce5154497c40c04751725c3e6feaa69115a18f6",
+    "build_final/CMakeFiles/mhgp12.dir/flags.make": "5a46c90e2fd5d966a54553369ba3b583a886f739709ad39af6a81afbd1fe4d86",
+    "build_final/CTestTestfile.cmake": "50d46dbc2e0c9a2ad90a13acc791ef387f1be768d4dfa6011c4a970c6469b19c",
+    "build_final/Testing/Temporary/LastTest.log": "a9a6cd7f4049851ea7cfc655487fa22c6c5a3dba4ce09b652b0ff54b5be7a64a",
+    "build_final/libmhgp12.a": "86cbd984c5de44abd0875927667a9959fd3e97ce78f1aba57c32eec445aa3f00",
+    "build_final/mhgp12_catalogue_probe": "b845fbae20b912a2af56173a3cc97cfcef342cb3d69ec02e8cc90364ed85788a",
+    "build_final/mhgp12_tower_index": "bd2c1453d47eda4d6790673bbf465916ad3ed84e8a215b26ecd304275e98383f",
+    "build_final/mhgp12_tower_probe": "9529a39733ae81e77984578f49191633be58f72f323271941ddeb2dd4f6196ca",
+    "final_checks.sh": "ce7dbd5017bf954036ce60d3749c2e8ed1b07de10f393384b99b3491238af8a9",
+    "runs/final_fast.log": "52270b4844ffce5baafc6818180421e2bf4dd3c1f2fe5e866961531fcd7f5dbf",
+    "runs/final_lidar.log": "af9f66371b52ff651466c1fba567bc3080481c7e63d81952145597603df81e49"
+  },
+  "driver_prefix_sha256": "23f515b397de826f8b2f9739f6224ce19db93b65459700e2bd753373b739d0c1",
+  "local_files_sha256": {
+    "README.md": "02d6cef94127da3eee9eda296939f810ae631eef3f28eddb10b77f8f85c733d9",
+    "check.py": "204110f5b41a00663e085e6c365cbba517105795c8d7864195dfff29021403e4"
+  },
+  "normal_exit_code": 0,
+  "normal_optimized_identical": true,
+  "observed_main_pin": "0a5ebf29f0eb6abaa738e4a29e42b71344e03664",
+  "ongoing_campaign_excluded": "runs/mutants_tower_final.log empty and no final JSON at first read; final2.json belongs to previous tree62726897 (two mutants)",
+  "optimized_exit_code": 0,
+  "result": {
+    "admission_minimum_processes": 10,
+    "artifact_hashes_verified_before_after": 13,
+    "bits": 21,
+    "cli_default_processes": 8,
+    "cuda_enabled": false,
+    "current_mutant_campaign_qualified": false,
+    "fast_passed": 675,
+    "last_id_guard_adopted": false,
+    "lidar_passed": 6,
+    "native_executed_by_auditor": false,
+    "old_24_32_tsan_transferred": false,
+    "prototype_pin": "45976be8ddc489f14494937b13e43d0ca5fa0a55",
+    "skipped": 0,
+    "source_files": 359,
+    "source_tree_sha256": "334101284e02c3519bc9d2f8b94ae89a2ebc8c5ff2386916f00df591cf8ad4e1",
+    "status": "ok",
+    "unique_gates": 680
+  },
+  "result_sha256": "e1b3030bfc017c12ad6169d4a69b066b23cd0d8883cc3750b21ac1ee11b3d873",
+  "source_pin": "45976be8ddc489f14494937b13e43d0ca5fa0a55",
+  "source_tree_sha256": "334101284e02c3519bc9d2f8b94ae89a2ebc8c5ff2386916f00df591cf8ad4e1"
+}

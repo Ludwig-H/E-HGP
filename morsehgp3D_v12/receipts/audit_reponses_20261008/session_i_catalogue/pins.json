@@ -1,0 +1,11 @@
+{
+ "inputs": {
+  "SHA256SUMS": "38a4db22e8fd509a57157917d42a2e26cf0945481c3a2f4617e6f6fe3ecb8bf9",
+  "receipt.json": "47c8d5d75116bdfe5bb6de441572a0e60d5c79f20e089e58df589b704c04259a",
+  "resultats/cmd/000_t1b_catalogue_appareil/files/t1b/report.json": "bdcd097828565136788ccee2e528c8d03e5e413c33dcdae0e6bdfb72d8ea3bbb"
+ },
+ "receipt_commit": "0a5ebf29f0eb6abaa738e4a29e42b71344e03664",
+ "receipt_path": "morsehgp3D_v12/receipts/g4_t1bi_20261008",
+ "schema": "audit_t1bi_proof_v1",
+ "source_commit": "d2f39fe8293d31508697b6db113a7954a7fd0d9e"
+}

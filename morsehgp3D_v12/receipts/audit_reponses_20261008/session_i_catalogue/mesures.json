@@ -1,0 +1,986 @@
+{
+  "cpu": {
+    "ng00:K10:L24": {
+      "first_pass": {
+        "max_ns": 1072054423,
+        "median_ns": 1072054423
+      },
+      "max_ns": 1070089953,
+      "max_process_median_ns": 1066815812,
+      "median_ns": 1066815812,
+      "non_ventile": {
+        "max_ns": 28284991,
+        "median_ns": 27597540
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 95417973,
+          "median_ns": 94927241
+        },
+        "feuilles": {
+          "max_ns": 563678394,
+          "median_ns": 562057267
+        },
+        "fin": {
+          "max_ns": 171321424,
+          "median_ns": 168627464
+        },
+        "parcours": {
+          "max_ns": 213800234,
+          "median_ns": 213605432
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng00:K5:L16": {
+      "first_pass": {
+        "max_ns": 351475076,
+        "median_ns": 351475076
+      },
+      "max_ns": 331336745,
+      "max_process_median_ns": 330735966,
+      "median_ns": 330735966,
+      "non_ventile": {
+        "max_ns": 3883550,
+        "median_ns": 3614680
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 13743700,
+          "median_ns": 13562659
+        },
+        "feuilles": {
+          "max_ns": 129347287,
+          "median_ns": 129150598
+        },
+        "fin": {
+          "max_ns": 68943029,
+          "median_ns": 68100779
+        },
+        "parcours": {
+          "max_ns": 116749110,
+          "median_ns": 115966990
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng00:K5:L24": {
+      "first_pass": {
+        "max_ns": 335464986,
+        "median_ns": 335464986
+      },
+      "max_ns": 329305716,
+      "max_process_median_ns": 327789536,
+      "median_ns": 327789536,
+      "non_ventile": {
+        "max_ns": 5078260,
+        "median_ns": 4760300
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 25154199,
+          "median_ns": 24946880
+        },
+        "feuilles": {
+          "max_ns": 157132667,
+          "median_ns": 156769647
+        },
+        "fin": {
+          "max_ns": 67626930,
+          "median_ns": 66903739
+        },
+        "parcours": {
+          "max_ns": 74963188,
+          "median_ns": 74415790
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng01:K10:L24": {
+      "first_pass": {
+        "max_ns": 892383819,
+        "median_ns": 892383819
+      },
+      "max_ns": 896861549,
+      "max_process_median_ns": 889362779,
+      "median_ns": 889362779,
+      "non_ventile": {
+        "max_ns": 33119971,
+        "median_ns": 28113350
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 80705121,
+          "median_ns": 80242406
+        },
+        "feuilles": {
+          "max_ns": 446112559,
+          "median_ns": 445653203
+        },
+        "fin": {
+          "max_ns": 158332563,
+          "median_ns": 155808094
+        },
+        "parcours": {
+          "max_ns": 180263032,
+          "median_ns": 179909202
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng01:K5:L16": {
+      "first_pass": {
+        "max_ns": 291859386,
+        "median_ns": 291859386
+      },
+      "max_ns": 289528847,
+      "max_process_median_ns": 289395697,
+      "median_ns": 289395697,
+      "non_ventile": {
+        "max_ns": 4634400,
+        "median_ns": 4496160
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 14889349,
+          "median_ns": 14588220
+        },
+        "feuilles": {
+          "max_ns": 104064493,
+          "median_ns": 103699442
+        },
+        "fin": {
+          "max_ns": 68133362,
+          "median_ns": 67387082
+        },
+        "parcours": {
+          "max_ns": 99285112,
+          "median_ns": 98812373
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng01:K5:L24": {
+      "first_pass": {
+        "max_ns": 291234106,
+        "median_ns": 291234106
+      },
+      "max_ns": 281659816,
+      "max_process_median_ns": 280875566,
+      "median_ns": 280875566,
+      "non_ventile": {
+        "max_ns": 4744830,
+        "median_ns": 4496881
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 24843221,
+          "median_ns": 24580160
+        },
+        "feuilles": {
+          "max_ns": 127157863,
+          "median_ns": 126915683
+        },
+        "fin": {
+          "max_ns": 61722151,
+          "median_ns": 60898731
+        },
+        "parcours": {
+          "max_ns": 64456903,
+          "median_ns": 64165701
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng02:K10:L24": {
+      "first_pass": {
+        "max_ns": 1063249860,
+        "median_ns": 1063249860
+      },
+      "max_ns": 1065322420,
+      "max_process_median_ns": 1054336331,
+      "median_ns": 1054336331,
+      "non_ventile": {
+        "max_ns": 40696640,
+        "median_ns": 36208241
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 102288870,
+          "median_ns": 101779700
+        },
+        "feuilles": {
+          "max_ns": 514423740,
+          "median_ns": 512930920
+        },
+        "fin": {
+          "max_ns": 199538030,
+          "median_ns": 193772940
+        },
+        "parcours": {
+          "max_ns": 210565160,
+          "median_ns": 209541920
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng02:K5:L16": {
+      "first_pass": {
+        "max_ns": 337308147,
+        "median_ns": 337308147
+      },
+      "max_ns": 336445300,
+      "max_process_median_ns": 333756478,
+      "median_ns": 333756478,
+      "non_ventile": {
+        "max_ns": 5957200,
+        "median_ns": 5396140
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 15850280,
+          "median_ns": 15578981
+        },
+        "feuilles": {
+          "max_ns": 120968982,
+          "median_ns": 120689534
+        },
+        "fin": {
+          "max_ns": 77834140,
+          "median_ns": 76193622
+        },
+        "parcours": {
+          "max_ns": 116467770,
+          "median_ns": 115809832
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "ng02:K5:L24": {
+      "first_pass": {
+        "max_ns": 357232490,
+        "median_ns": 357232490
+      },
+      "max_ns": 335084560,
+      "max_process_median_ns": 331990190,
+      "median_ns": 331990190,
+      "non_ventile": {
+        "max_ns": 5962540,
+        "median_ns": 5499370
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 29220570,
+          "median_ns": 28968149
+        },
+        "feuilles": {
+          "max_ns": 148596390,
+          "median_ns": 148249500
+        },
+        "fin": {
+          "max_ns": 73985270,
+          "median_ns": 72585319
+        },
+        "parcours": {
+          "max_ns": 77420200,
+          "median_ns": 76709432
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "u16000:K5:L24": {
+      "first_pass": {
+        "max_ns": 236636750,
+        "median_ns": 236636750
+      },
+      "max_ns": 226211060,
+      "max_process_median_ns": 224209649,
+      "median_ns": 224209649,
+      "non_ventile": {
+        "max_ns": 5138330,
+        "median_ns": 4437340
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 15136529,
+          "median_ns": 14901420
+        },
+        "feuilles": {
+          "max_ns": 109324840,
+          "median_ns": 108680610
+        },
+        "fin": {
+          "max_ns": 66797350,
+          "median_ns": 66132660
+        },
+        "parcours": {
+          "max_ns": 30760720,
+          "median_ns": 30263470
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "u32000:K5:L24": {
+      "first_pass": {
+        "max_ns": 438362780,
+        "median_ns": 438362780
+      },
+      "max_ns": 441308170,
+      "max_process_median_ns": 436634410,
+      "median_ns": 436634410,
+      "non_ventile": {
+        "max_ns": 18114920,
+        "median_ns": 14985450
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 34061720,
+          "median_ns": 33857520
+        },
+        "feuilles": {
+          "max_ns": 220420920,
+          "median_ns": 219881700
+        },
+        "fin": {
+          "max_ns": 117737611,
+          "median_ns": 114600120
+        },
+        "parcours": {
+          "max_ns": 53273560,
+          "median_ns": 52914520
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    },
+    "u8000:K5:L24": {
+      "first_pass": {
+        "max_ns": 127168700,
+        "median_ns": 127168700
+      },
+      "max_ns": 119211850,
+      "max_process_median_ns": 118491810,
+      "median_ns": 118491810,
+      "non_ventile": {
+        "max_ns": 56800,
+        "median_ns": 53800
+      },
+      "processes": 1,
+      "stages": {
+        "emission": {
+          "max_ns": 9237480,
+          "median_ns": 9053620
+        },
+        "feuilles": {
+          "max_ns": 52089970,
+          "median_ns": 51843750
+        },
+        "fin": {
+          "max_ns": 38932180,
+          "median_ns": 38464440
+        },
+        "parcours": {
+          "max_ns": 19321000,
+          "median_ns": 19110000
+        },
+        "publication": {
+          "max_ns": 0,
+          "median_ns": 0
+        },
+        "transferts": {
+          "max_ns": 0,
+          "median_ns": 0
+        }
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 9
+    }
+  },
+  "device": {
+    "ng00:K10": {
+      "first_pass": {
+        "max_ns": 161868407,
+        "median_ns": 160887997
+      },
+      "max_ns": 139871848,
+      "max_process_median_ns": 138213347.0,
+      "median_ns": 137380715.0,
+      "non_ventile": {
+        "max_ns": 19360,
+        "median_ns": 18070.0
+      },
+      "processes": 3,
+      "stages": {
+        "emission": {
+          "max_ns": 14763589,
+          "median_ns": 14671024.5
+        },
+        "feuilles": {
+          "max_ns": 40133040,
+          "median_ns": 40084410.0
+        },
+        "fin": {
+          "max_ns": 12314210,
+          "median_ns": 12292439.5
+        },
+        "parcours": {
+          "max_ns": 9241620,
+          "median_ns": 9209375.0
+        },
+        "publication": {
+          "max_ns": 15835770,
+          "median_ns": 14883725.0
+        },
+        "transferts": {
+          "max_ns": 48522399,
+          "median_ns": 46350264.5
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 668542672,
+        "D2H_controle_restant": 4664,
+        "D2H_hors_six_sorties": 4664,
+        "D2H_repli": 0,
+        "D2H_repli_tableaux_complets": 0,
+        "H2D": 478728,
+        "budget_peak": 3629893304,
+        "chain_elements": 0,
+        "chains_repaired": 0,
+        "device_bytes": 2567626540,
+        "ops": 119,
+        "pinned_bytes": 67108864,
+        "six_sorties": {
+          "boules": 176405440,
+          "incidences": 181534152,
+          "niveaux": 244127280,
+          "offsets_population": 44101368,
+          "offsets_supports": 319088,
+          "valeurs_supports": 22050680
+        },
+        "sorties_total": 668538008
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 12
+    },
+    "ng00:K5": {
+      "first_pass": {
+        "max_ns": 63363970,
+        "median_ns": 61410110
+      },
+      "max_ns": 36923790,
+      "max_process_median_ns": 35458880,
+      "median_ns": 35065999,
+      "non_ventile": {
+        "max_ns": 26490,
+        "median_ns": 16950
+      },
+      "processes": 5,
+      "stages": {
+        "emission": {
+          "max_ns": 3689060,
+          "median_ns": 3589860
+        },
+        "feuilles": {
+          "max_ns": 11729990,
+          "median_ns": 11705460
+        },
+        "fin": {
+          "max_ns": 2585460,
+          "median_ns": 2557510
+        },
+        "parcours": {
+          "max_ns": 4388130,
+          "median_ns": 4362200
+        },
+        "publication": {
+          "max_ns": 4351680,
+          "median_ns": 3722020
+        },
+        "transferts": {
+          "max_ns": 11451470,
+          "median_ns": 9085420
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 134322136,
+        "D2H_controle_restant": 2732,
+        "D2H_hors_six_sorties": 2732,
+        "D2H_repli": 0,
+        "D2H_repli_tableaux_complets": 0,
+        "H2D": 478728,
+        "budget_peak": 994134448,
+        "chain_elements": 0,
+        "chains_repaired": 0,
+        "device_bytes": 737091392,
+        "ops": 72,
+        "pinned_bytes": 52117200,
+        "six_sorties": {
+          "boules": 41814272,
+          "incidences": 24388484,
+          "niveaux": 52117200,
+          "offsets_population": 10453576,
+          "offsets_supports": 319088,
+          "valeurs_supports": 5226784
+        },
+        "sorties_total": 134319404
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 45
+    },
+    "ng01:K10": {
+      "first_pass": {
+        "max_ns": 138848667,
+        "median_ns": 136748829
+      },
+      "max_ns": 115114328,
+      "max_process_median_ns": 113447692.0,
+      "median_ns": 112895058.0,
+      "non_ventile": {
+        "max_ns": 23300,
+        "median_ns": 16565.0
+      },
+      "processes": 3,
+      "stages": {
+        "emission": {
+          "max_ns": 14200709,
+          "median_ns": 13968565.0
+        },
+        "feuilles": {
+          "max_ns": 32445929,
+          "median_ns": 32392154.0
+        },
+        "fin": {
+          "max_ns": 8512870,
+          "median_ns": 8469909.5
+        },
+        "parcours": {
+          "max_ns": 8017310,
+          "median_ns": 7990305.0
+        },
+        "publication": {
+          "max_ns": 13226399,
+          "median_ns": 12617650.0
+        },
+        "transferts": {
+          "max_ns": 39566859,
+          "median_ns": 37374619.0
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 532531816,
+        "D2H_controle_restant": 6372,
+        "D2H_hors_six_sorties": 6372,
+        "D2H_repli": 0,
+        "D2H_repli_tableaux_complets": 0,
+        "H2D": 426720,
+        "budget_peak": 2934361596,
+        "chain_elements": 0,
+        "chains_repaired": 0,
+        "device_bytes": 2071668108,
+        "ops": 125,
+        "pinned_bytes": 67108864,
+        "six_sorties": {
+          "boules": 140265664,
+          "incidences": 142827972,
+          "niveaux": 196547760,
+          "offsets_population": 35066424,
+          "offsets_supports": 284416,
+          "valeurs_supports": 17533208
+        },
+        "sorties_total": 532525444
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 12
+    },
+    "ng01:K5": {
+      "first_pass": {
+        "max_ns": 53515870,
+        "median_ns": 53266329
+      },
+      "max_ns": 32302280,
+      "max_process_median_ns": 30951630,
+      "median_ns": 30817030,
+      "non_ventile": {
+        "max_ns": 22050,
+        "median_ns": 15420
+      },
+      "processes": 5,
+      "stages": {
+        "emission": {
+          "max_ns": 4052910,
+          "median_ns": 3826480
+        },
+        "feuilles": {
+          "max_ns": 9495910,
+          "median_ns": 9470210
+        },
+        "fin": {
+          "max_ns": 2403650,
+          "median_ns": 2383940
+        },
+        "parcours": {
+          "max_ns": 3990090,
+          "median_ns": 3958170
+        },
+        "publication": {
+          "max_ns": 3687060,
+          "median_ns": 3239880
+        },
+        "transferts": {
+          "max_ns": 9528420,
+          "median_ns": 7862690
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 114029272,
+        "D2H_controle_restant": 3004,
+        "D2H_hors_six_sorties": 3004,
+        "D2H_repli": 0,
+        "D2H_repli_tableaux_complets": 0,
+        "H2D": 426720,
+        "budget_peak": 827677880,
+        "chain_elements": 0,
+        "chains_repaired": 0,
+        "device_bytes": 607239920,
+        "ops": 75,
+        "pinned_bytes": 45178368,
+        "six_sorties": {
+          "boules": 35069632,
+          "incidences": 20342732,
+          "niveaux": 45178368,
+          "offsets_population": 8767416,
+          "offsets_supports": 284416,
+          "valeurs_supports": 4383704
+        },
+        "sorties_total": 114026268
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 45
+    },
+    "ng02:K10": {
+      "first_pass": {
+        "max_ns": 184538956,
+        "median_ns": 184304337
+      },
+      "max_ns": 147496147,
+      "max_process_median_ns": 146696692.5,
+      "median_ns": 146221862.0,
+      "non_ventile": {
+        "max_ns": 20800,
+        "median_ns": 19315.0
+      },
+      "processes": 3,
+      "stages": {
+        "emission": {
+          "max_ns": 14902689,
+          "median_ns": 14722524.5
+        },
+        "feuilles": {
+          "max_ns": 36687910,
+          "median_ns": 36613544.0
+        },
+        "fin": {
+          "max_ns": 20545439,
+          "median_ns": 20380269.0
+        },
+        "parcours": {
+          "max_ns": 8990810,
+          "median_ns": 8974515.0
+        },
+        "publication": {
+          "max_ns": 14828390,
+          "median_ns": 14358770.0
+        },
+        "transferts": {
+          "max_ns": 52010879,
+          "median_ns": 51305944.0
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 742641868,
+        "D2H_controle_restant": 4256,
+        "D2H_hors_six_sorties": 87738400,
+        "D2H_repli": 87734144,
+        "D2H_repli_tableaux_complets": 87733120,
+        "H2D": 550508,
+        "budget_peak": 3512400948,
+        "chain_elements": 16,
+        "chains_repaired": 2,
+        "device_bytes": 2474948404,
+        "ops": 126,
+        "pinned_bytes": 67108864,
+        "six_sorties": {
+          "boules": 175466240,
+          "incidences": 177653252,
+          "niveaux": 235617360,
+          "offsets_population": 43866568,
+          "offsets_supports": 366768,
+          "valeurs_supports": 21933280
+        },
+        "sorties_total": 654903468
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 12
+    },
+    "ng02:K5": {
+      "first_pass": {
+        "max_ns": 70159830,
+        "median_ns": 69722450
+      },
+      "max_ns": 38513990,
+      "max_process_median_ns": 37710100,
+      "median_ns": 37576010,
+      "non_ventile": {
+        "max_ns": 25740,
+        "median_ns": 19200
+      },
+      "processes": 5,
+      "stages": {
+        "emission": {
+          "max_ns": 4002660,
+          "median_ns": 3890870
+        },
+        "feuilles": {
+          "max_ns": 10888090,
+          "median_ns": 10858520
+        },
+        "fin": {
+          "max_ns": 4124600,
+          "median_ns": 4078310
+        },
+        "parcours": {
+          "max_ns": 4490060,
+          "median_ns": 4446650
+        },
+        "publication": {
+          "max_ns": 4197690,
+          "median_ns": 3742410
+        },
+        "transferts": {
+          "max_ns": 11933580,
+          "median_ns": 10401050
+        }
+      },
+      "traffic_and_capacity": {
+        "D2H": 163681688,
+        "D2H_controle_restant": 2560,
+        "D2H_hors_six_sorties": 22529296,
+        "D2H_repli": 22526736,
+        "D2H_repli_tableaux_complets": 22526160,
+        "H2D": 550396,
+        "budget_peak": 1010465300,
+        "chain_elements": 9,
+        "chains_repaired": 1,
+        "device_bytes": 744876104,
+        "ops": 78,
+        "pinned_bytes": 52779888,
+        "six_sorties": {
+          "boules": 45052320,
+          "incidences": 26058788,
+          "niveaux": 52779888,
+          "offsets_population": 11263088,
+          "offsets_supports": 366768,
+          "valeurs_supports": 5631540
+        },
+        "sorties_total": 141152392
+      },
+      "warm_allocations": [
+        0
+      ],
+      "warm_values": 45
+    }
+  },
+  "logs": {
+    "cpu_ng00_k10_f24.log": "fb6fb825e5ec870e8511f170b97214e20430be290763ca1cbd05611e0c5ecb80",
+    "cpu_ng00_k5_f16.log": "b60dc8ef34f3151786b9a30fd87060babaff83abf393833baf05d1cead7aca86",
+    "cpu_ng00_k5_f24.log": "f8b6115c108e9fa6e9ad85749a0189bf592bdb83ba6e49836e24b93c967a8261",
+    "cpu_ng01_k10_f24.log": "7c626ba716bc4abefbc42c81b6dbfa3398ee961dc0b6d73349a6d2129abce2ae",
+    "cpu_ng01_k5_f16.log": "f16c3e041ebe9bbfa402ebd20dccf3ff4069ae44003e3d40936d9d4471489053",
+    "cpu_ng01_k5_f24.log": "e4cd967a08743d6af3910f3c6622dbb6478b61ed984248589ab4035b011aea36",
+    "cpu_ng02_k10_f24.log": "f9e7aefdcd840ecb2a7487cff1087f602786ac6239fa2f06eda3c84c5085bfb2",
+    "cpu_ng02_k5_f16.log": "e9da3e65fe30ad2f9046342c0810db3c6715469250cf9e7d33fb3d22c30da052",
+    "cpu_ng02_k5_f24.log": "ddf5cff9fc8483ec6c10e7228e18901a5426d43e4e2b402265878e6e87481a6e",
+    "cpu_u16000_k5_f24.log": "89f725d577c7e5e06af4b1a138069ade0c05857ceb242ab8b18ea3338cec2609",
+    "cpu_u32000_k5_f24.log": "a1de7394e5ceb1c26422d696f1e399f1ec2c513f7719925b10031c00475dd129",
+    "cpu_u8000_k5_f24.log": "7e586a00b74831981d499d57eb6496447c8c1fda2b7bc3b1c749a44c9a2f87c4",
+    "dev_k10_ng00_p0.log": "a6897e78ff9704fbb413f86d112a78960a3d7d87012e85a2db4d918b3d09902a",
+    "dev_k10_ng00_p1.log": "373583ead35bd32aa27db8b896ac6310900887a95ca339430a062917cda0d2da",
+    "dev_k10_ng00_p2.log": "18f093c97f81b631247c1807e004501349e248985e6e62a6bd0548c9546ae9f9",
+    "dev_k10_ng01_p0.log": "d9f1756332411a85219210d0df77be012e0b3a84a1b3a34bd36ae41b671ba8c8",
+    "dev_k10_ng01_p1.log": "e71e02a090bcb9a1ab5bcb05ea7c352c9767d3521de9598f3f9ca0dfab18915e",
+    "dev_k10_ng01_p2.log": "ef61afbd05116477d35162a24f33aecdc77470cb74f9edc67868f4c81093d5c0",
+    "dev_k10_ng02_p0.log": "b49a85cc1c945428c13e5c4da21abbf3c4e2ba2b4233e86587f2ef06a5ef92ba",
+    "dev_k10_ng02_p1.log": "c22e359c4e23b084c4389760be85d0ec6f6c1de6480645d9c74473ebf8dc4c1b",
+    "dev_k10_ng02_p2.log": "c08d367fa89f0ee9866ed5016d7f85e222b69610ac4a63948edc8c7b93a607f3",
+    "dev_k5_ng00_p0.log": "6078864a987ee15568b7060ae6ac5d63e686a97f27f2fbe57ab51cacdc879e71",
+    "dev_k5_ng00_p1.log": "f96155eb3bc0b6236b5f2f190fcc91ac46e36110fd0cbc2bcf033491e57e5ec1",
+    "dev_k5_ng00_p2.log": "7e56b0c363b3237d23c101649f42b881fba65656a96fba18c2663481c2219d3b",
+    "dev_k5_ng00_p3.log": "8e9836d3a54596dfa612553aff49614118c4de6434380404095ce14bc5bb0662",
+    "dev_k5_ng00_p4.log": "4297a6c0221db09291534c99ef31c37737ca4b9680ede8390a7df605da1d170e",
+    "dev_k5_ng01_p0.log": "c43cbeaf2d439f3568baa30504a39a9737e49251c80a17cad56603a2e18e92ad",
+    "dev_k5_ng01_p1.log": "04e69cb367160634e8d743bc05860183d30eb3f032168aa60332d714665acd8a",
+    "dev_k5_ng01_p2.log": "58bd55d47a6c7b590ff22881c297c711b73decb6037f2196ad0866bd7731a3de",
+    "dev_k5_ng01_p3.log": "a64f89c0a2020ae73dbced10cd2c4c021cc51a255b8a70d386b5e9d6bb20d77d",
+    "dev_k5_ng01_p4.log": "e46894607db4f71365142239ab6266345e161f519d48bc5d9ace1a555f35600f",
+    "dev_k5_ng02_p0.log": "5a5975c2522724e132a7c609f1c09725b3d70f18b41612e87da68964744e9793",
+    "dev_k5_ng02_p1.log": "df2351b447d352e97e6bd08d70b5c5181836f682667d97816ee80b985892808b",
+    "dev_k5_ng02_p2.log": "2a8b0f9003f5157ca3df7f02492bee444520f14827208d395f6034ae360d7e95",
+    "dev_k5_ng02_p3.log": "7a9dd6c84285a176eb5ad8b7551da3875b3eb49cdab283e8a198c10531eb79f2",
+    "dev_k5_ng02_p4.log": "ebb0c3efa51c3bce66ac8131a64593f20755a4b4ddbd0df7e1fcce9c714a2a56"
+  },
+  "passes_lues": 315,
+  "portee": "Catalogue C seul, u21, W48 ; aucune somme C+G ni temps FULL, aucun natif relance.",
+  "schema": "audit_session_i_mesures_v1",
+  "sources": {
+    "bench/catalogue_probe.cpp": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356",
+    "src/catalogue/assemble.cpp": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd",
+    "src/catalogue/catalogue.hpp": "59c7370a1e6e3b90cf403e266343fdbfb1ae53244f7240f33298fbeba87bfc64",
+    "src/catalogue/device_cuda.cu": "7a8cfe35d67afb5b181d4e2be7a4980db9940fc7efd1d4152dca60198e4dfe62",
+    "src/catalogue/device_pipeline.hpp": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+    "src/catalogue/finish_driver.hpp": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+    "src/catalogue/finish_level.hpp": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb"
+  }
+}

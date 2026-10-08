@@ -1,0 +1,125 @@
+{
+ "archived_verdict_exact": true,
+ "cloud_or_native_run_by_auditor": false,
+ "device_open": {
+  "controls": 217,
+  "failures": 0,
+  "witnesses": 9
+ },
+ "fast_gates": 665,
+ "gpu_quiet_before_after": true,
+ "identity": [
+  {
+   "case": "ng00",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 3990,
+   "replayed_leaves": 1
+  },
+  {
+   "case": "ng00",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 10,
+   "leaves_rewritten": 20263,
+   "replayed_leaves": 2
+  },
+  {
+   "case": "ng01",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 3772,
+   "replayed_leaves": 3
+  },
+  {
+   "case": "ng01",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 10,
+   "leaves_rewritten": 17647,
+   "replayed_leaves": 13
+  },
+  {
+   "case": "ng02",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 5180,
+   "replayed_leaves": 0
+  },
+  {
+   "case": "ng02",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 10,
+   "leaves_rewritten": 25129,
+   "replayed_leaves": 0
+  },
+  {
+   "case": "u8000",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 980,
+   "replayed_leaves": 0
+  },
+  {
+   "case": "u16000",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 2235,
+   "replayed_leaves": 0
+  },
+  {
+   "case": "u32000",
+   "cpu_digests": 1,
+   "device_digests": 3,
+   "equal_to_f2": true,
+   "k": 5,
+   "leaves_rewritten": 4107,
+   "replayed_leaves": 0
+  }
+ ],
+ "manifest_entries": 83,
+ "mutants": [
+  {
+   "criterion": "identite",
+   "id": "feuille_non_resolue_admise_sans_rejeu",
+   "ng00_digest_changed": false,
+   "unit_code": 1
+  },
+  {
+   "criterion": "identite",
+   "id": "fin_sans_departage_exact",
+   "ng00_digest_changed": false,
+   "unit_code": 1
+  },
+  {
+   "criterion": "temps",
+   "id": "un_fil_par_feuille",
+   "warm_median_ms": 119.038384
+  }
+ ],
+ "raw_summaries_matched": 57,
+ "source_files_equal_to_git": 116,
+ "source_kind": "worktree_snapshot",
+ "stop": {
+  "certified": true,
+  "closure": "stopped",
+  "last_stop": "2026-10-07T17:24:12.424-07:00",
+  "status": "TERMINATED"
+ },
+ "verdict": "adopte",
+ "worker_source": "worktree_snapshot:d2f39fe8293d31508697b6db113a7954a7fd0d9e"
+}
