@@ -1,0 +1,221 @@
+{
+  "births": 5,
+  "cells": 513,
+  "claimed_slice": 1,
+  "cpp_complete_execution_proved": false,
+  "flags_assumed": [
+    "KernelOpen done",
+    "kernel busy",
+    "slice1 done+leaves",
+    "not closed"
+  ],
+  "future_hint": {
+    "attach": [
+      2,
+      2,
+      4294967295,
+      2,
+      2
+    ],
+    "attach_rank": [
+      513,
+      512,
+      0,
+      1,
+      2
+    ],
+    "cuts": {
+      "1": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2,
+          3,
+          4
+        ]
+      ],
+      "511": [
+        [
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "512": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ]
+    },
+    "event_cells": [
+      0,
+      1,
+      511,
+      512
+    ],
+    "events": [
+      {
+        "a": 2,
+        "b": 3,
+        "minimum": 2,
+        "rank": 1,
+        "survivor": 2
+      },
+      {
+        "a": 2147483648,
+        "b": 4,
+        "minimum": 2,
+        "rank": 2,
+        "survivor": 2
+      },
+      {
+        "a": 2147483649,
+        "b": 1,
+        "minimum": 1,
+        "rank": 512,
+        "survivor": 2
+      },
+      {
+        "a": 0,
+        "b": 2147483650,
+        "minimum": 0,
+        "rank": 513,
+        "survivor": 2
+      }
+    ],
+    "final_root": 2,
+    "retained": [
+      0,
+      1,
+      511,
+      512
+    ]
+  },
+  "geometric_catalogue_constructed": false,
+  "hint_window": 32,
+  "native_execution": false,
+  "negative_controls": {
+    "birth_date": "refused",
+    "disconnected": "refused",
+    "empty": "refused",
+    "future_cell": "refused",
+    "no_target": "refused",
+    "target_domain": "refused"
+  },
+  "prior_graph_events": 47,
+  "prior_leaf_bridge_rejected": true,
+  "prior_relaxed_accepted": true,
+  "processed_cells": 0,
+  "reference": {
+    "attach": [
+      2,
+      0,
+      4294967295,
+      2,
+      2
+    ],
+    "attach_rank": [
+      513,
+      512,
+      0,
+      1,
+      2
+    ],
+    "cuts": {
+      "1": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2,
+          3,
+          4
+        ]
+      ],
+      "511": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3,
+          4
+        ]
+      ],
+      "512": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      ]
+    },
+    "event_cells": [
+      0,
+      1,
+      511,
+      512
+    ],
+    "events": [
+      {
+        "a": 2,
+        "b": 3,
+        "minimum": 2,
+        "rank": 1,
+        "survivor": 2
+      },
+      {
+        "a": 2147483648,
+        "b": 4,
+        "minimum": 2,
+        "rank": 2,
+        "survivor": 2
+      },
+      {
+        "a": 0,
+        "b": 1,
+        "minimum": 0,
+        "rank": 512,
+        "survivor": 0
+      },
+      {
+        "a": 2147483650,
+        "b": 2147483649,
+        "minimum": 0,
+        "rank": 513,
+        "survivor": 2
+      }
+    ],
+    "final_root": 2,
+    "retained": [
+      0,
+      1,
+      511,
+      512
+    ]
+  },
+  "representatives": 517,
+  "slice_sizes": [
+    256,
+    256,
+    1
+  ]
+}

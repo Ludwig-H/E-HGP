@@ -1,0 +1,104 @@
+{
+  "observed_utc": "2026-10-08T12:27:34.511887+00:00",
+  "source_git": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+  "source_before_git": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "source_before_archive_sha256": "33b73bab8a2ff1c89c0dd76e3bb998bcd27a46f0bd6a4ab482b8e72ee0d28ca0",
+  "package_sha256": "710dc05256d59869a54fc2f95f059ffed81b0d0b4be10ab566d9c5b979947e3d",
+  "plan_sha256": "72b1e911bb6b6b3e84e71fe201191ccb99cb7201a3669474d2ecc591efcaaf0e",
+  "launch_started_utc": "2026-10-08T11:54:03Z",
+  "local_files": {
+    "receipt.json": {
+      "bytes": 24165,
+      "sha256": "57d053102c794c42ef451ed1cdf7a73b124973ebab2a27a82ae366cff0718749"
+    },
+    "DONE": {
+      "bytes": 2,
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2"
+    },
+    "launch.json": {
+      "bytes": 697,
+      "sha256": "8691248138aa4901534d6fd6e9e1082fbce461ebb12aca919e7b6bacdec28a61"
+    },
+    "preflight.json": {
+      "bytes": 6434,
+      "sha256": "a7b23a960d2eae4f0a839f7e01c464ae9484cd365133d89b0c835117ee44429a"
+    },
+    "package/plan.json": {
+      "bytes": 3018,
+      "sha256": "72b1e911bb6b6b3e84e71fe201191ccb99cb7201a3669474d2ecc591efcaaf0e"
+    },
+    "host/logs/021_results_hash.stdout": {
+      "bytes": 174,
+      "sha256": "ced2c9fb1c3771fed52045eb837aabcfacefbbc0113e6a713bae64b4720960de"
+    }
+  },
+  "closure": {
+    "status": "failed_remote",
+    "worker_exit_code": 1,
+    "worker_outcome": "exited",
+    "worker_launched": true,
+    "results_verified": false,
+    "results_bytes": 575450,
+    "targeted_shutdown_certified": true,
+    "stop_exit_code": 0,
+    "stop_attempts": 1,
+    "guest_guard_intact": true,
+    "reserve_released": true,
+    "data_verified_remote": true,
+    "retrieval": "failed",
+    "closure": "stopped"
+  },
+  "done": 3,
+  "public_error": "rapatriement : Refusal: espace local insuffisant pour 575450 octets : 572317696 libres",
+  "errors_count": 1,
+  "reported_remote_archive_sha256": "1ee399cdb3ef9e0ed401a3cae75b68ba4dc8de5c57450e59e55ed7b0a3e5eecb",
+  "reported_remote_archive_bytes": 575450,
+  "stop_observations": {
+    "observed_before_stop": {
+      "lastStartTimestamp": "2026-10-08T04:54:59.184-07:00",
+      "lastStopTimestamp": "2026-10-08T04:35:51.809-07:00",
+      "status": "RUNNING"
+    },
+    "observed_after": {
+      "lastStartTimestamp": "2026-10-08T04:54:59.184-07:00",
+      "lastStopTimestamp": "2026-10-08T05:22:51.083-07:00",
+      "status": "TERMINATED"
+    }
+  },
+  "declared_commands": [
+    {
+      "name": "socle_ctest",
+      "timeout_seconds": 400
+    },
+    {
+      "name": "t2da6_pilote",
+      "timeout_seconds": 1500
+    },
+    {
+      "name": "lidar_ctest",
+      "timeout_seconds": 900
+    },
+    {
+      "name": "mutants_tour",
+      "timeout_seconds": 600
+    }
+  ],
+  "build_timeout_seconds": 400,
+  "local_observation": {
+    "results_archive_present": false,
+    "worker_log_bytes": 0,
+    "commands_tsv_present": false
+  },
+  "native_calls": 0,
+  "remote_calls": 0,
+  "retrieval_guard_source": {
+    "path": "gcp-migration/v12_session.py",
+    "git": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+    "bytes": 138559,
+    "sha256": "8ababf35a6e295749b446faacc0c6f2ca54d69362199131f2a40d8ac5c23d8aa",
+    "lines": [
+      143,
+      1936
+    ]
+  }
+}

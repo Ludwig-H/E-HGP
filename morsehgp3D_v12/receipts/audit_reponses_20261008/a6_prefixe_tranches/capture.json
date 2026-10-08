@@ -1,0 +1,19 @@
+{
+  "constat": "CST-0242",
+  "native_execution": false,
+  "prior_model_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/a6_prefixe_relaxed/check.py",
+  "prior_model_sha256": "e4bc0ade898bd074e92104eeb25c0a6a9f06349ba7aaf7634778b896dda1889b",
+  "publication_pin": "ce81936fcf6fe8d2a771bebecf7a91b49bf45258",
+  "source_pin": "30a69104a697fa2ea2dadd8499bde6c7cb8d72c0",
+  "sources": {
+    "src/tower/forest.hpp": "1f21cdeb598da5492bfa0708551a2bb319685c7d74d197b1d764512ebe6478fb",
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/forest_kernel.cpp": "136d46a55591f94a3c624b643b815c53222d05a670ddeeb0e7b6dba2a914f22f",
+    "src/tower/pipeline.hpp": "b6c6eb7bc7bbd2446e565b46ca0e99bdee3b26b9653ba6d21a91bd7c521486b2",
+    "src/tower/pipeline_run.cpp": "543ca7bda001e87a1c2e5ceb38a4cecfb7c5123127877f5d214e679e057b97ba",
+    "src/tower/pipeline_steps.cpp": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765",
+    "src/tower/stage.hpp": "08f339e8c567bd1e624ca066016be483caab6785de43d0c1baa35d4b2685b39f",
+    "src/tower/tower.hpp": "49759fb6e01acc1af151a3c02df455d2f6097f478929c1f3038ed77c3db1d660"
+  }
+}

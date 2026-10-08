@@ -56,9 +56,10 @@ pont release/acquire proposé. [Fragment de 47 événements](../receipts/audit_r
 admis par les clauses mémoire examinées, exclu par le pont ; ni trame déclenchante ni échec natif établis.
 [21 grandes trames × 3 bras](../receipts/audit_reponses_20261008/a6_identites_complementaires/README.md) : FUL1 égales,
 CPU/u21/K5/W3. Ces 63 sorties ne closent pas CST-0242. [A6 livré](../receipts/audit_reponses_20261008/a6_livraison_0242/README.md) en `30a69104a` :
-mêmes corps relaxed, pont applicable, preuve de préfixe ouverte. Aucun nouveau gain G4 FULL admis.
-[Admission N proposée](../receipts/audit_reponses_20261008/a6_admission_n/README.md) : somme des W plus grands
-scratchs par tâche, retrait du doublon par ordre ; borne logique, pas de gain mémoire mesuré.
+mêmes corps relaxed, pont applicable, preuve de préfixe ouverte. [Première tentative G4](../receipts/audit_reponses_20261008/session_a6_tentative/README.md) :
+worker1, arrêt certifié, archive non rapatriée faute de marge disque ; aucun temps A6 admis.
+Codespace nettoyé le8 à12:39 UTC : environ8,4 Go libérés, 8,9 Gio disponibles.
+[Admission N](../receipts/audit_reponses_20261008/a6_admission_n/README.md) : borne par tâche proposée, aucun gain mesuré.
 
 **[G-APP2 admis ; D1 et D2 rejetés](../receipts/audit_reponses_20261008/gapp2_admission/README.md).**
 Source9815 : 75 chaudes K5 décisives ; identités exactes, aucun refus.
@@ -66,7 +67,6 @@ D1 : borne IC95 propositions GPU/CPU0,511–0,525 >0,50 ; deux totaux sur trois 
 D2 : propositions0,960–1,096 >0,20, totaux0,218–0,247 >0,10. K10 reste informatif.
 Lots préparés et certification CPU après chrono : **aucun gain G/FULL intégré**. [Preuve des issues](../receipts/audit_reponses_20261008/gapp2_issues_contrat/README.md) :
 boule minimale unique sous certification exacte ; mécanisme et issue distincts, aucun amendement acquis.
-[G-APP1](../receipts/audit_reponses_20261008/gapp_admission/README.md) antérieur.
 [Raccord CPU B2-C](../receipts/audit_reponses_20261008/b2_census_raccord/README.md) statiquement cohérent :
 API/replis conservés, bornes signées vérifiées ; préconditions brutes à expliciter, gain à mesurer.
 
@@ -86,5 +86,6 @@ Scion sans sol3,439M30,982s, Meadow6,181M30,565s. Une seule chaude par cas cité
 [Sources/arrêt clos](../receipts/audit_reponses_20261008/session_b1p_provenance/README.md), mêmes entrées L1r,
 39 fichiers natifs changés : comparaison descriptive, aucun gain causal isolé. FUL1 seulement jusqu'à1,6M.
 Meadow : C/G/queue2,720/7,571/19,783s ; Boreas CPU C13,959s sur20,056s. Pas de seuil universel en sites.
-[L2 CPU froide](../receipts/audit_reponses_20261008/session_l2_admission/README.md) reste antérieure ;
+Plus grands succès : GPU, Marseille brut 6,709 M en 26,602 s à froid ;
+[L2 CPU](../receipts/audit_reponses_20261008/session_l2_admission/README.md), Paris brut 14,552 M en 165,789 s à froid ;
 [raffinement certifié proposé](../receipts/audit_reponses_20261008/feuille_large_raffinement/README.md), égalités massives ouvertes.
