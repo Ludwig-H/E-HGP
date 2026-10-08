@@ -142,3 +142,14 @@ add_executable(mhgp12_tower_chain ${CMAKE_CURRENT_LIST_DIR}/tower_chain.cpp)
 target_link_libraries(mhgp12_tower_chain PRIVATE mhgp12)
 mhgp12_python_gate(mhgp12_tower_chain_m0 0 mes_m0.py --chaine $<TARGET_FILE:mhgp12_tower_chain> ${MHGP12_COORD_BITS}
                    - LABELS lidar long TIMEOUT 7200)
+
+# Sonde FULL residente (bench/full_probe.cpp ; frontiere du mur proposee par l'auditeur Codex le 8 octobre) : Session
+# ouverte une fois, passes du nuage a la tour complete en memoire, trames successives, voie appareil avec --device.
+# Porte de la voie CPU : empreinte FUL1 identique d'une passe a l'autre et egale a celle de mhgp12_tower_chain, trames
+# alternees, etages du mur disjoints ; usage faux : code 2. La voie appareil se juge sur G4.
+add_executable(mhgp12_full_probe ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
+target_link_libraries(mhgp12_full_probe PRIVATE mhgp12)
+mhgp12_expect_code(mhgp12_full_probe_usage 2 mhgp12_full_probe --k=5 LABELS fast)
+mhgp12_python_gate(mhgp12_full_probe_cpu 0 full_probe_check.py $<TARGET_FILE:mhgp12_full_probe>
+                   $<TARGET_FILE:mhgp12_tower_chain> LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui"
+                   LABELS fast TIMEOUT 600)
