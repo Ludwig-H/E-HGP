@@ -1,0 +1,1396 @@
+{
+ "budget_ns": 100000000,
+ "contrat": {
+  "ng00_02": {
+   "maximum_ns": 164635953,
+   "mediane_ns": 159302836,
+   "tenu": false,
+   "trames": 3
+  },
+  "v12set": {
+   "maximum_ns": 467920453,
+   "mediane_ns": 241309401,
+   "tenu": false,
+   "trames": 37
+  }
+ },
+ "duree_s": 1351.0,
+ "empreintes": {
+  "k10": {
+   "ng00": "e9e5f0bdb3e192c0b9f040576b0871ceb099457d43bdacc95ea5395ab23a6398",
+   "ng01": "f07ebf5b7aee58430bc693e41b5cf5fab6d05264e447740c9d5dcf388d578a78",
+   "ng02": "8c9e3c5945e79694727f42ff629848d138d967a5237986e927fffdc53a166c1c"
+  },
+  "k5": {
+   "ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+   "ng01": "2d58a72a623ab293a05f30c215cd65fcb455419a0a118f6d301bb17600645e26",
+   "ng02": "27d7650add157cdd582d55f50305f0b8f9319865c8ffd0737cf12b76ac2197f0"
+  },
+  "v12set": {
+   "kitti_ng_00_000648": "8459afbedad6fd282d2a3742ec019799d4235a0910970678c9654aceca47177e",
+   "kitti_ng_00_000660": "d77ac503062736589f5de545dc6afa91cadc65713d30a2cd0fbe4ddf2dca7fca",
+   "kitti_ng_00_001464": "80d5741af6e70c66ab446fa3c2fac23479a6824082ead2b30f1b96d95279272b",
+   "kitti_ng_00_001502": "2f19bf7de3e44d911898109affa243909182ce706db1510a9badd01c231d1949",
+   "kitti_ng_00_001880": "a20b9791a5d39afca7d4ea48597709ac751b292671fdb4a164d97f61b9f80f46",
+   "kitti_ng_00_001896": "29c79b952c389f356c271d56ce3892a1ed0204ff6ee0e3c6cee393ccef536acc",
+   "kitti_ng_00_003612": "460c68b7adab7304a4fb51d66b3e45f8660904af9b866aa1069ebda47b5e14f2",
+   "kitti_ng_00_003624": "ebee2d91eef6f74ca22c2ad94ce36b5dfb660e52db4429095591e8dff0be2b2f",
+   "kitti_ng_02_000620": "94e3ea0ba77c461a10e30133e939eec87e1be7e86a99843eb08fa16a85078f2f",
+   "kitti_ng_02_001600": "95213cdfa1df19fed36bb3689057a36f6c5bc95963adf5d5b4778746a3b18bb5",
+   "kitti_ng_02_001604": "b02b6a1cd15ce6b1176dc76ba23b377620c9fbe7dec6b2b9cf5ffb4d6fb72903",
+   "kitti_ng_02_001606": "fe47826e6624e1749b974d28409ed4748262fe426b2fa049e621135e95884683",
+   "kitti_ng_02_001610": "3f3e10301bdf3b27588ce095a5ac27b76ce5f853991c9b9ba3ab8d8237382b06",
+   "kitti_ng_05_002060": "d34169a8e340c6c8f6849ec41c5dd98eefe44dbba53a779d06c9110b49e747b6",
+   "kitti_ng_05_002064": "f22e248480ff230728543e68bdd0dd79f68c0989b4363dfe93d7b3047795a7bc",
+   "kitti_ng_05_002748": "ce00e7a94ebf57073651f290c5906dfa24e56db6e2b9caa0beb9ef0fc8456ca6",
+   "kitti_ng_06_000770": "2974aaf24b78d5be6d4e1a24aca3de2d8a7c47dbd87ef0e3195b2b1dab9d7871",
+   "kitti_ng_06_000772": "fba066619c3d1ea67b827fed0e29005e4b94be990280272aaf7dbd8f8201b81a",
+   "kitti_ng_06_000774": "80c815dcf462848b254602f6e7490698bfc8feb5d41e88ab1500802db824e903",
+   "kitti_ng_06_000780": "1555662eb2fb1a1207ee82fff77d83ba364d1944297d288de40883044c768e72",
+   "kitti_ng_06_000798": "7cd34c6cac2494aa084c5b972ab02d80a7caa58f8b7a2a63f8cf4cb434428061",
+   "kitti_ng_06_000800": "2c6c2a9b97a5a8c69ccb359d45238f8f3256fe931ef658e6e75e83f3d9360b25",
+   "kitti_ng_06_000804": "6d4cdc3c9f41c02dd8a18d67ce71c64f21d0da3e5ea8f1930a5c8e15741f7fa1",
+   "kitti_ng_06_000806": "79951b18fd334a638cc7b903842aab6a0ac862320fca311f0dc0445bdc7f4818",
+   "kitti_ng_08_000000": "0bda53caa7a30962639ea6b1c610eb5964e8390a93e51b4c011b6cdbe6c0073e",
+   "kitti_ng_08_000100": "d44e2199c3684ce26495f07afa797834b344fa63851cc6e54697a0811b99e5a4",
+   "kitti_ng_08_000200": "27d7650add157cdd582d55f50305f0b8f9319865c8ffd0737cf12b76ac2197f0",
+   "kitti_ng_08_000246": "7c81fdf53fe6b0f90d37a62be8157aa127787086665dd81be971dc3caefa9ead",
+   "kitti_ng_08_000691": "119911b011c2491425e20c37cb195611a0dc7f8a29768e61fe5c7d039d85cd21",
+   "kitti_ng_08_001176": "0ebdb2606334855480f03e90f5277234b022203c46e0124c34f89b4f7a948a2f",
+   "kitti_ng_08_001193": "c38ea7d5e870f281c707c90a6ba62a1a72381e77ab5354c0299a4c82cdb242a6",
+   "kitti_ng_08_001302": "d436476e2f6fe38c515ac6a93df6994443092e36651895c98f6a28be40ccbbea",
+   "kitti_ng_08_001847": "c76c6acebf5b4c87ea09731430e44fe6311e1a3238d69ab87aaad66d24dcc8af",
+   "kitti_ng_08_002119": "a371f9a846402654da39f113cb7685abf1778f21ef3562fa0ba072758633c166",
+   "kitti_ng_08_002554": "56d2802b4a5f7dcfa4208f39d9844aa999a47a6dd4fdd0dbf966d9d4698dbcb7",
+   "kitti_ng_10_000424": "c3dd49fd6cc6c0dcb33936fec6ca04fbec53c4023c15547a5c5bdac26f4a7ee5",
+   "kitti_ng_10_000430": "3e6c91dd985def353bc7fc714e7cd674c522963ccdb1d2f62f8caa448a93ea98"
+  }
+ },
+ "environnement_apres": {
+  "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+  "gpu_apps": "",
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+ },
+ "environnement_avant": {
+  "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+  "gpu_apps": "",
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+ },
+ "mesure": "MES-FULL",
+ "options": {
+  "archive_v12set": "$HOME/ehgp-v12/ehgp-v12.jcU88GIuUo/data/g4_kitti_v12set_xyz.tar",
+  "delai": 900,
+  "donnees": "$HOME/ehgp-v12/ehgp-v12.jcU88GIuUo/data",
+  "essai": false,
+  "fils": 48,
+  "jobs": 44,
+  "passes": 10,
+  "processus": 5,
+  "sonde": null,
+  "sortie": "$HOME/ehgp-v12/ehgp-v12.jcU88GIuUo/results/cmd/000_mes_full/files/full",
+  "src": "$HOME/ehgp-v12/ehgp-v12.jcU88GIuUo/src",
+  "travail": "$HOME/ehgp-v12/ehgp-v12.jcU88GIuUo/build/full"
+ },
+ "refus": [],
+ "statistiques": {
+  "k10_appareil": {
+   "ng00": {
+    "c_ns": {
+     "emission": 14483125.5,
+     "feuilles": 39483958.5,
+     "fin_etage": 12316377.0,
+     "parcours": 9207997.5,
+     "publication": 14671317.0,
+     "transferts": 45943026.0
+    },
+    "etapes_ns": {
+     "C": 135917057.5,
+     "G": 433130336.0,
+     "M": 39794566.0,
+     "P": 1647955.0,
+     "R": 69825929.0,
+     "T": 85452856.5,
+     "TMVR": 220001564.0,
+     "V": 9081531.5,
+     "raccord": 2745.0
+    },
+    "max_medianes_ns": 798873947.0,
+    "max_ns": 802724739,
+    "mediane_ns": 793439449.0,
+    "pic_octets": 4405479095,
+    "premiere_ns": 826268743,
+    "sites": 39885,
+    "valeurs": 12
+   },
+   "ng01": {
+    "c_ns": {
+     "emission": 13936511.0,
+     "feuilles": 31937640.0,
+     "fin_etage": 8487891.5,
+     "parcours": 7986656.5,
+     "publication": 11698972.0,
+     "transferts": 37466544.5
+    },
+    "etapes_ns": {
+     "C": 111537405.0,
+     "G": 318241634.5,
+     "M": 33593289.5,
+     "P": 1446485.0,
+     "R": 55443728.0,
+     "T": 63069064.0,
+     "TMVR": 171790049.0,
+     "V": 6968141.0,
+     "raccord": 2810.5
+    },
+    "max_medianes_ns": 604180336.0,
+    "max_ns": 617740478,
+    "mediane_ns": 603340761.5,
+    "pic_octets": 3550598297,
+    "premiere_ns": 626196459,
+    "sites": 35551,
+    "valeurs": 12
+   },
+   "ng02": {
+    "c_ns": {
+     "emission": 14574901.5,
+     "feuilles": 36098545.5,
+     "fin_etage": 19145212.0,
+     "parcours": 8988675.0,
+     "publication": 13715727.0,
+     "transferts": 49498322.5
+    },
+    "etapes_ns": {
+     "C": 142000265.0,
+     "G": 350854422.0,
+     "M": 39964371.0,
+     "P": 1822055.0,
+     "R": 68900165.0,
+     "T": 85894147.5,
+     "TMVR": 220421533.0,
+     "V": 8892191.0,
+     "raccord": 2790.0
+    },
+    "max_medianes_ns": 717753883.0,
+    "max_ns": 723355963,
+    "mediane_ns": 715307815.5,
+    "pic_octets": 4293444166,
+    "premiere_ns": 756966091,
+    "sites": 45845,
+    "valeurs": 12
+   }
+  },
+  "k5_appareil": {
+   "ng00": {
+    "c_ns": {
+     "emission": 3560528,
+     "feuilles": 11557333,
+     "fin_etage": 2569940,
+     "parcours": 4367067,
+     "publication": 3781378,
+     "transferts": 9039956
+    },
+    "etapes_ns": {
+     "C": 34940982,
+     "G": 57199985,
+     "M": 11697072,
+     "P": 1728719,
+     "R": 14256500,
+     "T": 33078369,
+     "TMVR": 65372931,
+     "V": 2207654,
+     "raccord": 1500
+    },
+    "max_medianes_ns": 160760208,
+    "max_ns": 164457942,
+    "mediane_ns": 159302836,
+    "pic_octets": 1158841124,
+    "premiere_ns": 188577537,
+    "sites": 39885,
+    "valeurs": 45
+   },
+   "ng01": {
+    "c_ns": {
+     "emission": 3829696,
+     "feuilles": 9355305,
+     "fin_etage": 2397512,
+     "parcours": 3957087,
+     "publication": 3323678,
+     "transferts": 7858535
+    },
+    "etapes_ns": {
+     "C": 30797590,
+     "G": 43833108,
+     "M": 8434018,
+     "P": 1455720,
+     "R": 11965702,
+     "T": 25847283,
+     "TMVR": 51671786,
+     "V": 1949143,
+     "raccord": 1470
+    },
+    "max_medianes_ns": 127803949,
+    "max_ns": 132950482,
+    "mediane_ns": 127626536,
+    "pic_octets": 965164686,
+    "premiere_ns": 154391476,
+    "sites": 35551,
+    "valeurs": 45
+   },
+   "ng02": {
+    "c_ns": {
+     "emission": 3879006,
+     "feuilles": 10714217,
+     "fin_etage": 4082776,
+     "parcours": 4438577,
+     "publication": 3849816,
+     "transferts": 10407284
+    },
+    "etapes_ns": {
+     "C": 37417377,
+     "G": 51736692,
+     "M": 12006758,
+     "P": 1875250,
+     "R": 15321864,
+     "T": 37951406,
+     "TMVR": 72279734,
+     "V": 2358534,
+     "raccord": 1540
+    },
+    "max_medianes_ns": 164635953,
+    "max_ns": 173552070,
+    "mediane_ns": 163268927,
+    "pic_octets": 1192437778,
+    "premiere_ns": 194584547,
+    "sites": 45845,
+    "valeurs": 45
+   }
+  },
+  "k5_cpu": {
+   "ng00": {
+    "c_ns": {
+     "emission": 25047466.0,
+     "feuilles": 156071390.0,
+     "fin_etage": 66381105.5,
+     "parcours": 74523671.0,
+     "publication": 0.0,
+     "transferts": 0.0
+    },
+    "etapes_ns": {
+     "C": 326091956.0,
+     "G": 53475019.5,
+     "M": 8777237.0,
+     "P": 1659770.0,
+     "R": 12016031.5,
+     "T": 33196055.5,
+     "TMVR": 60260595.0,
+     "V": 2211555.5,
+     "raccord": 1605.0
+    },
+    "max_medianes_ns": 444215846.0,
+    "max_ns": 447493456,
+    "mediane_ns": 441069223.5,
+    "pic_octets": 534376236,
+    "premiere_ns": 447647707,
+    "sites": 39885,
+    "valeurs": 12
+   },
+   "ng01": {
+    "c_ns": {
+     "emission": 24119818.5,
+     "feuilles": 126045136.0,
+     "fin_etage": 58802404.0,
+     "parcours": 62781466.5,
+     "publication": 0.0,
+     "transferts": 0.0
+    },
+    "etapes_ns": {
+     "C": 274070972.5,
+     "G": 41942266.5,
+     "M": 7740071.5,
+     "P": 1601430.5,
+     "R": 10378551.5,
+     "T": 27354353.5,
+     "TMVR": 50788437.5,
+     "V": 1972245.0,
+     "raccord": 1515.0
+    },
+    "max_medianes_ns": 368783228.0,
+    "max_ns": 371939874,
+    "mediane_ns": 368333052.0,
+    "pic_octets": 451615804,
+    "premiere_ns": 386514195,
+    "sites": 35551,
+    "valeurs": 12
+   },
+   "ng02": {
+    "c_ns": {
+     "emission": 28855513.5,
+     "feuilles": 147660193.5,
+     "fin_etage": 71654172.5,
+     "parcours": 76596877.0,
+     "publication": 0.0,
+     "transferts": 0.0
+    },
+    "etapes_ns": {
+     "C": 329246151.0,
+     "G": 48154783.0,
+     "M": 8493271.5,
+     "P": 2156295.5,
+     "R": 13014822.5,
+     "T": 39240126.5,
+     "TMVR": 67426132.0,
+     "V": 2344620.0,
+     "raccord": 1595.0
+    },
+    "max_medianes_ns": 448229023.0,
+    "max_ns": 451246013,
+    "mediane_ns": 447075489.5,
+    "pic_octets": 567747376,
+    "premiere_ns": 476459711,
+    "sites": 45845,
+    "valeurs": 12
+   }
+  },
+  "v12set_k5_appareil": {
+   "kitti_ng_00_000648": {
+    "c_ns": {
+     "emission": 6830831,
+     "feuilles": 16821602,
+     "fin_etage": 3605280,
+     "parcours": 5793680,
+     "publication": 5274080,
+     "transferts": 14715262
+    },
+    "etapes_ns": {
+     "C": 53150926,
+     "G": 70834050,
+     "M": 17309682,
+     "P": 3094640,
+     "R": 24011073,
+     "T": 71492659,
+     "TMVR": 123714714,
+     "V": 3779091,
+     "raccord": 1650
+    },
+    "max_medianes_ns": 262551394,
+    "max_ns": 262551394,
+    "mediane_ns": 250239767,
+    "pic_octets": 2723920923,
+    "premiere_ns": 247580758,
+    "sites": 77965,
+    "valeurs": 5
+   },
+   "kitti_ng_00_000660": {
+    "c_ns": {
+     "emission": 6890581,
+     "feuilles": 16934522,
+     "fin_etage": 3546661,
+     "parcours": 5554601,
+     "publication": 5123171,
+     "transferts": 14447661
+    },
+    "etapes_ns": {
+     "C": 52453216,
+     "G": 72285831,
+     "M": 16951142,
+     "P": 2885691,
+     "R": 23570293,
+     "T": 64594307,
+     "TMVR": 115223214,
+     "V": 3463370,
+     "raccord": 1550
+    },
+    "max_medianes_ns": 260337809,
+    "max_ns": 260337809,
+    "mediane_ns": 242713899,
+    "pic_octets": 2711555909,
+    "premiere_ns": 252039673,
+    "sites": 71483,
+    "valeurs": 5
+   },
+   "kitti_ng_00_001464": {
+    "c_ns": {
+     "emission": 6937640,
+     "feuilles": 17340312,
+     "fin_etage": 3661160,
+     "parcours": 5706420,
+     "publication": 5224221,
+     "transferts": 15129711
+    },
+    "etapes_ns": {
+     "C": 53973326,
+     "G": 75310399,
+     "M": 16936052,
+     "P": 3008281,
+     "R": 24207343,
+     "T": 68868139,
+     "TMVR": 120832296,
+     "V": 3718711,
+     "raccord": 1500
+    },
+    "max_medianes_ns": 256809229,
+    "max_ns": 256809229,
+    "mediane_ns": 252965567,
+    "pic_octets": 2734185578,
+    "premiere_ns": 262948974,
+    "sites": 74736,
+    "valeurs": 5
+   },
+   "kitti_ng_00_001502": {
+    "c_ns": {
+     "emission": 6466241,
+     "feuilles": 15016092,
+     "fin_etage": 3217650,
+     "parcours": 5249571,
+     "publication": 4678791,
+     "transferts": 12687521
+    },
+    "etapes_ns": {
+     "C": 47439785,
+     "G": 61422857,
+     "M": 12499921,
+     "P": 2574491,
+     "R": 20848482,
+     "T": 59129168,
+     "TMVR": 101582403,
+     "V": 3222890,
+     "raccord": 1510
+    },
+    "max_medianes_ns": 225898465,
+    "max_ns": 225898465,
+    "mediane_ns": 213621038,
+    "pic_octets": 2647046796,
+    "premiere_ns": 226306319,
+    "sites": 64995,
+    "valeurs": 5
+   },
+   "kitti_ng_00_001880": {
+    "c_ns": {
+     "emission": 8013721,
+     "feuilles": 22856923,
+     "fin_etage": 4522760,
+     "parcours": 6457711,
+     "publication": 6681691,
+     "transferts": 19092213
+    },
+    "etapes_ns": {
+     "C": 67577589,
+     "G": 109385542,
+     "M": 19771832,
+     "P": 3354540,
+     "R": 30552184,
+     "T": 89576553,
+     "TMVR": 153419502,
+     "V": 4586510,
+     "raccord": 1450
+    },
+    "max_medianes_ns": 340906550,
+    "max_ns": 340906550,
+    "mediane_ns": 333944839,
+    "pic_octets": 2907823882,
+    "premiere_ns": 342092784,
+    "sites": 80607,
+    "valeurs": 5
+   },
+   "kitti_ng_00_001896": {
+    "c_ns": {
+     "emission": 9301640,
+     "feuilles": 31340152,
+     "fin_etage": 7189531,
+     "parcours": 7001290,
+     "publication": 9035561,
+     "transferts": 25835964
+    },
+    "etapes_ns": {
+     "C": 89664132,
+     "G": 163636689,
+     "M": 23842763,
+     "P": 3927650,
+     "R": 40685614,
+     "T": 127861705,
+     "TMVR": 209104734,
+     "V": 5466301,
+     "raccord": 1440
+    },
+    "max_medianes_ns": 467920453,
+    "max_ns": 467920453,
+    "mediane_ns": 465777522,
+    "pic_octets": 3182581983,
+    "premiere_ns": 479015848,
+    "sites": 95586,
+    "valeurs": 5
+   },
+   "kitti_ng_00_003612": {
+    "c_ns": {
+     "emission": 6202721,
+     "feuilles": 15993001,
+     "fin_etage": 3502521,
+     "parcours": 5467961,
+     "publication": 5310581,
+     "transferts": 14081022
+    },
+    "etapes_ns": {
+     "C": 50710076,
+     "G": 67346098,
+     "M": 13561612,
+     "P": 2822010,
+     "R": 22790623,
+     "T": 63363417,
+     "TMVR": 109667613,
+     "V": 3485660,
+     "raccord": 1440
+    },
+    "max_medianes_ns": 235631031,
+    "max_ns": 235631031,
+    "mediane_ns": 230587406,
+    "pic_octets": 2697864004,
+    "premiere_ns": 242957551,
+    "sites": 70537,
+    "valeurs": 5
+   },
+   "kitti_ng_00_003624": {
+    "c_ns": {
+     "emission": 6243191,
+     "feuilles": 16787181,
+     "fin_etage": 3543410,
+     "parcours": 5671860,
+     "publication": 5389351,
+     "transferts": 15043252
+    },
+    "etapes_ns": {
+     "C": 52445996,
+     "G": 70630199,
+     "M": 16773302,
+     "P": 2961570,
+     "R": 22970902,
+     "T": 65515327,
+     "TMVR": 115526875,
+     "V": 3480071,
+     "raccord": 1540
+    },
+    "max_medianes_ns": 249490067,
+    "max_ns": 249490067,
+    "mediane_ns": 241309401,
+    "pic_octets": 2704466885,
+    "premiere_ns": 245479380,
+    "sites": 72836,
+    "valeurs": 5
+   },
+   "kitti_ng_02_000620": {
+    "c_ns": {
+     "emission": 6269980,
+     "feuilles": 15929493,
+     "fin_etage": 3159770,
+     "parcours": 4831910,
+     "publication": 5189420,
+     "transferts": 13685982
+    },
+    "etapes_ns": {
+     "C": 49011205,
+     "G": 73438129,
+     "M": 14648211,
+     "P": 2159221,
+     "R": 19714162,
+     "T": 50394906,
+     "TMVR": 93642950,
+     "V": 2839791,
+     "raccord": 1430
+    },
+    "max_medianes_ns": 220049274,
+    "max_ns": 220049274,
+    "mediane_ns": 218342095,
+    "pic_octets": 2629445793,
+    "premiere_ns": 217312035,
+    "sites": 52403,
+    "valeurs": 5
+   },
+   "kitti_ng_02_001600": {
+    "c_ns": {
+     "emission": 6420351,
+     "feuilles": 18632022,
+     "fin_etage": 5808491,
+     "parcours": 5751721,
+     "publication": 5332980,
+     "transferts": 16678731
+    },
+    "etapes_ns": {
+     "C": 58576537,
+     "G": 80443270,
+     "M": 16521642,
+     "P": 2780030,
+     "R": 23195672,
+     "T": 61459578,
+     "TMVR": 111213202,
+     "V": 3425761,
+     "raccord": 1610
+    },
+    "max_medianes_ns": 260628239,
+    "max_ns": 260628239,
+    "mediane_ns": 253456143,
+    "pic_octets": 2715587057,
+    "premiere_ns": 256583433,
+    "sites": 67585,
+    "valeurs": 5
+   },
+   "kitti_ng_02_001604": {
+    "c_ns": {
+     "emission": 7184320,
+     "feuilles": 19388942,
+     "fin_etage": 3666272,
+     "parcours": 5669611,
+     "publication": 5979321,
+     "transferts": 15801692
+    },
+    "etapes_ns": {
+     "C": 57704307,
+     "G": 84702140,
+     "M": 16917833,
+     "P": 2900190,
+     "R": 24279043,
+     "T": 67115858,
+     "TMVR": 118966203,
+     "V": 3605600,
+     "raccord": 1620
+    },
+    "max_medianes_ns": 271498450,
+    "max_ns": 271498450,
+    "mediane_ns": 263299033,
+    "pic_octets": 2739759641,
+    "premiere_ns": 262987070,
+    "sites": 67805,
+    "valeurs": 5
+   },
+   "kitti_ng_02_001606": {
+    "c_ns": {
+     "emission": 6486060,
+     "feuilles": 18490732,
+     "fin_etage": 3385140,
+     "parcours": 5562741,
+     "publication": 5518140,
+     "transferts": 14636372
+    },
+    "etapes_ns": {
+     "C": 54073826,
+     "G": 79014908,
+     "M": 16290402,
+     "P": 2669621,
+     "R": 22899122,
+     "T": 63198277,
+     "TMVR": 112549333,
+     "V": 3446480,
+     "raccord": 1500
+    },
+    "max_medianes_ns": 256246989,
+    "max_ns": 256246989,
+    "mediane_ns": 248513068,
+    "pic_octets": 2703036066,
+    "premiere_ns": 249751552,
+    "sites": 64740,
+    "valeurs": 5
+   },
+   "kitti_ng_02_001610": {
+    "c_ns": {
+     "emission": 6195540,
+     "feuilles": 18726283,
+     "fin_etage": 3587190,
+     "parcours": 5885731,
+     "publication": 5439991,
+     "transferts": 15624813
+    },
+    "etapes_ns": {
+     "C": 55362577,
+     "G": 80581199,
+     "M": 16495232,
+     "P": 2805560,
+     "R": 23153132,
+     "T": 63168808,
+     "TMVR": 113084544,
+     "V": 3381981,
+     "raccord": 1560
+    },
+    "max_medianes_ns": 257730913,
+    "max_ns": 257730913,
+    "mediane_ns": 251451558,
+    "pic_octets": 2713035739,
+    "premiere_ns": 252966319,
+    "sites": 67864,
+    "valeurs": 5
+   },
+   "kitti_ng_05_002060": {
+    "c_ns": {
+     "emission": 7763441,
+     "feuilles": 21337644,
+     "fin_etage": 4050411,
+     "parcours": 5944450,
+     "publication": 6101561,
+     "transferts": 16952752
+    },
+    "etapes_ns": {
+     "C": 62075807,
+     "G": 101639853,
+     "M": 17636112,
+     "P": 2715760,
+     "R": 25545172,
+     "T": 71314988,
+     "TMVR": 126116754,
+     "V": 3667201,
+     "raccord": 1580
+    },
+    "max_medianes_ns": 295547673,
+    "max_ns": 295547673,
+    "mediane_ns": 292506503,
+    "pic_octets": 2785905175,
+    "premiere_ns": 291705944,
+    "sites": 66456,
+    "valeurs": 5
+   },
+   "kitti_ng_05_002064": {
+    "c_ns": {
+     "emission": 7147980,
+     "feuilles": 20411143,
+     "fin_etage": 3653450,
+     "parcours": 5737230,
+     "publication": 6101161,
+     "transferts": 15992261
+    },
+    "etapes_ns": {
+     "C": 59190057,
+     "G": 98151031,
+     "M": 17093642,
+     "P": 2608381,
+     "R": 24582513,
+     "T": 62076757,
+     "TMVR": 114673272,
+     "V": 3522900,
+     "raccord": 1550
+    },
+    "max_medianes_ns": 284245492,
+    "max_ns": 284245492,
+    "mediane_ns": 274376312,
+    "pic_octets": 2761126892,
+    "premiere_ns": 280277674,
+    "sites": 62859,
+    "valeurs": 5
+   },
+   "kitti_ng_05_002748": {
+    "c_ns": {
+     "emission": 4397651,
+     "feuilles": 12668912,
+     "fin_etage": 2692740,
+     "parcours": 4777530,
+     "publication": 4029310,
+     "transferts": 10164150
+    },
+    "etapes_ns": {
+     "C": 38809254,
+     "G": 52341266,
+     "M": 10595951,
+     "P": 2047111,
+     "R": 16391832,
+     "T": 38662834,
+     "TMVR": 73072869,
+     "V": 2613631,
+     "raccord": 1340
+    },
+    "max_medianes_ns": 167120449,
+    "max_ns": 167120449,
+    "mediane_ns": 164412738,
+    "pic_octets": 2530624486,
+    "premiere_ns": 167002829,
+    "sites": 50136,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000770": {
+    "c_ns": {
+     "emission": 3239831,
+     "feuilles": 9703011,
+     "fin_etage": 2492831,
+     "parcours": 4576650,
+     "publication": 3418690,
+     "transferts": 8326381
+    },
+    "etapes_ns": {
+     "C": 31720563,
+     "G": 42102225,
+     "M": 10561211,
+     "P": 1891001,
+     "R": 13666781,
+     "T": 32072354,
+     "TMVR": 63064817,
+     "V": 2259971,
+     "raccord": 1410
+    },
+    "max_medianes_ns": 142056186,
+    "max_ns": 142056186,
+    "mediane_ns": 139577246,
+    "pic_octets": 2471521547,
+    "premiere_ns": 139633010,
+    "sites": 46561,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000772": {
+    "c_ns": {
+     "emission": 3790931,
+     "feuilles": 10643581,
+     "fin_etage": 2569420,
+     "parcours": 4973581,
+     "publication": 3612421,
+     "transferts": 9898071
+    },
+    "etapes_ns": {
+     "C": 35437634,
+     "G": 45192645,
+     "M": 9362541,
+     "P": 2121990,
+     "R": 14615401,
+     "T": 34562284,
+     "TMVR": 65629398,
+     "V": 2370221,
+     "raccord": 1360
+    },
+    "max_medianes_ns": 151098347,
+    "max_ns": 151098347,
+    "mediane_ns": 148528358,
+    "pic_octets": 2497653567,
+    "premiere_ns": 147628589,
+    "sites": 49668,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000774": {
+    "c_ns": {
+     "emission": 5124750,
+     "feuilles": 12789051,
+     "fin_etage": 2653460,
+     "parcours": 5020521,
+     "publication": 3863791,
+     "transferts": 10539271
+    },
+    "etapes_ns": {
+     "C": 39851355,
+     "G": 48051665,
+     "M": 10884171,
+     "P": 2291690,
+     "R": 15951922,
+     "T": 38828054,
+     "TMVR": 73062419,
+     "V": 2483811,
+     "raccord": 1530
+    },
+    "max_medianes_ns": 169934970,
+    "max_ns": 169934970,
+    "mediane_ns": 162881971,
+    "pic_octets": 2524951075,
+    "premiere_ns": 163632340,
+    "sites": 53754,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000780": {
+    "c_ns": {
+     "emission": 3929200,
+     "feuilles": 10397991,
+     "fin_etage": 2537930,
+     "parcours": 4991600,
+     "publication": 3516961,
+     "transferts": 8761341
+    },
+    "etapes_ns": {
+     "C": 34202834,
+     "G": 44159675,
+     "M": 10912411,
+     "P": 2116930,
+     "R": 14313861,
+     "T": 34191344,
+     "TMVR": 66272837,
+     "V": 2328950,
+     "raccord": 1470
+    },
+    "max_medianes_ns": 147372676,
+    "max_ns": 147372676,
+    "mediane_ns": 146792106,
+    "pic_octets": 2487702717,
+    "premiere_ns": 148793701,
+    "sites": 49628,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000798": {
+    "c_ns": {
+     "emission": 2707280,
+     "feuilles": 7391711,
+     "fin_etage": 2240010,
+     "parcours": 4036900,
+     "publication": 2648971,
+     "transferts": 7460460
+    },
+    "etapes_ns": {
+     "C": 26518063,
+     "G": 31906213,
+     "M": 8976681,
+     "P": 1563591,
+     "R": 10475871,
+     "T": 21416392,
+     "TMVR": 45759936,
+     "V": 1747301,
+     "raccord": 1300
+    },
+    "max_medianes_ns": 106551602,
+    "max_ns": 106551602,
+    "mediane_ns": 105441231,
+    "pic_octets": 2385396963,
+    "premiere_ns": 107260363,
+    "sites": 37543,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000800": {
+    "c_ns": {
+     "emission": 3108021,
+     "feuilles": 7568941,
+     "fin_etage": 2321021,
+     "parcours": 3988431,
+     "publication": 2883890,
+     "transferts": 6074481
+    },
+    "etapes_ns": {
+     "C": 26029973,
+     "G": 33935044,
+     "M": 8758911,
+     "P": 1679010,
+     "R": 11019771,
+     "T": 24356973,
+     "TMVR": 48947666,
+     "V": 1883891,
+     "raccord": 1320
+    },
+    "max_medianes_ns": 111344252,
+    "max_ns": 111344252,
+    "mediane_ns": 110589783,
+    "pic_octets": 2399197087,
+    "premiere_ns": 109429483,
+    "sites": 38341,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000804": {
+    "c_ns": {
+     "emission": 3519891,
+     "feuilles": 10153481,
+     "fin_etage": 2501570,
+     "parcours": 4876311,
+     "publication": 3473131,
+     "transferts": 7723521
+    },
+    "etapes_ns": {
+     "C": 32222363,
+     "G": 43436185,
+     "M": 10227722,
+     "P": 2251501,
+     "R": 13869361,
+     "T": 31311044,
+     "TMVR": 61932226,
+     "V": 2235661,
+     "raccord": 1320
+    },
+    "max_medianes_ns": 141020186,
+    "max_ns": 141020186,
+    "mediane_ns": 139918067,
+    "pic_octets": 2474667247,
+    "premiere_ns": 140643566,
+    "sites": 47658,
+    "valeurs": 5
+   },
+   "kitti_ng_06_000806": {
+    "c_ns": {
+     "emission": 3662901,
+     "feuilles": 11092871,
+     "fin_etage": 2609470,
+     "parcours": 4983380,
+     "publication": 3738751,
+     "transferts": 8798631
+    },
+    "etapes_ns": {
+     "C": 34897115,
+     "G": 47794295,
+     "M": 10893882,
+     "P": 2387880,
+     "R": 15393822,
+     "T": 35772764,
+     "TMVR": 69087638,
+     "V": 2364910,
+     "raccord": 1560
+    },
+    "max_medianes_ns": 157299030,
+    "max_ns": 157299030,
+    "mediane_ns": 154432138,
+    "pic_octets": 2512725225,
+    "premiere_ns": 154973917,
+    "sites": 50884,
+    "valeurs": 5
+   },
+   "kitti_ng_08_000000": {
+    "c_ns": {
+     "emission": 3557241,
+     "feuilles": 11544702,
+     "fin_etage": 2567900,
+     "parcours": 4356711,
+     "publication": 3889950,
+     "transferts": 8444191
+    },
+    "etapes_ns": {
+     "C": 34304084,
+     "G": 54960817,
+     "M": 9502341,
+     "P": 1872321,
+     "R": 14095941,
+     "T": 29761353,
+     "TMVR": 59870716,
+     "V": 2203601,
+     "raccord": 1390
+    },
+    "max_medianes_ns": 151213288,
+    "max_ns": 151213288,
+    "mediane_ns": 150652987,
+    "pic_octets": 2491285844,
+    "premiere_ns": 154191718,
+    "sites": 39885,
+    "valeurs": 5
+   },
+   "kitti_ng_08_000100": {
+    "c_ns": {
+     "emission": 3865161,
+     "feuilles": 9360171,
+     "fin_etage": 2399980,
+     "parcours": 3952810,
+     "publication": 3323970,
+     "transferts": 7197631
+    },
+    "etapes_ns": {
+     "C": 30130944,
+     "G": 43099695,
+     "M": 8693951,
+     "P": 1737111,
+     "R": 12000992,
+     "T": 22386883,
+     "TMVR": 48375105,
+     "V": 1982930,
+     "raccord": 1400
+    },
+    "max_medianes_ns": 125341205,
+    "max_ns": 125341205,
+    "mediane_ns": 123377744,
+    "pic_octets": 2434468494,
+    "premiere_ns": 125705134,
+    "sites": 35551,
+    "valeurs": 5
+   },
+   "kitti_ng_08_000200": {
+    "c_ns": {
+     "emission": 3864590,
+     "feuilles": 10739792,
+     "fin_etage": 4102520,
+     "parcours": 4445240,
+     "publication": 3840910,
+     "transferts": 11845342
+    },
+    "etapes_ns": {
+     "C": 38968464,
+     "G": 49679476,
+     "M": 9769401,
+     "P": 2007440,
+     "R": 15105772,
+     "T": 34483374,
+     "TMVR": 66284039,
+     "V": 2361330,
+     "raccord": 1310
+    },
+    "max_medianes_ns": 161237508,
+    "max_ns": 161237508,
+    "mediane_ns": 156116257,
+    "pic_octets": 2516336938,
+    "premiere_ns": 155783888,
+    "sites": 45845,
+    "valeurs": 5
+   },
+   "kitti_ng_08_000246": {
+    "c_ns": {
+     "emission": 4840420,
+     "feuilles": 11359991,
+     "fin_etage": 2584551,
+     "parcours": 4436750,
+     "publication": 3991830,
+     "transferts": 9378181
+    },
+    "etapes_ns": {
+     "C": 36757754,
+     "G": 52034836,
+     "M": 10097531,
+     "P": 2011700,
+     "R": 14425011,
+     "T": 29890904,
+     "TMVR": 61063997,
+     "V": 2282191,
+     "raccord": 1530
+    },
+    "max_medianes_ns": 157986197,
+    "max_ns": 157986197,
+    "mediane_ns": 152106687,
+    "pic_octets": 2500531779,
+    "premiere_ns": 152486140,
+    "sites": 41691,
+    "valeurs": 5
+   },
+   "kitti_ng_08_000691": {
+    "c_ns": {
+     "emission": 7598001,
+     "feuilles": 19382523,
+     "fin_etage": 3549991,
+     "parcours": 5768540,
+     "publication": 5699241,
+     "transferts": 15768581
+    },
+    "etapes_ns": {
+     "C": 57913466,
+     "G": 88842140,
+     "M": 16448882,
+     "P": 2852160,
+     "R": 23426322,
+     "T": 61323766,
+     "TMVR": 111743472,
+     "V": 3508921,
+     "raccord": 1530
+    },
+    "max_medianes_ns": 268369792,
+    "max_ns": 268369792,
+    "mediane_ns": 261471099,
+    "pic_octets": 2732419691,
+    "premiere_ns": 264062410,
+    "sites": 61198,
+    "valeurs": 5
+   },
+   "kitti_ng_08_001176": {
+    "c_ns": {
+     "emission": 6966461,
+     "feuilles": 20012222,
+     "fin_etage": 4057601,
+     "parcours": 5510111,
+     "publication": 6217991,
+     "transferts": 16586842
+    },
+    "etapes_ns": {
+     "C": 59389997,
+     "G": 94851221,
+     "M": 17539992,
+     "P": 2819061,
+     "R": 25727323,
+     "T": 66395659,
+     "TMVR": 121237355,
+     "V": 3788980,
+     "raccord": 1600
+    },
+    "max_medianes_ns": 285860304,
+    "max_ns": 285860304,
+    "mediane_ns": 278014266,
+    "pic_octets": 2785882233,
+    "premiere_ns": 286207264,
+    "sites": 67114,
+    "valeurs": 5
+   },
+   "kitti_ng_08_001193": {
+    "c_ns": {
+     "emission": 7852252,
+     "feuilles": 25855392,
+     "fin_etage": 4703390,
+     "parcours": 6679210,
+     "publication": 7166391,
+     "transferts": 20472923
+    },
+    "etapes_ns": {
+     "C": 72785799,
+     "G": 123965943,
+     "M": 20446763,
+     "P": 3585720,
+     "R": 32217754,
+     "T": 97739071,
+     "TMVR": 164450708,
+     "V": 4841690,
+     "raccord": 1520
+    },
+    "max_medianes_ns": 377162798,
+    "max_ns": 377162798,
+    "mediane_ns": 364668056,
+    "pic_octets": 2951335077,
+    "premiere_ns": 364496365,
+    "sites": 80433,
+    "valeurs": 5
+   },
+   "kitti_ng_08_001302": {
+    "c_ns": {
+     "emission": 5205841,
+     "feuilles": 14783751,
+     "fin_etage": 2890650,
+     "parcours": 4903751,
+     "publication": 4461171,
+     "transferts": 11104742
+    },
+    "etapes_ns": {
+     "C": 43119135,
+     "G": 59717497,
+     "M": 9659061,
+     "P": 2062630,
+     "R": 16897462,
+     "T": 37986285,
+     "TMVR": 71881398,
+     "V": 2589100,
+     "raccord": 1590
+    },
+    "max_medianes_ns": 180153013,
+    "max_ns": 180153013,
+    "mediane_ns": 177129699,
+    "pic_octets": 2559328539,
+    "premiere_ns": 181109683,
+    "sites": 48925,
+    "valeurs": 5
+   },
+   "kitti_ng_08_001847": {
+    "c_ns": {
+     "emission": 2529910,
+     "feuilles": 8339781,
+     "fin_etage": 2240731,
+     "parcours": 4107031,
+     "publication": 2676301,
+     "transferts": 6098491
+    },
+    "etapes_ns": {
+     "C": 26080554,
+     "G": 35500844,
+     "M": 8278491,
+     "P": 1449780,
+     "R": 9883662,
+     "T": 17960022,
+     "TMVR": 40551015,
+     "V": 1555830,
+     "raccord": 1230
+    },
+    "max_medianes_ns": 106157994,
+    "max_ns": 106157994,
+    "mediane_ns": 103799112,
+    "pic_octets": 2377618293,
+    "premiere_ns": 103756922,
+    "sites": 33179,
+    "valeurs": 5
+   },
+   "kitti_ng_08_002119": {
+    "c_ns": {
+     "emission": 10987182,
+     "feuilles": 33027954,
+     "fin_etage": 6695141,
+     "parcours": 7859780,
+     "publication": 8284981,
+     "transferts": 24891742
+    },
+    "etapes_ns": {
+     "C": 91849930,
+     "G": 158195820,
+     "M": 23475843,
+     "P": 4572711,
+     "R": 39655995,
+     "T": 124762074,
+     "TMVR": 205423074,
+     "V": 5613361,
+     "raccord": 1350
+    },
+    "max_medianes_ns": 466729469,
+    "max_ns": 466729469,
+    "mediane_ns": 461318093,
+    "pic_octets": 3145835177,
+    "premiere_ns": 470009720,
+    "sites": 99099,
+    "valeurs": 5
+   },
+   "kitti_ng_08_002554": {
+    "c_ns": {
+     "emission": 6993071,
+     "feuilles": 17962222,
+     "fin_etage": 3665980,
+     "parcours": 5892691,
+     "publication": 5401060,
+     "transferts": 15000492
+    },
+    "etapes_ns": {
+     "C": 54955206,
+     "G": 79768210,
+     "M": 16791922,
+     "P": 3006650,
+     "R": 23859283,
+     "T": 66211678,
+     "TMVR": 117150753,
+     "V": 3523961,
+     "raccord": 1580
+    },
+    "max_medianes_ns": 268329460,
+    "max_ns": 268329460,
+    "mediane_ns": 254466290,
+    "pic_octets": 2731213004,
+    "premiere_ns": 257873440,
+    "sites": 72426,
+    "valeurs": 5
+   },
+   "kitti_ng_10_000424": {
+    "c_ns": {
+     "emission": 6896421,
+     "feuilles": 18880782,
+     "fin_etage": 3731881,
+     "parcours": 5994541,
+     "publication": 5642900,
+     "transferts": 15505722
+    },
+    "etapes_ns": {
+     "C": 56576756,
+     "G": 84303639,
+     "M": 17206962,
+     "P": 2842720,
+     "R": 24425013,
+     "T": 65869927,
+     "TMVR": 118367844,
+     "V": 3695451,
+     "raccord": 1690
+    },
+    "max_medianes_ns": 275211162,
+    "max_ns": 275211162,
+    "mediane_ns": 262103514,
+    "pic_octets": 2748065485,
+    "premiere_ns": 262351993,
+    "sites": 69106,
+    "valeurs": 5
+   },
+   "kitti_ng_10_000430": {
+    "c_ns": {
+     "emission": 7711481,
+     "feuilles": 21942843,
+     "fin_etage": 4216091,
+     "parcours": 6246221,
+     "publication": 6566411,
+     "transferts": 17826471
+    },
+    "etapes_ns": {
+     "C": 64537497,
+     "G": 102411271,
+     "M": 18658702,
+     "P": 3070560,
+     "R": 27867633,
+     "T": 77525430,
+     "TMVR": 136883346,
+     "V": 3986211,
+     "raccord": 1580
+    },
+    "max_medianes_ns": 307932850,
+    "max_ns": 307932850,
+    "mediane_ns": 304844348,
+    "pic_octets": 2840933977,
+    "premiere_ns": 309337399,
+    "sites": 73576,
+    "valeurs": 5
+   }
+  }
+ },
+ "verdict": "non tenu"
+}

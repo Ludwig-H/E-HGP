@@ -1,0 +1,3744 @@
+{
+ "controles": [
+  "ng00 p21 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p21 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p24 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p24 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p32 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p32 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p32 x2048 tour 0 : tour_g non conforme (code 0)",
+  "ng00 p21 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p24 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p24 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p32 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p32 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p32 x2048 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p21 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng00 p24 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p24 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p32 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p32 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p32 x2048 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p21 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng00 p21 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p21 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p21 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p24 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p24 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p32 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p32 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p32 x2048 tour 0 : tour_g non conforme (code 0)",
+  "ng01 p21 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p24 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p24 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p32 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p32 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p32 x2048 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p21 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng01 p24 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p24 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p32 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p32 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p32 x2048 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p21 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng01 p21 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p21 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p21 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p24 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p24 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p32 x1 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p32 x8 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p32 x2048 tour 0 : tour_g non conforme (code 0)",
+  "ng02 p21 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p24 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p24 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p32 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p32 x8 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p32 x2048 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p21 x1 tour 1 : tour_g non conforme (code 0)",
+  "ng02 p24 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p24 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p32 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p32 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p32 x2048 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p21 x1 tour 2 : tour_g non conforme (code 0)",
+  "ng02 p21 x8 tour 2 : tour_g non conforme (code 0)",
+  "ng00 : exports du catalogue (en-tete exclu) differents entre profils a facteur 1",
+  "ng01 : exports du catalogue (en-tete exclu) differents entre profils a facteur 1",
+  "ng02 : exports du catalogue (en-tete exclu) differents entre profils a facteur 1"
+ ],
+ "mesure": "MES-D6",
+ "prises": [
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 324.2977005,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "2d4c8340018653f625ab5d39dbf0b39c780333a0f182e771d514bb1cf7465ba1",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "2d4c8340018653f625ab5d39dbf0b39c780333a0f182e771d514bb1cf7465ba1",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     343.658973,
+     324.32404,
+     323.930371,
+     324.53504,
+     324.271361
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 336.271887,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     341.502293,
+     335.729532,
+     335.545823,
+     337.224432,
+     336.814242
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 327.400331,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "e76f6414f64ed3277e642fb7a9629c82dffda6776f082fa57f0115c5bce28770",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "e76f6414f64ed3277e642fb7a9629c82dffda6776f082fa57f0115c5bce28770",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     333.735652,
+     327.374611,
+     327.426051,
+     327.782361,
+     327.116301
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 335.875726,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     342.328983,
+     337.105382,
+     335.811631,
+     335.939821,
+     334.982071
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 327.66774,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "b9ba7709b5296b9be38ac20e084e699c2a738b6f86638c47f3abb731c8ab66ae",
+    "empreinte": "4955063ac816bf55e478c6414fdde5d42e9f00ba2b3b75c7e277887dea2ed3db",
+    "export": {
+     "bytes": 77135152,
+     "cat_bin_sha256": "4955063ac816bf55e478c6414fdde5d42e9f00ba2b3b75c7e277887dea2ed3db",
+     "phase": "export"
+    },
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     335.040471,
+     329.357951,
+     327.53919,
+     327.33784,
+     327.79629
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 338.579991,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     346.750603,
+     338.791602,
+     338.395901,
+     338.764081,
+     336.535931
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 955.3284175,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     996.585123,
+     955.024307,
+     955.632528,
+     954.991337,
+     955.976807
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 335.557436,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     341.167882,
+     337.118951,
+     335.482611,
+     334.044141,
+     335.632261
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 326.682655,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "0ce73502aec2c17ae21f47c4a24d3b7799a52f99ce0dbdd9d348888607ccca4c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     334.342461,
+     327.08884,
+     326.48283,
+     326.316331,
+     326.88248
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 336.9225015,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     342.822932,
+     337.972341,
+     336.930211,
+     336.914792,
+     336.332341
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 328.3262255,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "478ac1de3e96fffc7321a71629544abf85db34de4e958399b93ed76270f8814c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     336.040621,
+     329.910151,
+     328.43537,
+     328.217081,
+     327.351421
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 338.950441,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     344.206082,
+     338.991441,
+     338.910341,
+     338.990541,
+     337.713842
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 961.7562485,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     971.8538,
+     963.090048,
+     962.463229,
+     961.049268,
+     957.334798
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 326.40894,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     332.770801,
+     326.52255,
+     327.31724,
+     325.77472,
+     326.29533
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 326.65261,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "0ce73502aec2c17ae21f47c4a24d3b7799a52f99ce0dbdd9d348888607ccca4c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     331.902871,
+     326.27816,
+     325.6055,
+     327.02706,
+     327.65105
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 335.270611,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7a8ecd3980c65a581fb0af9d933e8c32308dff2243fdf4bfdf8dede1c2c3454f",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     341.802722,
+     336.360632,
+     334.028981,
+     335.492871,
+     335.048351
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 329.1439855,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "478ac1de3e96fffc7321a71629544abf85db34de4e958399b93ed76270f8814c",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     333.855331,
+     329.351291,
+     327.87815,
+     330.00705,
+     328.93668
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 338.786037,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "241402b8b1fd49ca85424f22a0552f7305cd0c35899966fb0af5ef1cbd653f97",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     344.244422,
+     339.019392,
+     339.248222,
+     338.552682,
+     338.515221
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 958.1893225,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "890061efa8253772ca62639ffd1b19d505fd75e1248337f5722842a2aa4b8a37",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     966.822068,
+     959.201938,
+     959.644848,
+     957.176707,
+     954.968857
+    ],
+    "sites": 39885
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 325.201115,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "698efd3d46e2d9c24363dca26eb76d293d78ddb46e4594d1fcb16eef2f1dd977",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     330.788411,
+     325.27587,
+     326.88201,
+     325.12636,
+     324.91389
+    ],
+    "sites": 39885
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1306696,
+    "chaud_ms": 336.658321,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "7e2be02d24b7c982a208e46dc1116d19a9a0c15964bd027c29b2e6ce8cc90e48",
+    "export": null,
+    "incidences": 6097121,
+    "niveaux": 1085776,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     341.236762,
+     334.945201,
+     336.981741,
+     336.334901,
+     337.344781
+    ],
+    "sites": 39885
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 279.153584,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "d4eb565d386824f379843bbb97515580fe107d8d860d99fec2a4c77dc51537b9",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "d4eb565d386824f379843bbb97515580fe107d8d860d99fec2a4c77dc51537b9",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     289.079826,
+     278.521144,
+     279.907384,
+     279.325694,
+     278.981474
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 296.5286615,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     309.159008,
+     295.447486,
+     296.627246,
+     296.430077,
+     297.073446
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 278.185164,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "133c63671a7855c54485d1bb6d19ef8a24662d7e020b04e773c2b2a5313fa29b",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "133c63671a7855c54485d1bb6d19ef8a24662d7e020b04e773c2b2a5313fa29b",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     290.303235,
+     278.057994,
+     276.291114,
+     278.312334,
+     279.615764
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 296.1484915,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     313.709818,
+     295.998626,
+     294.234886,
+     296.298357,
+     297.126936
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 280.890259,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "73e113808ddec54fa351f57ed456e0414220b0276e6bb7d10983c7a81cefe566",
+    "empreinte": "2e49ac81f71a955560fb3cf46545848a2afa10c4eb4bf7379d3208298a9952f4",
+    "export": {
+     "bytes": 64606592,
+     "cat_bin_sha256": "2e49ac81f71a955560fb3cf46545848a2afa10c4eb4bf7379d3208298a9952f4",
+     "phase": "export"
+    },
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     294.227706,
+     280.906764,
+     281.373624,
+     280.026604,
+     280.873754
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 297.050231,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     308.397058,
+     297.224746,
+     296.768176,
+     296.875716,
+     298.271507
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 810.6140245,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     819.604071,
+     810.690549,
+     810.5375,
+     811.550909,
+     809.78973
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 294.981011,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     308.443228,
+     295.004936,
+     294.657746,
+     295.405296,
+     294.957086
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 279.24987,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "092105ba5cdfd0aa7c6b27cfe308da4a86609d865d8a39b9b37a7e9389a5acb7",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     291.972366,
+     279.160845,
+     279.468744,
+     279.338895,
+     278.985424
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 296.3393365,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     312.045148,
+     296.924637,
+     296.047606,
+     296.631067,
+     295.861926
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 280.6405345,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f336ab88cd33d529e9adb520f19db57fa4c2be658bfe9994de5528737fb30298",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     293.281266,
+     280.071195,
+     280.290154,
+     280.990915,
+     282.213557
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 298.085294,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     309.80285,
+     297.970669,
+     298.754869,
+     297.648659,
+     298.199919
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 810.199626,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     816.451196,
+     809.085455,
+     812.538145,
+     810.370096,
+     810.029156
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 279.140392,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     291.195878,
+     279.967056,
+     279.188227,
+     279.092557,
+     278.269136
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 279.2369615,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "092105ba5cdfd0aa7c6b27cfe308da4a86609d865d8a39b9b37a7e9389a5acb7",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     294.047428,
+     279.512687,
+     279.270086,
+     279.203837,
+     278.048096
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 295.0775035,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "32fdaf329cd8ef343e14516b891471fd38e7c23d1109a752d166f11127d88f62",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     308.56691,
+     295.604148,
+     296.249829,
+     294.550859,
+     293.607908
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 280.540827,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f336ab88cd33d529e9adb520f19db57fa4c2be658bfe9994de5528737fb30298",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     291.873438,
+     280.326316,
+     281.433437,
+     280.626187,
+     280.455467
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 297.5821035,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d8c967b492ce8c3eed4ab937f69ffe8af988b047e3b71417e13563927bac7de5",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     323.431232,
+     297.384308,
+     297.252458,
+     297.779899,
+     299.030619
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 811.969651,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "506784a97390eeefe4a45ba8fc3d838960e72487cdf43e1dbc53e43ff4b8010b",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     816.615377,
+     812.277316,
+     811.903816,
+     812.035486,
+     810.147506
+    ],
+    "sites": 35551
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 278.9770465,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "12e7684173191378e43dcf306b87259111fbea427c5381829a447a563ce4d309",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     292.140738,
+     279.055097,
+     279.639886,
+     278.898996,
+     277.332876
+    ],
+    "sites": 35551
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1095926,
+    "chaud_ms": 295.7864685,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "ad0f0ded42223c60ddc00c64a02e58d4720589a5ec845a1ede122018b001a86c",
+    "export": null,
+    "incidences": 5085683,
+    "niveaux": 941217,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     315.603461,
+     295.899118,
+     296.604229,
+     295.673819,
+     295.416208
+    ],
+    "sites": 35551
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 328.424948,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "1db70a320e272a8755ed17a1250fae344898f16676ea295bb14c332108ef027d",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "1db70a320e272a8755ed17a1250fae344898f16676ea295bb14c332108ef027d",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     338.918304,
+     328.857313,
+     328.977393,
+     327.992583,
+     327.334593
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 336.4215635,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     357.390326,
+     337.968663,
+     335.899444,
+     336.154503,
+     336.688624
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 329.079263,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "35bf930d186006d3368867012efb696fcce30c2bc82c3b23714de385bf35cddf",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "35bf930d186006d3368867012efb696fcce30c2bc82c3b23714de385bf35cddf",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     351.550446,
+     331.582443,
+     328.879933,
+     327.744903,
+     329.278593
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 335.4223185,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.690195,
+     335.585374,
+     335.259263,
+     336.816874,
+     334.495534
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 333.232098,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": "e9c5effab396e36d570184e6e758bf223b433fe6874429254beb69d1d6776227",
+    "empreinte": "b82e2277f9c2363310bcbb18e0f2e1b545bf9930f7c6830cca3b8c3a6b0e62d7",
+    "export": {
+     "bytes": 82924536,
+     "cat_bin_sha256": "b82e2277f9c2363310bcbb18e0f2e1b545bf9930f7c6830cca3b8c3a6b0e62d7",
+     "phase": "export"
+    },
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     354.291976,
+     333.579723,
+     334.311674,
+     332.884473,
+     332.577604
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 338.572084,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.284985,
+     337.651684,
+     338.891924,
+     338.252244,
+     339.191114
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 953.5472145,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     969.395397,
+     954.260845,
+     954.331324,
+     952.833584,
+     951.969864
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 0,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 335.7490985,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     355.412527,
+     337.415054,
+     336.742574,
+     334.755623,
+     334.473914
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 329.220613,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f02025c588a05d2cb85640770fa6946b93d40d97c71669cc16a6515f8a8caf5c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     348.638285,
+     329.496463,
+     330.243013,
+     328.944763,
+     328.065463
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 334.966754,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     351.130545,
+     335.085654,
+     336.011383,
+     334.847854,
+     333.830213
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 331.1481185,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "995ced9ed6e21598651f7a2d66e003dd62533e7b0ba772f2ba32ed8e8f39c62c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.555695,
+     333.262503,
+     330.589614,
+     331.706623,
+     330.344853
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 338.350294,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.963726,
+     337.989674,
+     339.292954,
+     338.542734,
+     338.157854
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 957.73734,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     975.052467,
+     958.103315,
+     957.066064,
+     958.607075,
+     957.371365
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 328.616413,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     341.887995,
+     329.667043,
+     328.815003,
+     326.968373,
+     328.417823
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 1,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 328.454958,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "f02025c588a05d2cb85640770fa6946b93d40d97c71669cc16a6515f8a8caf5c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.944335,
+     328.957353,
+     328.494593,
+     327.706372,
+     328.415323
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 335.539739,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "61775322fb059e934fe69cc6e46702896bff6b1288b55feea2528899e97dc70d",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     345.485315,
+     335.462464,
+     334.406863,
+     335.617014,
+     335.900814
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 24,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 331.331013,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "995ced9ed6e21598651f7a2d66e003dd62533e7b0ba772f2ba32ed8e8f39c62c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.736955,
+     331.496803,
+     330.553683,
+     331.165223,
+     332.819693
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 338.388759,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "a57bdcf2cc0ff412bfe3aad633e3daf51ecf489ecb29df362b7ac7e3e4cb4bb7",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     347.350595,
+     336.349414,
+     339.763075,
+     338.940974,
+     337.836544
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 954.4616995,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "e73e3245f35873937c5d029fc028071fb1d37fe03b63521b6f35417825216821",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     968.280676,
+     953.908704,
+     955.014695,
+     952.265684,
+     955.464814
+    ],
+    "sites": 45845
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 32,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 328.4267075,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "d0578a530bd4247b873fbb99efac3038f2b9eb3f9c52da3a2de9e44821046c7c",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     348.885376,
+     327.440332,
+     328.785793,
+     328.067622,
+     329.136903
+    ],
+    "sites": 45845
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "admission": "conforme",
+    "boules": 1407885,
+    "chaud_ms": 336.215849,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "corps_sha256": null,
+    "empreinte": "b65df88d760abb5bde97192ae4f7ba5961172431986814691ffc07c4b2a5b633",
+    "export": null,
+    "incidences": 6514697,
+    "niveaux": 1099582,
+    "objet": {},
+    "ok": true,
+    "passes_ms": [
+     354.390226,
+     336.261994,
+     337.055954,
+     335.966424,
+     336.169704
+    ],
+    "sites": 45845
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour": 2,
+   "tour_g": {
+    "admission": "protocole invalide",
+    "boules": null,
+    "chaud_ms": null,
+    "code": 0,
+    "configuration": {
+     "coord_bits": 21,
+     "kmax": 5,
+     "leaf": 24,
+     "passes": 5,
+     "threads": 48
+    },
+    "empreinte": null,
+    "incidences": null,
+    "objet": {},
+    "ok": false,
+    "passes_ms": []
+   }
+  }
+ ],
+ "rapports": [
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 325.201115,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 336.271887,
+    "rapport": 1.0352311399670324,
+    "rapport_max": 1.0369234394247577,
+    "rapport_min": 1.0280277127213489
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 326.682655,
+    "rapport": 1.0044633764555204,
+    "rapport_max": 1.0095672294167253,
+    "rapport_min": 1.00083856465451
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 335.875726,
+    "rapport": 1.03220978414378,
+    "rapport_max": 1.0357018427270654,
+    "rapport_min": 1.0309639036754223
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 328.3262255,
+    "rapport": 1.010391808189833,
+    "rapport_max": 1.0121244064615214,
+    "rapport_min": 1.005873875574609
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 338.786037,
+    "rapport": 1.0417739096620255,
+    "rapport_max": 1.0440406776797357,
+    "rapport_min": 1.0384226639135559
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng00",
+   "catalogue": {
+    "chaud_ms": 958.1893225,
+    "rapport": 2.9464515289254156,
+    "rapport_max": 2.9464764307619764,
+    "rapport_min": 2.9458377781497713
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 279.140392,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 295.7864685,
+    "rapport": 1.0602537814880768,
+    "rapport_max": 1.062242000446607,
+    "rapport_min": 1.0567478568275421
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 279.2369615,
+    "rapport": 1.0003921969128708,
+    "rapport_max": 1.0009316716312717,
+    "rapport_min": 0.9965308702610101
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 296.1484915,
+    "rapport": 1.060880133639982,
+    "rapport_max": 1.0616139583983961,
+    "rapport_min": 1.0577124792236268
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 280.6405345,
+    "rapport": 1.0056054091891033,
+    "rapport_max": 1.006221216919787,
+    "rapport_min": 1.0053741505815468
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 297.5821035,
+    "rapport": 1.0666902787645651,
+    "rapport_max": 1.06786872320506,
+    "rapport_min": 1.0641103966625052
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng01",
+   "catalogue": {
+    "chaud_ms": 810.6140245,
+    "rapport": 2.9038281109799398,
+    "rapport_max": 2.9105249381152944,
+    "rapport_min": 2.9024807918160405
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 328.4267075,
+    "rapport": 1.0,
+    "rapport_max": 1.0,
+    "rapport_min": 1.0
+   },
+   "facteur": 1,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 336.215849,
+    "rapport": 1.023716528900135,
+    "rapport_max": 1.0243483801967443,
+    "rapport_min": 1.0217052016205896
+   },
+   "facteur": 8,
+   "profil": 21,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 329.079263,
+    "rapport": 1.0018386178416474,
+    "rapport_max": 1.0019922816582132,
+    "rapport_min": 1.0000860176695585
+   },
+   "facteur": 1,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 335.4223185,
+    "rapport": 1.021305843367295,
+    "rapport_max": 1.0216578960771634,
+    "rapport_min": 1.019324479084981
+   },
+   "facteur": 8,
+   "profil": 24,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 331.331013,
+    "rapport": 1.008843085637303,
+    "rapport_max": 1.0146369818409777,
+    "rapport_min": 1.0077041358856291
+   },
+   "facteur": 1,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 338.388759,
+    "rapport": 1.030332647353291,
+    "rapport_max": 1.0308963617465505,
+    "rapport_min": 1.0296207998594398
+   },
+   "facteur": 8,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  },
+  {
+   "cas": "ng02",
+   "catalogue": {
+    "chaud_ms": 954.4616995,
+    "rapport": 2.9061634687550493,
+    "rapport_max": 2.9144537585832633,
+    "rapport_min": 2.903394581644267
+   },
+   "facteur": 2048,
+   "profil": 32,
+   "tour_g": {
+    "chaud_ms": null,
+    "rapport": null,
+    "rapport_max": null,
+    "rapport_min": null
+   }
+  }
+ ]
+}
