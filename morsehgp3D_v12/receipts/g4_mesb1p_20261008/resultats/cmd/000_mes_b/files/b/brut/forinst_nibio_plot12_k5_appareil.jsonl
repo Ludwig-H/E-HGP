@@ -1,0 +1,2 @@
+{"phase":"open","status":"ok","reason":"none","wall_ns":115643959,"budget_appareil":"separe"}
+{"phase":"exit","status":"resource_exhausted","reason":"memory_budget"}
