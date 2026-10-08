@@ -125,6 +125,7 @@ DEVICE_KEYS = ('batches replayed_leaves replayed_balls replayed_wide replayed_sp
                'device_bytes pinned_bytes allocations arena_bytes transfer_ns transfer_h2d_bytes transfer_d2h_bytes '
                'transfer_ops publish_ns').split()
 G_DIAG_KEYS = 'count_ns fill_ns tables_ns resolve_ns workspace_bytes table_bytes peak_bytes'.split()
+G_GC_DIAG_KEYS = G_DIAG_KEYS + 'prepare_ns setup_ns workspace_ns joins_ns orders_ns reste_ns'.split()
 WORK_KEYS = ('probes first_probe_hits probe_hits_after_steps route_t1 route_cert_table route_cert_census '
              'route_fallback_table route_fallback_census fallback_no_proposal fallback_not_in_part '
              'fallback_certificate census_saturated census_complete census_sites census_sites_max census_nodes '
@@ -141,6 +142,24 @@ def hex_sha(value):
 
 def integer_record(row, names):
     return type(row) is dict and set(row) == set(names) and all(uint(row[name]) for name in names)
+
+
+def g_diagnostic_schema(diag, kmax):
+    # Deux schemas fermes : G initial et Gc. Les tableaux portent K demande, meme si sites < K.
+    if type(diag) is not dict:
+        return None
+    if set(diag) == set(G_DIAG_KEYS) | {'order_ns'}:
+        scalar, arrays, schema = G_DIAG_KEYS, {'order_ns': kmax}, 'G'
+    elif set(diag) == set(G_GC_DIAG_KEYS) | {'order_ns', 'pass_ns', 'table_ns', 'join_ns'}:
+        scalar, arrays, schema = G_GC_DIAG_KEYS, dict(order_ns=kmax, pass_ns=kmax,
+                                                     table_ns=kmax - 1, join_ns=kmax - 1), 'Gc'
+    else:
+        return None
+    if not all(uint(diag[key]) for key in scalar) or any(
+            type(diag[key]) is not list or len(diag[key]) != length or
+            not all(uint(value) for value in diag[key]) for key, length in arrays.items()):
+        return None
+    return schema
 
 
 def summarize(code, lines, phase, digest_key, expected=None, exported=False):
@@ -164,6 +183,7 @@ def summarize(code, lines, phase, digest_key, expected=None, exported=False):
     if lines[-1] != end or (phase == 'tour_g' and not uint(lines[-1].get('order'))):
         return result
     at, stages, digests, objects = 0, [], [], {}
+    g_schema = None
     common = 'phase pass status reason coord_bits kmax threads sites wall_ns'.split()
     extra = ['path', 'leaf', 'balls', 'incidences', 'levels', 'ledger', 'diagnostics', 'device'] \
         if phase == 'catalogue' else ['order', 'diagnostics']
@@ -196,12 +216,11 @@ def summarize(code, lines, phase, digest_key, expected=None, exported=False):
             digests.append(lines[at][digest_key])
             at += 1
         else:
-            diag = row['diagnostics']
-            if not uint(row['order']) or row['order'] != 0 or type(diag) is not dict or \
-                    set(diag) != set(G_DIAG_KEYS) | {'order_ns'} or not all(uint(diag[key]) for key in G_DIAG_KEYS) or \
-                    type(diag['order_ns']) is not list or len(diag['order_ns']) != expected['kmax'] or \
-                    not all(uint(value) for value in diag['order_ns']):
+            schema = g_diagnostic_schema(row['diagnostics'], expected['kmax'])
+            if not uint(row['order']) or row['order'] != 0 or schema is None or \
+                    (g_schema is not None and g_schema != schema):
                 return result
+            g_schema = schema
         stages.append(row)
     if phase == 'tour_g':
         for k in range(1, min(expected['kmax'], stages[0]['sites']) + 1):
@@ -427,6 +446,8 @@ def main(argv):
     if not cases or 21 not in profiles or any(p not in (21, 24, 32) for p in profiles) or args.passes < 2 or \
             args.tours < 1 or not 1 <= args.k <= 12 or args.fils < 1:
         return 2
+    if len(cases) != len(set(cases)) or len(profiles) != len(set(profiles)) or args.jobs < 1 or args.delai < 1:
+        return 2
     os.makedirs(os.path.join(args.sortie, 'brut'), exist_ok=True)
     inputs_dir = os.path.join(args.racine, 'entrees')
     os.makedirs(inputs_dir, exist_ok=True)
@@ -440,7 +461,10 @@ def main(argv):
     for case in cases:
         try:
             inputs = {f: dilate(args.donnees, case, f, inputs_dir) for f in FACTORS}
-        except OSError:
+        except (OSError, ValueError, OverflowError):
+            return 2
+        # La comparaison D6 exige sa reference (21, x1) pour chaque trame.
+        if inputs[1][0] is None or inputs[1][2] >= 1 << 21:
             return 2
         combos = [(bits, f) for bits in profiles for f in FACTORS
                   if inputs[f][0] is not None and inputs[f][2] < 1 << bits]
