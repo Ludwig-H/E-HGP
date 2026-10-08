@@ -18,9 +18,9 @@
   const FONT = '"DejaVu Sans", "Helvetica Neue", Arial, sans-serif';
   const EPS = 1 + 1e-12;
   // Chronologie d'une scène (secondes)
-  const T_INTRO = 2.4, T_MIX = 0.6, T_SWEEP = 9.0, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35;
-  const SWEEP0 = T_INTRO + T_MIX, SWEEP1 = SWEEP0 + T_SWEEP, FINAL0 = SWEEP1 + T_FINAL_IN;
-  const DURATION = FINAL0 + T_FINAL;
+  const T_INTRO = 2.4, T_MIX = 0.6, T_SWEEP = 9.0, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35, T_PAUSE = 1.7;
+  const SWEEP0 = T_INTRO + T_MIX;
+  let SWEEP1 = 0, FINAL0 = 0, DURATION = 0;  // propres à la scène : le balayage s'arrête aux événements importants
 
   // Objets en bleu, ambre, violet : le vert et le rouge sont réservés au verdict (retrouvé / réuni ou manqué).
   const THEMES = {
@@ -98,6 +98,7 @@
     }
     S.cam = camera(scene.view || { az: 0, el: 30 });
     fit();
+    schedule();
     return DURATION;
   }
 
@@ -157,10 +158,43 @@
   }
   const foundBy = (track, r) => track.some((row) => row[0] <= r * EPS && row[1] > 0.5);
 
-  function rAt(t) {
-    const v = clamp((t - SWEEP0) / T_SWEEP, 0, 1), u = 0.5 * v + 0.5 * smooth(v);
-    return Math.exp(lerp(Math.log(S.rmin), Math.log(S.rend), u));
+  // Progression du balayage sans pauses : v (temps) -> u (fraction du log de r)
+  const ease = (v) => 0.5 * v + 0.5 * smooth(v);
+  function easeInv(u) { let a = 0, b = 1; for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (ease(m) < u) a = m; else b = m; } return (a + b) / 2; }
+  const L = (r) => (Math.log(r) - Math.log(S.rmin)) / (Math.log(S.rend) - Math.log(S.rmin));
+  // Événements importants (rôles des pauses de tools/duel_scene.py) : pour chaque méthode, « tous retrouvés et encore
+  // séparés » s'il existe, sinon chaque objet retrouvé ; et les fusions d'objets dont l'un n'était pas encore retrouvé.
+  function schedule() {
+    const keys = (o) => S.scene.objects[o].key;
+    const ev = [];
+    for (const P of PANELS) {
+      const m = S.scene.methods[P.key];
+      const roles = [];
+      for (const pz of S.scene.timing.pauses) for (const role of pz.roles) { const [kind, method, what] = role.split(':'); if (method === P.key) roles.push({ kind, what, r: pz.r }); }
+      const sep = roles.find((x) => x.kind === 'sep');
+      if (sep) ev.push({ r: sep.r, key: P.key, good: true, parts: () => [[sep.what.split('+').map((o) => keys(+o)).join(', '), null, true], [' found ✓', C.good, true]], objs: sep.what.split('+').map(Number) });
+      else for (const x of roles) if (x.kind === 'best') ev.push({ r: x.r, key: P.key, good: true, parts: () => [[keys(+x.what), null, true], [' found ✓', C.good, true]], objs: [+x.what] });
+      for (const f of m.fusions) if (!f.before.every(Boolean)) ev.push({ r: f.r, key: P.key, good: false, parts: () => [[f.objects.map(keys).join(' + '), null, true], [' merged too early ✗', C.bad, true]], objs: f.objects });
+    }
+    ev.sort((a, b) => a.r - b.r);
+    const stops = [];
+    for (const e of ev) {
+      if (e.r < S.rmin || e.r > S.rend) continue;
+      const last = stops[stops.length - 1];
+      if (last && e.r / last.r < 1.008) last.events.push(e); else stops.push({ r: e.r, events: [e] });
+    }
+    let shift = 0;
+    for (const s of stops) { s.t0 = SWEEP0 + T_SWEEP * easeInv(clamp(L(s.r), 0, 1)) + shift; s.t1 = s.t0 + T_PAUSE; shift += T_PAUSE; }
+    S.stops = stops;
+    SWEEP1 = SWEEP0 + T_SWEEP + shift; FINAL0 = SWEEP1 + T_FINAL_IN; DURATION = FINAL0 + T_FINAL;
   }
+  function rAt(t) {
+    let shift = 0;
+    for (const s of S.stops) { if (t >= s.t1) shift += T_PAUSE; else if (t >= s.t0) return s.r; }
+    const v = clamp((t - shift - SWEEP0) / T_SWEEP, 0, 1);
+    return Math.exp(lerp(Math.log(S.rmin), Math.log(S.rend), ease(v)));
+  }
+  function stopAt(t) { return S.stops.find((s) => t >= s.t0 && t <= s.t1) || null; }
 
   // ---------------------------------------------------------------- dessin
   let haloCanvas = null;
@@ -213,16 +247,22 @@
   function drawLabels(ctx, P, mode, marks) {
     const size = 34, placed = [];
     for (let o = 0; o < S.nobj; o++) {
-      let mx = 0, cnt = 0, top = Infinity;
-      for (let i = 0; i < S.n; i++) if (S.gt[i] === o) { mx += S.sx[i]; cnt++; top = Math.min(top, S.sy[i]); }
+      let mx = 0, cnt = 0, top = Infinity, bot = -Infinity;
+      for (let i = 0; i < S.n; i++) if (S.gt[i] === o) { mx += S.sx[i]; cnt++; top = Math.min(top, S.sy[i]); bot = Math.max(bot, S.sy[i]); }
       if (!cnt) continue;
       const ob = S.scene.objects[o];
       const parts = [[mode === 'truth' ? `${ob.key} · ${ob.name}` : ob.key, C.objects[o], true]];
       if (marks && marks[o] === 'v') parts.push([' ✓', C.good, true]);
       if (marks && marks[o] === 'x') parts.push([' ✗', C.bad, true]);
-      const w = richWidth(ctx, parts, size) + 30;
-      const lb = { x: clamp(P.x + mx / cnt, P.x + w / 2 + 10, P.x + P.w - w / 2 - 10), y: Math.max(P.y + 74, P.y + top - 58), w };
-      for (let g = 0; g < 6 && placed.some((q) => Math.abs(q.x - lb.x) < (q.w + lb.w) / 2 + 8 && Math.abs(q.y - lb.y) < size + 22); g++) lb.y -= size + 22;
+      const w = richWidth(ctx, parts, size) + size * 1.3, h = size * 1.55;
+      // position entièrement dans le panneau, hors du nom de la méthode et du bandeau du bas, sans chevauchement
+      const fits = (x, y) => x - w / 2 >= P.x + 8 && x + w / 2 <= P.x + P.w - 8 && y >= P.y + 12 && y + h <= P.y + P.h - 92 &&
+        !(x - w / 2 < P.x + 330 && y < P.y + 80) && !placed.some((q) => Math.abs(q.x - x) < (q.w + w) / 2 + 8 && Math.abs(q.y - y) < h + 6);
+      const cx = P.x + mx / cnt, ya = P.y + top - h - 10, yb = P.y + bot + 12, cands = [];
+      for (const y of [ya, ya - h - 8, ya + h + 8]) for (const dx of [0, 1, -1, 2, -2]) cands.push([cx + dx * (w * 0.75 + 12), y]);
+      for (const dx of [0, 1, -1]) cands.push([cx + dx * (w * 0.75 + 12), yb]);
+      const pick = cands.find(([x, y]) => fits(x, y)) || [clamp(cx, P.x + w / 2 + 10, P.x + P.w - w / 2 - 10), clamp(ya, P.y + 12, P.y + P.h - 92 - h)];
+      const lb = { x: pick[0], y: pick[1], w };
       placed.push(lb);
       pill(ctx, parts, lb.x, lb.y, size, rgba(C.objects[o], 0.95));
     }
@@ -309,6 +349,18 @@
           if (mix > 0.5) { ctx.globalAlpha = (1 - fin); drawLabels(ctx, P, 'sweep', st.marks); ctx.globalAlpha = 1; }
         }
         if (fin > 0) { ctx.globalAlpha = fin; drawBest(ctx, P, M); ctx.globalAlpha = 1; }
+        const stop = phase === 'sweep' ? stopAt(t) : null;
+        if (stop) {
+          ctx.globalAlpha = Math.min(smooth((t - stop.t0) / 0.25), smooth((stop.t1 - t) / 0.25));
+          let y = P.y + P.h - 72;
+          for (const e of stop.events.filter((x) => x.key === P.key).reverse()) {
+            const parts = e.parts();
+            if (e.objs.length === 1) parts[0][1] = C.objects[e.objs[0]]; else parts[0][1] = C.text;
+            pill(ctx, parts, P.x + P.w / 2, y, 36, e.good ? C.good : C.bad);
+            y -= 66;
+          }
+          ctx.globalAlpha = 1;
+        }
       } else drawLabels(ctx, P, 'truth', null);
       ctx.restore();
       text(ctx, P.name, P.x + 26, P.y + 60, 48, C.text, { bold: true });
@@ -318,5 +370,5 @@
     if (fade > 0) { ctx.globalAlpha = fade; ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   }
 
-  window.SocialPlayer = { W, H, DURATION, THEMES, setTheme, load, renderAt };
+  window.SocialPlayer = { W, H, THEMES, setTheme, load, renderAt, stops: () => S.stops, duration: () => DURATION };
 })();

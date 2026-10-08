@@ -5,14 +5,16 @@ Versions courtes du duel HGP contre HDBSCAN, faites pour un écran de téléphon
 ## LinkedIn
 
 `LinkedIn/hgp_vs_hdbscan_dark.mp4` (fond sombre) et `LinkedIn/hgp_vs_hdbscan_light.mp4` (fond clair) : 1080 × 1350
-(portrait 4:5), anglais, environ 70 s. Quatre scènes à la suite, dans cet ordre :
+(portrait 4:5), anglais, 90 s. Quatre scènes à la suite, dans cet ordre :
 
 1. `06_000800_pieton_deux_velos_2_8_12/sans_sol`, k = 10 ;
 2. `08_002852_deux_velos_6_51/sans_sol`, k = 5 ;
 3. `08_001170_deux_velos_43_57/sans_sol`, k = 5 ;
 4. `00_002140_pieton_velo_1_6/instances`, k = 10.
 
-Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient le rayon r **en même temps**, puis le
+Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient le rayon r **en même temps**, avec une courte pause
+et un bandeau d'une ligne aux événements importants (« A found ✓ », « A, B found ✓ » quand tous sont retrouvés et
+encore séparés, « A + B merged too early ✗ » quand des objets fusionnent avant d'avoir été retrouvés), puis le
 meilleur nœud de chaque hiérarchie pour chaque objet, encadré en vert s'il retrouve l'objet (IoU > 0,5), en rouge
 sinon. Seuls textes : HGP, HDBSCAN, r et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues
 (scènes `data/duel_k<k>_en.js`, `best_sites` de `tools/duel_scene.py`).
