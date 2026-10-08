@@ -324,7 +324,7 @@
     else if (t < FINAL0) {
       const u = phase === 'final' ? 1 - smooth((t - SWEEP1) / T_FINAL_IN) : 1;
       ctx.globalAlpha = u;
-      text(ctx, `r = ${(100 * r).toFixed(1)} cm`, W / 2, 92, 60, C.text, { bold: true, align: 'center' });
+      text(ctx, `ε = ${(100 * r).toFixed(1)} cm`, W / 2, 92, 60, C.text, { bold: true, align: 'center' });
       ctx.globalAlpha = 1;
     }
     if (phase === 'final') {

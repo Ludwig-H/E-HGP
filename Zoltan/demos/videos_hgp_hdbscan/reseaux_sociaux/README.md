@@ -12,11 +12,11 @@ Versions courtes du duel HGP contre HDBSCAN, faites pour un écran de téléphon
 3. `08_001170_deux_velos_43_57/sans_sol`, k = 5 ;
 4. `00_002140_pieton_velo_1_6/instances`, k = 10.
 
-Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient le rayon r **en même temps**, avec une courte pause
+Chaque scène : les objets, puis HGP (en haut) et HDBSCAN (en bas) balaient l'échelle $\varepsilon$ (le rayon, comme le paramètre de DBSCAN) **en même temps**, avec une courte pause
 et un bandeau d'une ligne aux événements importants (« A found ✓ », « A, B found ✓ » quand tous sont retrouvés et
 encore séparés, « A + B merged too early ✗ » quand des objets fusionnent avant d'avoir été retrouvés), puis le
 meilleur nœud de chaque hiérarchie pour chaque objet, encadré en vert s'il retrouve l'objet (IoU > 0,5), en rouge
-sinon. Seuls textes : HGP, HDBSCAN, r et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues
+sinon. Seuls textes : HGP, HDBSCAN, $\varepsilon$ et les clusters. Mêmes données et mêmes meilleurs nœuds que les vidéos longues
 (scènes `data/duel_k<k>_en.js`, `best_sites` de `tools/duel_scene.py`).
 
 Lecteur : `player/social.html` et `player/social.js` ; rendu :
