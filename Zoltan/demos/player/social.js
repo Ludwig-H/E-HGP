@@ -18,7 +18,8 @@
   const FONT = '"DejaVu Sans", "Helvetica Neue", Arial, sans-serif';
   const EPS = 1 + 1e-12;
   // Chronologie d'une scène (secondes)
-  const T_INTRO = 2.4, T_MIX = 0.6, T_SWEEP = 7.0, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35, T_PAUSE = 1.7;
+  const T_INTRO = 2.4, T_MIX = 0.6, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35;
+  const PAUSE = { found: 1.6, sep: 2.2, merge: 2.5, chute: 1.6 };  // secondes d'arrêt, selon l'événement
   const SWEEP0 = T_INTRO + T_MIX;
   let SWEEP1 = 0, FINAL0 = 0, DURATION = 0;  // propres à la scène : le balayage s'arrête aux événements importants
 
@@ -158,45 +159,76 @@
     for (let i = 0; i < S.n; i++) { root[i] = find(i); big[i] = st.entered[i] && st.size[root[i]] >= 2 ? 1 : 0; }
     return { root, big };
   }
-  const foundBy = (track, r) => track.some((row) => row[0] <= r * EPS && row[1] > 0.5);
 
-  // Progression du balayage sans pauses : v (temps) -> u (fraction du log de r)
-  const ease = (v) => 0.5 * v + 0.5 * smooth(v);
-  function easeInv(u) { let a = 0, b = 1; for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (ease(m) < u) a = m; else b = m; } return (a + b) / 2; }
   const L = (r) => (Math.log(r) - Math.log(S.rmin)) / (Math.log(S.rend) - Math.log(S.rmin));
-  // Événements importants (rôles des pauses de tools/duel_scene.py) : pour chaque méthode, « tous retrouvés et encore
-  // séparés » s'il existe, sinon chaque objet retrouvé ; et les fusions d'objets dont l'un n'était pas encore retrouvé.
+  // Événements montrés (rôles des pauses de tools/duel_scene.py), pour chaque méthode :
+  // - « tous retrouvés et encore séparés » s'il existe, sinon chaque objet retrouvé (maximum de son IoU, > 0,5) ;
+  // - les fusions d'objets dont l'un n'avait pas encore été retrouvé (fusions parasites) ;
+  // - l'absorption par le fond d'un objet déjà retrouvé, avant que la hiérarchie ne se fige (elle explique la couleur).
   function schedule() {
-    const keys = (o) => S.scene.objects[o].key;
     const ev = [];
     for (const P of PANELS) {
-      const m = S.scene.methods[P.key];
+      const M = S.methods[P.key], m = M.m;
       const roles = [];
-      for (const pz of S.scene.timing.pauses) for (const role of pz.roles) { const [kind, method, what] = role.split(':'); if (method === P.key) roles.push({ kind, what, r: pz.r }); }
+      for (const pz of S.scene.timing.pauses) for (const role of pz.roles) { const [kind, method, what] = role.split(':'); if (method === P.key) roles.push({ kind, what, r: pz.r, pz }); }
       const sep = roles.find((x) => x.kind === 'sep');
-      if (sep) ev.push({ r: sep.r, key: P.key, good: true, parts: () => [[sep.what.split('+').map((o) => keys(+o)).join(', '), null, true], [' found ✓', C.good, true]], objs: sep.what.split('+').map(Number) });
-      else for (const x of roles) if (x.kind === 'best') ev.push({ r: x.r, key: P.key, good: true, parts: () => [[keys(+x.what), null, true], [' found ✓', C.good, true]], objs: [+x.what] });
-      for (const f of m.fusions) if (!f.before.every(Boolean)) ev.push({ r: f.r, key: P.key, good: false, parts: () => [[f.objects.map(keys).join(' + '), null, true], [' merged too early ✗', C.bad, true]], objs: f.objects });
+      if (sep) ev.push({ r: sep.r, key: P.key, kind: 'sep', objs: sep.what.split('+').map(Number) });
+      else for (const x of roles) if (x.kind === 'best') ev.push({ r: x.r, key: P.key, kind: 'found', objs: [+x.what] });
+      for (const f of m.fusions) {
+        if (f.before.every(Boolean)) continue;
+        ev.push({ r: f.r, key: P.key, kind: 'merge', objs: f.objects, never: f.objects.filter((o) => m.best[o] <= 0.5),
+          late: f.objects.filter((o, j) => m.best[o] > 0.5 && !f.before[j]) });
+      }
+      const done = new Set();
+      for (const x of roles) {
+        if (x.kind !== 'chute' || done.has(x.pz) || x.r > M.freeze * EPS) continue;
+        done.add(x.pz);
+        const badge = x.pz.badges[P.key].find((b) => b.border === 'fusion' && / merge/.test(b.parts.map((q) => q[0]).join('')));
+        if (!badge) continue;
+        const words = badge.parts.map((q) => q[0]).join('').replace(/^✗ /, '').split(' · ')[0];
+        const objs = x.pz.roles.filter((q) => q.startsWith(`chute:${P.key}:`)).map((q) => +q.split(':')[2]);
+        ev.push({ r: x.r, key: P.key, kind: 'chute', objs, words });
+      }
     }
     ev.sort((a, b) => a.r - b.r);
-    // la conclusion est acquise au dernier événement retenu : le balayage s'arrête juste après
-    if (ev.length) S.rend = clamp(1.03 * ev[ev.length - 1].r, S.rmin * 1.5, S.rend);
+    // la conclusion est acquise au dernier événement décisif : le balayage s'arrête juste après
+    const decisive = ev.filter((e) => e.kind !== 'chute');
+    if (decisive.length) S.rend = clamp(1.03 * decisive[decisive.length - 1].r, S.rmin * 1.5, S.rend);
+    // une pause par événement ; deux méthodes dont les événements sont presque simultanés partagent la même
     const stops = [];
     for (const e of ev) {
       if (e.r < S.rmin || e.r > S.rend) continue;
       const last = stops[stops.length - 1];
-      if (last && e.r / last.r < 1.008) last.events.push(e); else stops.push({ r: e.r, events: [e] });
+      if (last && e.r / last.r0 < 1.008 && !last.events.some((x) => x.key === e.key)) { last.events.push(e); last.r = Math.max(last.r, e.r); }
+      else stops.push({ r0: e.r, r: e.r, events: [e] });
     }
+    for (const s of stops) s.pause = Math.max(...s.events.map((e) => PAUSE[e.kind]));
+    // ralentis : la vitesse du balayage (en log de epsilon) baisse à l'approche de chaque événement et en repartant
+    const us = stops.map((s) => clamp(L(s.r), 0, 1));
+    const speed = (u) => {
+      let dip = 0;
+      for (const ue of us) dip = Math.max(dip, Math.exp(-(((u - ue) / 0.03) ** 2)));
+      return Math.max(0.1, 1 - 0.85 * dip) * (0.55 + 0.45 * smooth(u / 0.12));
+    };
+    const N = 3000, cum = new Float64Array(N + 1);
+    for (let i = 0; i < N; i++) cum[i + 1] = cum[i] + 1 / (N * speed((i + 0.5) / N));
+    S.tsw = 5.0 + 0.7 * stops.length;  // durée du balayage hors pauses
+    for (let i = 0; i <= N; i++) cum[i] *= S.tsw / cum[N];
+    S.cum = cum;
+    const tauOf = (u) => { const x = u * N, i = Math.min(N - 1, Math.floor(x)); return lerp(cum[i], cum[i + 1], x - i); };
     let shift = 0;
-    for (const s of stops) { s.t0 = SWEEP0 + T_SWEEP * easeInv(clamp(L(s.r), 0, 1)) + shift; s.t1 = s.t0 + T_PAUSE; shift += T_PAUSE; }
+    for (let k = 0; k < stops.length; k++) { stops[k].t0 = SWEEP0 + tauOf(us[k]) + shift; stops[k].t1 = stops[k].t0 + stops[k].pause; shift += stops[k].pause; }
     S.stops = stops;
-    SWEEP1 = SWEEP0 + T_SWEEP + shift; FINAL0 = SWEEP1 + T_FINAL_IN; DURATION = FINAL0 + T_FINAL;
+    SWEEP1 = SWEEP0 + S.tsw + shift; FINAL0 = SWEEP1 + T_FINAL_IN; DURATION = FINAL0 + T_FINAL;
   }
   function rAt(t) {
     let shift = 0;
-    for (const s of S.stops) { if (t >= s.t1) shift += T_PAUSE; else if (t >= s.t0) return s.r; }
-    const v = clamp((t - shift - SWEEP0) / T_SWEEP, 0, 1);
-    return Math.exp(lerp(Math.log(S.rmin), Math.log(S.rend), ease(v)));
+    for (const s of S.stops) { if (t >= s.t1) shift += s.pause; else if (t >= s.t0) return s.r; else break; }
+    const tau = clamp(t - shift - SWEEP0, 0, S.tsw), cum = S.cum, N = cum.length - 1;
+    let lo = 0, hi = N;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (cum[mid] <= tau) lo = mid; else hi = mid; }
+    const u = (lo + (tau - cum[lo]) / Math.max(1e-12, cum[hi] - cum[lo])) / N;
+    return Math.exp(lerp(Math.log(S.rmin), Math.log(S.rend), clamp(u, 0, 1)));
   }
   function stopAt(t) { return S.stops.find((s) => t >= s.t0 && t <= s.t1) || null; }
 
@@ -229,14 +261,15 @@
       for (let o = 0; o < S.nobj; o++) if (seedRoot[o] === h.root[i]) { s = fused.has(h.root[i]) ? 9 : 2 + o; break; }
       style[i] = s;
     }
-    const marks = S.scene.objects.map((_, o) => (fused.has(seedRoot[o]) ? 'x' : (foundBy(M.m.tracks[o], r) ? 'v' : '')));
+    const marks = S.scene.objects.map((_, o) => (fused.has(seedRoot[o]) ? 'x'
+      : (M.m.best[o] > 0.5 && r * EPS >= M.m.best_level[o] ? 'v' : '')));
     return { style, marks };
   }
+  const colorOf = (s) => (s === 9 ? C.bad : C.objects[s - 2]);
   function pointRadius(s, g) { return g >= 0 ? (s === 0 ? 2.6 : (s === 1 ? 3.4 : 4.8)) : (s === 0 ? 1.7 : (s === 1 ? 2.3 : 2.8)); }
 
   // Points d'un panneau. mode 'truth' : couleurs de la vérité ; 'sweep' : groupes de la hiérarchie au niveau r.
   function drawPoints(ctx, P, mode, st) {
-    const colorOf = (s) => (s === 9 ? C.bad : C.objects[s - 2]);
     const pass = (keep) => {
       for (const i of S.order) {
         const g = S.gt[i], s = mode === 'truth' ? (g >= 0 ? 2 + g : 0) : st.style[i];
@@ -248,7 +281,7 @@
     pass((s, g) => s <= 1 && g < 0); pass((s, g) => s <= 1 && g >= 0); pass((s) => s >= 2);
   }
   // Étiquettes des objets au-dessus de leurs points : « A · bicycle » sur la vérité, puis « A », « A ✓ », « A ✗ ».
-  function drawLabels(ctx, P, mode, marks) {
+  function drawLabels(ctx, P, mode, marks, reserve) {
     const size = 34, placed = [];
     for (let o = 0; o < S.nobj; o++) {
       let mx = 0, cnt = 0, top = Infinity, bot = -Infinity;
@@ -261,7 +294,7 @@
       const w = richWidth(ctx, parts, size) + size * 1.3, h = size * 1.55;
       // position entièrement dans le panneau, hors du nom de la méthode et du bandeau du bas, sans chevauchement
       const fits = (x, y) => x - w / 2 >= P.x + 8 && x + w / 2 <= P.x + P.w - 8 && y >= P.y + 12 && y + h <= P.y + P.h - 92 &&
-        !(x - w / 2 < P.x + 330 && y < P.y + 80) && !placed.some((q) => Math.abs(q.x - x) < (q.w + w) / 2 + 8 && Math.abs(q.y - y) < h + 6);
+        !(x - w / 2 < P.x + reserve && y < P.y + 80) && !placed.some((q) => Math.abs(q.x - x) < (q.w + w) / 2 + 8 && Math.abs(q.y - y) < h + 6);
       const cx = P.x + mx / cnt, ya = P.y + top - h - 10, yb = P.y + bot + 12, cands = [];
       for (const y of [ya, ya - h - 8, ya + h + 8]) for (const dx of [0, 1, -1, 2, -2]) cands.push([cx + dx * (w * 0.75 + 12), y]);
       for (const dx of [0, 1, -1]) cands.push([cx + dx * (w * 0.75 + 12), yb]);
@@ -271,9 +304,72 @@
       pill(ctx, parts, lb.x, lb.y, size, rgba(C.objects[o], 0.95));
     }
   }
+  // Commentaire d'un événement, sur une ou deux lignes (formulation des vidéos longues, sans les IoU).
+  function listParts(objs) {
+    const out = [];
+    objs.forEach((o, j) => {
+      if (j) out.push([j === objs.length - 1 ? ' and ' : ', ', C.text, true]);
+      out.push([S.scene.objects[o].key, C.objects[o], true]);
+    });
+    return out;
+  }
+  function captionOf(e) {
+    if (e.kind === 'found') return { border: C.good, lines: [{ size: 38, parts: [...listParts(e.objs), [' recovered ✓', C.good, true]] }] };
+    if (e.kind === 'sep') {
+      return { border: C.good, lines: [{ size: 38, parts: [...listParts(e.objs), [' recovered ✓', C.good, true]] },
+        { size: 31, parts: [['still separate', C.text, false]] }] };
+    }
+    if (e.kind === 'merge') {
+      const who = e.never.length ? e.never : e.late;
+      return { border: C.bad, lines: [{ size: 38, parts: [['✗ ', C.bad, true], ...listParts(e.objs), [' now merged', C.text, true]] },
+        { size: 31, parts: [...listParts(who), [e.never.length ? ' never recovered separately' : ' not yet recovered', C.text, false]] }] };
+    }
+    const key = S.scene.objects[e.objs[0]].key;
+    const parts = e.objs.length === 1 && e.words.startsWith(key + ' ')
+      ? [[key, C.objects[e.objs[0]], true], [e.words.slice(key.length), C.text, true]] : [[e.words, C.text, true]];
+    return { border: C.dim, lines: [{ size: 34, parts }] };
+  }
+  function card(ctx, cap, cx, bottom) {
+    const pad = 24, gap = 6;
+    const w = Math.max(...cap.lines.map((l) => richWidth(ctx, l.parts, l.size))) + 2 * pad;
+    const h = cap.lines.reduce((s, l) => s + 1.22 * l.size, 0) + gap * (cap.lines.length - 1) + 24;
+    const y0 = bottom - h;
+    ctx.fillStyle = C.plate; roundRect(ctx, cx - w / 2, y0, w, h, 18); ctx.fill();
+    ctx.strokeStyle = cap.border; ctx.lineWidth = 3; roundRect(ctx, cx - w / 2 + 1.5, y0 + 1.5, w - 3, h - 3, 16.5); ctx.stroke();
+    let y = y0 + 12;
+    for (const l of cap.lines) { rich(ctx, l.parts, cx, y + 0.93 * l.size, l.size); y += 1.22 * l.size + gap; }
+    return h;
+  }
+  // Surbrillance d'un événement : le reste du panneau s'estompe, les clusters concernés ressortent, avec un éclair
+  // bref au début de la pause puis un anneau qui pulse (vert : retrouvé ; rouge : fusion parasite).
+  function highlight(ctx, P, st, mine, t, stop, alpha) {
+    const ring = new Map();  // style -> couleur de l'anneau
+    for (const e of mine) {
+      if (e.kind === 'merge') ring.set(9, C.bad);
+      else if (e.kind === 'chute' && e.objs.length > 1) ring.set(9, C.text);
+      else for (const o of e.objs) ring.set(2 + o, e.kind === 'chute' ? C.objects[o] : C.good);
+    }
+    ctx.globalAlpha = 0.62 * alpha; ctx.fillStyle = C.panel; ctx.fillRect(P.x, P.y, P.w, P.h); ctx.globalAlpha = 1;
+    for (const i of S.order) {
+      const s = st.style[i];
+      if (!ring.has(s)) continue;
+      ctx.fillStyle = colorOf(s); ctx.beginPath(); disc(ctx, P.x + S.sx[i], P.y + S.sy[i], pointRadius(s, S.gt[i]) + 0.4); ctx.fill();
+    }
+    const u = t - stop.t0, pulse = (0.5 + 0.5 * Math.cos(2 * Math.PI * u / 0.9)) * alpha, flash = 1 - smooth(u / 0.4);
+    ctx.lineWidth = 2.5;
+    for (const [s, col] of ring) {
+      ctx.strokeStyle = rgba(col, Math.min(1, 0.65 * pulse + 0.35 * flash)); ctx.beginPath();
+      for (const i of S.order) if (S.gt[i] >= 0 && st.style[i] === s) disc(ctx, P.x + S.sx[i], P.y + S.sy[i], 8 + 3 * pulse + 9 * flash);
+      ctx.stroke();
+    }
+  }
+
   // Fin : meilleur nœud de la hiérarchie pour chaque objet, encadré en vert (IoU > 0,5) ou en rouge.
-  function drawBest(ctx, P, M) {
+  // aPts : opacité des points et des cadres ; aTxt : celle des étiquettes et du bilan (le texte entre après celui
+  // du balayage, sans superposition).
+  function drawBest(ctx, P, M, reserve, aPts, aTxt) {
     const ok = M.m.best.map((v) => v > 0.5);
+    ctx.globalAlpha = aPts;
     for (const i of S.order) {  // tout en pâle d'abord
       ctx.fillStyle = C.alone; ctx.beginPath(); disc(ctx, P.x + S.sx[i], P.y + S.sy[i], S.gt[i] >= 0 ? 2.8 : 1.7); ctx.fill();
     }
@@ -297,6 +393,7 @@
     for (const b of boxes) {
       ctx.strokeStyle = b.col; ctx.lineWidth = 5; roundRect(ctx, b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0, 12); ctx.stroke();
     }
+    ctx.globalAlpha = aTxt;
     const size = 36, placed = [];
     for (const b of boxes) {
       const parts = [[S.scene.objects[b.o].key, C.objects[b.o], true], [ok[b.o] ? ' ✓' : ' ✗', b.col, true]];
@@ -305,7 +402,7 @@
       const cands = [[b.x0 + w / 2, b.y0 - h - 8], [b.x1 - w / 2, b.y0 - h - 8], [b.x0 + w / 2 + 8, b.y0 + 8], [b.x1 - w / 2 - 8, b.y0 + 8],
         [b.x0 - w / 2 - 8, b.y0], [b.x1 + w / 2 + 8, b.y0], [b.x0 - w / 2 - 8, (b.y0 + b.y1 - h) / 2], [b.x1 + w / 2 + 8, (b.y0 + b.y1 - h) / 2],
         [b.x0 + w / 2, b.y1 + 8], [b.x1 - w / 2, b.y1 + 8]];
-      const fits = (x, y) => y >= P.y + 12 && y + h <= P.y + P.h - 92 && !(x - w / 2 < P.x + 250 && y < P.y + 76) &&
+      const fits = (x, y) => y >= P.y + 12 && y + h <= P.y + P.h - 92 && !(x - w / 2 < P.x + reserve && y < P.y + 80) &&
         x - w / 2 >= P.x + 8 && x + w / 2 <= P.x + P.w - 8 &&
         !placed.some((q) => Math.abs(q.x - x) < (q.w + w) / 2 + 8 && Math.abs(q.y - y) < h + 6);
       let pick = cands.find(([x, y]) => fits(x, y)) || cands[0];
@@ -315,7 +412,8 @@
     }
     const found = ok.filter(Boolean).length, all = ok.length;
     const col = found === all ? C.good : C.bad;
-    pill(ctx, [[found === all ? '✓ ' : '✗ ', col, true], [`${found} / ${all} clusters found`, C.text, true]], P.x + P.w / 2, P.y + P.h - 72, 36, col);
+    pill(ctx, [[found === all ? '✓ ' : '✗ ', col, true], [`${found} / ${all} objects recovered`, C.text, true]], P.x + P.w / 2, P.y + P.h - 72, 36, col);
+    ctx.globalAlpha = 1;
   }
 
   function renderAt(ctx, t) {
@@ -323,21 +421,26 @@
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
     const phase = t < T_INTRO ? 'intro' : (t < SWEEP1 ? 'sweep' : 'final');
     const r = phase === 'intro' ? S.rmin : rAt(t);
+    // vers la fin : les points se fondent sur toute la transition ; les textes du balayage sortent pendant la
+    // première moitié, ceux de la fin entrent pendant la seconde
+    const half = T_FINAL_IN / 2;
+    const fo = phase === 'final' ? 1 - smooth((t - SWEEP1) / half) : 1, fi = phase === 'final' ? smooth((t - SWEEP1 - half) / half) : 0;
     // en-tête : r pendant le balayage
     if (phase === 'intro') text(ctx, 'The objects', W / 2, 90, 56, C.text, { bold: true, align: 'center' });
     else if (t < FINAL0) {
-      const u = phase === 'final' ? 1 - smooth((t - SWEEP1) / T_FINAL_IN) : 1;
-      ctx.globalAlpha = u;
+      ctx.globalAlpha = fo;
       text(ctx, `ε = ${(100 * r).toFixed(1)} cm`, W / 2, 92, 60, C.text, { bold: true, align: 'center' });
       ctx.globalAlpha = 1;
     }
     if (phase === 'final') {
-      ctx.globalAlpha = smooth((t - SWEEP1) / T_FINAL_IN);
+      ctx.globalAlpha = fi;
       text(ctx, 'Best cluster for each object', W / 2, 90, 50, C.text, { bold: true, align: 'center' });
       ctx.globalAlpha = 1;
     }
     for (const P of PANELS) {
       const M = S.methods[P.key];
+      const nameW = measure(ctx, P.name, 48, true), epsText = `ε = ${(100 * M.freeze).toFixed(1)} cm`;
+      const reserveName = 26 + nameW + 24, reserve = reserveName + (M.freeze < Infinity ? 22 + measure(ctx, epsText, 34, true) : 0);
       panelFrame(ctx, P);
       ctx.save(); roundRect(ctx, P.x + 1, P.y + 1, P.w - 2, P.h - 2, 13); ctx.clip();
       const mix = phase === 'intro' ? 0 : smooth((t - T_INTRO) / T_MIX);
@@ -351,35 +454,25 @@
           const rp = Math.min(r, M.freeze);
           const st = stylesAt(M, rp);
           ctx.globalAlpha = mix * (1 - fin); drawPoints(ctx, P, 'sweep', st); ctx.globalAlpha = 1;
-          // fusion parasite : anneau rouge qui pulse autour des points des objets réunis, pendant sa pause
-          const bad = phase === 'sweep' ? stopAt(t) : null;
-          if (bad && bad.events.some((e) => e.key === P.key && !e.good)) {
-            const pulse = (0.5 + 0.5 * Math.cos(2 * Math.PI * (t - bad.t0) / 0.85)) * Math.min(smooth((t - bad.t0) / 0.25), smooth((bad.t1 - t) / 0.25));
-            ctx.strokeStyle = rgba(C.bad, 0.65 * pulse); ctx.lineWidth = 2.5; ctx.beginPath();
-            for (const i of S.order) if (S.gt[i] >= 0 && st.style[i] === 9) disc(ctx, P.x + S.sx[i], P.y + S.sy[i], 8 + 3 * pulse);
-            ctx.stroke();
-          }
-          if (mix > 0.5) { ctx.globalAlpha = (1 - fin); drawLabels(ctx, P, 'sweep', st.marks); ctx.globalAlpha = 1; }
+          const stop = phase === 'sweep' ? stopAt(t) : null;
+          const mine = stop ? stop.events.filter((e) => e.key === P.key) : [];
+          if (mine.length) highlight(ctx, P, st, mine, t, stop, Math.min(smooth((t - stop.t0) / 0.2), smooth((stop.t1 - t) / 0.3)));
+          if (mix > 0.5) { ctx.globalAlpha = fo; drawLabels(ctx, P, 'sweep', st.marks, reserve); ctx.globalAlpha = 1; }
         }
-        if (fin > 0) { ctx.globalAlpha = fin; drawBest(ctx, P, M); ctx.globalAlpha = 1; }
+        if (fin > 0) drawBest(ctx, P, M, reserveName, fin, fi);
         const stop = phase === 'sweep' ? stopAt(t) : null;
         if (stop) {
           ctx.globalAlpha = Math.min(smooth((t - stop.t0) / 0.25), smooth((stop.t1 - t) / 0.25));
-          let y = P.y + P.h - 72;
-          for (const e of stop.events.filter((x) => x.key === P.key).reverse()) {
-            const parts = e.parts();
-            if (e.objs.length === 1) parts[0][1] = C.objects[e.objs[0]]; else parts[0][1] = C.text;
-            pill(ctx, parts, P.x + P.w / 2, y, 36, e.good ? C.good : C.bad);
-            y -= 66;
-          }
+          let bottom = P.y + P.h - 18;
+          for (const e of stop.events.filter((x) => x.key === P.key).reverse()) bottom -= card(ctx, captionOf(e), P.x + P.w / 2, bottom) + 10;
           ctx.globalAlpha = 1;
         }
-      } else drawLabels(ctx, P, 'truth', null);
+      } else drawLabels(ctx, P, 'truth', null, reserveName);
       ctx.restore();
       text(ctx, P.name, P.x + 26, P.y + 60, 48, C.text, { bold: true });
       if (phase === 'sweep' && r > M.freeze) {
         ctx.globalAlpha = smooth((r / M.freeze - 1) / 0.03);
-        text(ctx, `ε = ${(100 * M.freeze).toFixed(1)} cm`, P.x + P.w - 26, P.y + 58, 36, C.dim, { bold: true, align: 'right' });
+        text(ctx, epsText, P.x + 26 + nameW + 22, P.y + 58, 34, C.dim, { bold: true });
         ctx.globalAlpha = 1;
       }
     }
