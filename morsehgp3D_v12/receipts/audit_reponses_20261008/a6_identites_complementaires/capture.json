@@ -1,0 +1,248 @@
+{
+  "scope": "FUL1 metadata only; no native or payload read; no scheduler interleaving proof",
+  "reader_git": "bdfca8fb198e6711626c6506b816a2a656315c83",
+  "reader": {
+    "bytes": 13663,
+    "sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+  },
+  "input_manifest": {
+    "bytes": 42084,
+    "sha256": "a1323fa263b735e72e12959453353443fd3e3ac222f80e8def5148943e5daecf"
+  },
+  "expected": [
+    [
+      "kitti_ng_08_000691",
+      61198
+    ],
+    [
+      "kitti_ng_05_002064",
+      62859
+    ],
+    [
+      "kitti_ng_02_001606",
+      64740
+    ],
+    [
+      "kitti_ng_00_001502",
+      64995
+    ],
+    [
+      "kitti_ng_05_002060",
+      66456
+    ],
+    [
+      "kitti_ng_08_001176",
+      67114
+    ],
+    [
+      "kitti_ng_02_001600",
+      67585
+    ],
+    [
+      "kitti_ng_02_001604",
+      67805
+    ],
+    [
+      "kitti_ng_02_001610",
+      67864
+    ],
+    [
+      "kitti_ng_10_000424",
+      69106
+    ],
+    [
+      "kitti_ng_00_003612",
+      70537
+    ],
+    [
+      "kitti_ng_00_000660",
+      71483
+    ],
+    [
+      "kitti_ng_08_002554",
+      72426
+    ],
+    [
+      "kitti_ng_00_003624",
+      72836
+    ],
+    [
+      "kitti_ng_10_000430",
+      73576
+    ],
+    [
+      "kitti_ng_00_001464",
+      74736
+    ],
+    [
+      "kitti_ng_00_000648",
+      77965
+    ],
+    [
+      "kitti_ng_08_001193",
+      80433
+    ],
+    [
+      "kitti_ng_00_001880",
+      80607
+    ],
+    [
+      "kitti_ng_00_001896",
+      95586
+    ],
+    [
+      "kitti_ng_08_002119",
+      99099
+    ]
+  ],
+  "inputs": {
+    "identite72/grandes_base.jsonl": {
+      "bytes": 31580,
+      "sha256": "2ebf8b13bb2fa5c6c0cdb5e0bf15eace66014862985dafcaa137e8a251f2640a"
+    },
+    "identite72/grandes_a6.jsonl": {
+      "bytes": 31540,
+      "sha256": "5837df1c3e7c82c8e11c6ad42da358076e285e91e2f8eb7e2b34fe8cc08929a0"
+    },
+    "identite72/grandes_a6_seq.jsonl": {
+      "bytes": 20389,
+      "sha256": "93603a9cb3b963387298861143a048823305c310c4999d930475a09c2d91d1b3"
+    },
+    "identite_grandes_72.log": {
+      "bytes": 168,
+      "sha256": "e45995a1dd7832037cd4c2f96dc64552c4b338ed8144eb287e8bb6e66f18d586"
+    },
+    "dev/identite_grandes_72.sh": {
+      "bytes": 2775,
+      "sha256": "7e5c08c04a6bc8e1067a6c72321b4f80e72f5eecac6102b7d002a2a8265e5049"
+    }
+  },
+  "external_codes": [
+    0,
+    0,
+    0
+  ],
+  "all_21_ful1_equal": true,
+  "current_probe_artifacts": {
+    "base": {
+      "bytes": 1080528,
+      "sha256": "763e73f7e695b274d18d8274a24a0b3007d97154efc37385acacecf2ff167707",
+      "mtime_utc": "2026-10-08T10:14:22.187628+00:00"
+    },
+    "a6": {
+      "bytes": 1086408,
+      "sha256": "f5cf14e4c891b7e3e83dd79a9da06ebe9d68ea3fa3cc5eabcae87906f38bbbc0",
+      "mtime_utc": "2026-10-08T09:57:43.634695+00:00"
+    }
+  },
+  "build_binding": "external codes from closed primary log; current ELF hashes are observations only, not before/after execution closure",
+  "reader_path": "morsehgp3D_v12/microbancs/outils/lecteur_full.py",
+  "digests": [
+    "119911b011c2491425e20c37cb195611a0dc7f8a29768e61fe5c7d039d85cd21",
+    "f22e248480ff230728543e68bdd0dd79f68c0989b4363dfe93d7b3047795a7bc",
+    "fe47826e6624e1749b974d28409ed4748262fe426b2fa049e621135e95884683",
+    "2f19bf7de3e44d911898109affa243909182ce706db1510a9badd01c231d1949",
+    "d34169a8e340c6c8f6849ec41c5dd98eefe44dbba53a779d06c9110b49e747b6",
+    "0ebdb2606334855480f03e90f5277234b022203c46e0124c34f89b4f7a948a2f",
+    "95213cdfa1df19fed36bb3689057a36f6c5bc95963adf5d5b4778746a3b18bb5",
+    "b02b6a1cd15ce6b1176dc76ba23b377620c9fbe7dec6b2b9cf5ffb4d6fb72903",
+    "3f3e10301bdf3b27588ce095a5ac27b76ce5f853991c9b9ba3ab8d8237382b06",
+    "c3dd49fd6cc6c0dcb33936fec6ca04fbec53c4023c15547a5c5bdac26f4a7ee5",
+    "460c68b7adab7304a4fb51d66b3e45f8660904af9b866aa1069ebda47b5e14f2",
+    "d77ac503062736589f5de545dc6afa91cadc65713d30a2cd0fbe4ddf2dca7fca",
+    "56d2802b4a5f7dcfa4208f39d9844aa999a47a6dd4fdd0dbf966d9d4698dbcb7",
+    "ebee2d91eef6f74ca22c2ad94ce36b5dfb660e52db4429095591e8dff0be2b2f",
+    "3e6c91dd985def353bc7fc714e7cd674c522963ccdb1d2f62f8caa448a93ea98",
+    "80d5741af6e70c66ab446fa3c2fac23479a6824082ead2b30f1b96d95279272b",
+    "8459afbedad6fd282d2a3742ec019799d4235a0910970678c9654aceca47177e",
+    "c38ea7d5e870f281c707c90a6ba62a1a72381e77ab5354c0299a4c82cdb242a6",
+    "a20b9791a5d39afca7d4ea48597709ac751b292671fdb4a164d97f61b9f80f46",
+    "29c79b952c389f356c271d56ce3892a1ed0204ff6ee0e3c6cee393ccef536acc",
+    "a371f9a846402654da39f113cb7685abf1778f21ef3562fa0ba072758633c166"
+  ],
+  "arms": {
+    "base": {
+      "journal": {
+        "bytes": 31580,
+        "sha256": "2ebf8b13bb2fa5c6c0cdb5e0bf15eace66014862985dafcaa137e8a251f2640a"
+      },
+      "full": 21,
+      "release": 21,
+      "exit": {
+        "phase": "exit",
+        "status": "ok",
+        "reason": "none"
+      },
+      "reader_state": "ok",
+      "schema": "recouvert"
+    },
+    "a6": {
+      "journal": {
+        "bytes": 31540,
+        "sha256": "5837df1c3e7c82c8e11c6ad42da358076e285e91e2f8eb7e2b34fe8cc08929a0"
+      },
+      "full": 21,
+      "release": 21,
+      "exit": {
+        "phase": "exit",
+        "status": "ok",
+        "reason": "none"
+      },
+      "reader_state": "ok",
+      "schema": "recouvert"
+    },
+    "a6_seq": {
+      "journal": {
+        "bytes": 20389,
+        "sha256": "93603a9cb3b963387298861143a048823305c310c4999d930475a09c2d91d1b3"
+      },
+      "full": 21,
+      "release": 21,
+      "exit": {
+        "phase": "exit",
+        "status": "ok",
+        "reason": "none"
+      },
+      "reader_state": "ok",
+      "schema": "sequentiel"
+    }
+  },
+  "additional_observations": {
+    "foret_a6_72.log": {
+      "bytes": 204,
+      "sha256": "64c8286cf2f1191175c3c321167f9c4c474d3336462b194e0f6d035acadb0a2d"
+    },
+    "cuda_a6.log": {
+      "bytes": 106,
+      "sha256": "f519c7282a421481d4bdd7aa4415564e4278c1fe98029c174d8f1c453fd29f5b"
+    },
+    "ctest_a6_cuda.log": {
+      "bytes": 1172,
+      "sha256": "fbc6b31ae8f8a90924ef36a57dd0c98953da91878c5f23e8c582f92bdad9aa43"
+    },
+    "r_direct.log": {
+      "bytes": 1833,
+      "sha256": "0a13dd71378e86fd5a9d187e3b2c22dc09d41c5028d49e0fdddc1e33c69165cd"
+    },
+    "dev/r_direct.cpp": {
+      "bytes": 4219,
+      "sha256": "e2769040e7c073244a0953c14dd9251c35265fd30c5b7c69c57dbca1adb027c0"
+    }
+  },
+  "documentary_observations": {
+    "excluded_from_replay": true,
+    "previous_report": {
+      "bytes": 21052,
+      "sha256": "56aa8c1bfc8d519e497a96e33687434510137400f4d6f386ed4a3ceae5911fbd"
+    },
+    "previous_report_bytes_preserved": false,
+    "current_report": {
+      "bytes": 22513,
+      "sha256": "14af78763486b370bf8139e8b997972bfce211360dc3fe4b8a51b280ef93d75a"
+    },
+    "refresh_utc": "2026-10-08T11:30:30.197157+00:00",
+    "receipt_v1_preserved_outside_git": true,
+    "note": "Only documentary report changed. Closed FUL1 inputs unchanged; current report copied outside Git, not a new qualification.",
+    "previous_observed_date": "2026-10-08"
+  }
+}

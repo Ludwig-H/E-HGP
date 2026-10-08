@@ -1,0 +1,15 @@
+{
+  "prior_receipt": "../a6_indices_concurrence/README.md",
+  "prototype_commit": "69dd8e9021fb9b4203e72374629aaf6c4c6610dd",
+  "references": [
+    "https://timsong-cpp.github.io/cppwp/n4861/intro.races",
+    "https://timsong-cpp.github.io/cppwp/n4861/atomics.order"
+  ],
+  "scope": "C++20 atomic graph of a kernel reduction, no native or geometric FULL execution",
+  "sources": {
+    "src/tower/forest_kernel.cpp": "136d46a55591f94a3c624b643b815c53222d05a670ddeeb0e7b6dba2a914f22f",
+    "src/tower/pipeline.hpp": "b6c6eb7bc7bbd2446e565b46ca0e99bdee3b26b9653ba6d21a91bd7c521486b2",
+    "src/tower/pipeline_run.cpp": "543ca7bda001e87a1c2e5ceb38a4cecfb7c5123127877f5d214e679e057b97ba",
+    "src/tower/pipeline_steps.cpp": "57b88173378d5cd9544aad5848d7ed32ff560c1e481856b03f6b79839e27f765"
+  }
+}

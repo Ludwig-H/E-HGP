@@ -1,0 +1,207 @@
+{
+  "both_bridges": {
+    "H_happens_before_U": true,
+    "L_happens_before_S": true,
+    "accepted": false,
+    "errors": [
+      [
+        "14 read takes HB-future",
+        "H",
+        "U"
+      ],
+      [
+        "14 read takes HB-future",
+        "L",
+        "S"
+      ],
+      [
+        "16 RR",
+        "H",
+        "K_root0_u"
+      ],
+      [
+        "17 RW",
+        "H",
+        "U"
+      ],
+      [
+        "17 RW",
+        "L",
+        "S"
+      ],
+      [
+        "18 WR",
+        "K_union1",
+        "H_root1"
+      ],
+      [
+        "18 WR",
+        "K_union1",
+        "K_root1"
+      ],
+      [
+        "18 WR",
+        "U",
+        "K_root0_u"
+      ],
+      [
+        "HB cycle",
+        "",
+        ""
+      ]
+    ],
+    "events": 47,
+    "hb_edges": 1166,
+    "sc_order": [
+      "H_enter",
+      "H_open",
+      "K_close",
+      "H_leave",
+      "K_wait0"
+    ]
+  },
+  "geometric_reachability_proved": false,
+  "independent_formal_cpp_tool": false,
+  "kernel_traces": [
+    {
+      "cut_after_t": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3,
+          4
+        ]
+      ],
+      "events": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "final_partition": [
+        2
+      ],
+      "hint": 0,
+      "last_write": [
+        0,
+        2
+      ]
+    },
+    {
+      "cut_after_t": [
+        [
+          0
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "events": [
+        [
+          1,
+          2
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "final_partition": [
+        2
+      ],
+      "hint": 2,
+      "last_write": [
+        0,
+        2
+      ]
+    }
+  ],
+  "leaf_bridge": {
+    "H_happens_before_U": true,
+    "L_happens_before_S": false,
+    "accepted": false,
+    "errors": [
+      [
+        "14 read takes HB-future",
+        "H",
+        "U"
+      ],
+      [
+        "16 RR",
+        "H",
+        "K_root0_u"
+      ],
+      [
+        "17 RW",
+        "H",
+        "U"
+      ]
+    ],
+    "events": 47,
+    "hb_edges": 998,
+    "sc_order": [
+      "H_enter",
+      "H_open",
+      "K_close",
+      "H_leave",
+      "K_wait0"
+    ]
+  },
+  "native_execution": false,
+  "relaxed": {
+    "H_happens_before_U": false,
+    "L_happens_before_S": false,
+    "accepted": true,
+    "errors": [],
+    "events": 47,
+    "hb_edges": 855,
+    "sc_order": [
+      "H_enter",
+      "H_open",
+      "K_close",
+      "H_leave",
+      "K_wait0"
+    ]
+  },
+  "up_bridge": {
+    "H_happens_before_U": false,
+    "L_happens_before_S": true,
+    "accepted": false,
+    "errors": [
+      [
+        "14 read takes HB-future",
+        "L",
+        "S"
+      ],
+      [
+        "17 RW",
+        "L",
+        "S"
+      ],
+      [
+        "18 WR",
+        "K_union1",
+        "H_root1"
+      ]
+    ],
+    "events": 47,
+    "hb_edges": 951,
+    "sc_order": [
+      "H_enter",
+      "H_open",
+      "K_close",
+      "H_leave",
+      "K_wait0"
+    ]
+  }
+}
