@@ -11,7 +11,7 @@ mhgp12_add_unit(mhgp12_num_unit SOURCES integer_test.cpp geometry_test.cpp power
 mhgp12_add_unit(mhgp12_num_local SOURCES frame_test.cpp lanes_test.cpp translation_test.cpp guard_test.cpp
                 GROUPS frame_extents frame_refusals frame_tiers lane_side lane_orientation lane_midpoint lane_distance
                        lane_reservoir lane_center lane_levels lane_centers_order translation certify guard_sites
-                       guard_boxes guard_certificate
+                       guard_boxes guard_certificate guard_site_lanes
                 LABELS fast TIMEOUT 120)
 # Bornes de census sur sites entiers (levier V3) : enumeration exacte, monotonie contre la borne continue.
 mhgp12_add_unit(mhgp12_num_lattice SOURCES lattice_bounds_test.cpp GROUPS lattice_fixtures lattice_random

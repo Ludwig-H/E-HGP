@@ -1,6 +1,8 @@
 // Boule certifiee et garde entiere (num/guard.hpp) : certificat barycentrique, pave, point entier le plus proche en
 // local, budget mixte et certificat au domaine s+2. Construction neuve de la v12 ; elle remplace, pour les boules
 // certifiees, LatticeSphere de la v11 (centre absolu sur 5B+6 bits, coins de boites n'importe ou dans le domaine).
+// Ici : la preparation et les voies hors ligne (essai controle, repli large) ; les decisions et la puissance des voies
+// native et certifiee sont en ligne dans num/guard.hpp (census a plat, T2-d-B2).
 #include "num/guard.hpp"
 #include "num/big.hpp"
 #include "num/center_view.hpp"
@@ -78,6 +80,7 @@ GuardedSphere::GuardedSphere(const CertifiedBall& ball) noexcept : ball_(ball) {
     guard_hi_[j] = i64{ball.corner()[j]} + 2 * m;
   }
   native_coefficients_ = view.native_coefficients();
+  short_norm_ = s + 2 <= 30;
   // Voie uniforme : palier etroit (6s+11 <= 107), sinon certificat au domaine des requetes gardees, t = s+2.
   if (tier_of(s) == Tier::narrow) lane_ = Lane::native;
   else if (native_coefficients_ && sphere.power_domain() >= s + 2) lane_ = Lane::certified;
@@ -105,33 +108,29 @@ GuardedSphere::GuardedSphere(const CertifiedBall& ball) noexcept : ball_(ball) {
     nearest_[j] = q + (half_or_less ? 0 : 1);  // ex aequo 2r = D : le plus petit, meme distance
     threshold_[j] = 2 * q + (zero ? 0 : half_or_less ? 1 : 2);  // ceil(2 (c_j - o_j))
   }
+  inline_lane_ = !broken_ && (lane_ == Lane::native || lane_ == Lane::certified);
 }
 
-// Precondition : |v_j| < 2M, ecart a l'ancre d'un point du pave resserre ; les budgets restent ceux de |v_j| < 3M.
-Result<int> GuardedSphere::power_sign(const std::array<i64, 3>& v, GuardLedger* ledger) const noexcept {
+// Voies hors ligne de power_sign (num/guard.hpp) : preparation impossible, essai controle, repli large.
+Outcome GuardedSphere::slow_sign(const std::array<i64, 3>& v, int& sign, GuardLedger* ledger) const noexcept {
   if (broken_) return fail(Reason::arithmetic_invariant);
   LaneCount* lanes = ledger == nullptr ? nullptr : &ledger->lanes;
-  if (lane_ == Lane::native || lane_ == Lane::certified) {
-    // Palier etroit : D|v|^2 < 648 M^6, 2|N.v| < 432 M^6, somme < 2^(6s+11) <= 2^107 (CST-0111). Certificat au domaine
-    // s+2 : |v_j| < 2^(s+2), chaque produit et somme partielle < 2^127 (power_certificate.hpp).
-    count_lane(lanes, lane_);
-    const i128 norm = ball_.span() + 2 <= 30 ? i128{detail::dot(v, v)} : detail::dot128(v, v);
-    i128 total = denominator_ * norm;
-    for (int j = 0; j < 3; ++j) total += numerator_[j] * (-2 * i128{v[j]});
-    return detail::sign(total);
-  }
   if (lane_ == Lane::checked) {
     const std::array<i128, 3> factors{-2 * i128{v[0]}, -2 * i128{v[1]}, -2 * i128{v[2]}};
     if (const auto value = detail::checked_power_sum(denominator_, numerator_, detail::dot128(v, v), factors)) {
       count_lane(lanes, Lane::checked);
-      return detail::sign(*value);
+      sign = detail::sign(*value);
+      return {};
     }
   }
   count_lane(lanes, Lane::wide);
   // Repli large a la largeur du palier de la boule : 6s+11 <= 155 bits (moyen, trois mots), 209 bits (large, quatre).
   constexpr int medium = words_for(TierBudgets<Tier::medium>::guarded_side);
   constexpr int wide = words_for(TierBudgets<Tier::wide>::guarded_side);
-  return tier_of(ball_.span()) == Tier::wide ? wide_sign<wide>(v) : wide_sign<medium>(v);
+  const auto made = tier_of(ball_.span()) == Tier::wide ? wide_sign<wide>(v) : wide_sign<medium>(v);
+  if (!made.ok()) return made.outcome();
+  sign = made.value();
+  return {};
 }
 
 template <int Words>
@@ -146,55 +145,6 @@ Result<int> GuardedSphere::wide_sign(const std::array<i64, 3>& v) const noexcept
     if (!total.ok()) return total.outcome();
   }
   return total.value().sign();
-}
-
-Result<int> GuardedSphere::side_offset(const std::array<i64, 3>& offset, GuardLedger* ledger) const noexcept {
-  constexpr i64 limit = i64{1} << 34;
-  std::array<i64, 3> point{};
-  for (int j = 0; j < 3; ++j) {
-    if (offset[j] < -limit || offset[j] > limit) return fail(Reason::parameter_out_of_range);
-    point[j] = anchor_[j] + offset[j];
-  }
-  if (!in_guard(point)) {
-    if (ledger != nullptr) ++ledger->outside_sites;
-    return 1;  // hors du pave : exterieur a la boule fermee, sans arithmetique
-  }
-  return power_sign(offset, ledger);
-}
-
-Result<int> GuardedSphere::side(Point point, GuardLedger* ledger) const noexcept {
-  const auto c = point.coordinates();
-  return side_offset({i64{c[0]} - anchor_[0], i64{c[1]} - anchor_[1], i64{c[2]} - anchor_[2]}, ledger);
-}
-
-Result<PowerBoundSigns> GuardedSphere::bound_signs(const Box& box, GuardLedger* ledger) const noexcept {
-  const auto lo = box.lo().coordinates(), hi = box.hi().coordinates();
-  bool contained = true;
-  for (int j = 0; j < 3; ++j) {
-    if (i64{hi[j]} <= guard_lo_[j] || i64{lo[j]} >= guard_hi_[j]) {  // disjointe du pave ouvert
-      if (ledger != nullptr) ++ledger->disjoint_boxes;
-      return PowerBoundSigns{.lower = 1, .upper = 1};
-    }
-    contained = contained && i64{lo[j]} > guard_lo_[j] && i64{hi[j]} < guard_hi_[j];
-  }
-  // Point entier le plus proche du centre ramene dans la boite : dans le pave (la boite le rencontre sur chaque axe et
-  // l'entier le plus proche du centre est dans [m, m+M-1]).
-  std::array<i64, 3> near{}, far{};
-  for (int j = 0; j < 3; ++j) {
-    near[j] = std::clamp<i64>(anchor_[j] + nearest_[j], lo[j], hi[j]) - anchor_[j];
-    far[j] = (i64{lo[j]} + hi[j] - 2 * anchor_[j] >= threshold_[j] ? i64{hi[j]} : i64{lo[j]}) - anchor_[j];
-  }
-  auto lower = power_sign(near, ledger);
-  if (!lower.ok()) return lower.outcome();
-  if (lower.value() > 0) return PowerBoundSigns{.lower = 1, .upper = 1};
-  if (!contained) {  // une boite non contenue dans le pave n'est pas dans la boule : majorant positif, a raffiner
-    if (ledger != nullptr) ++ledger->partial_boxes;
-    return PowerBoundSigns{.lower = lower.value(), .upper = 1};
-  }
-  auto upper = power_sign(far, ledger);
-  if (!upper.ok()) return upper.outcome();
-  if (lower.value() > upper.value()) return fail(Reason::arithmetic_invariant);
-  return PowerBoundSigns{.lower = lower.value(), .upper = upper.value()};
 }
 
 }  // namespace mhgp12::num

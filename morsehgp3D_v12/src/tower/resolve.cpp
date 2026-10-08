@@ -120,7 +120,8 @@ Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n, Section
   const Proposal prop = propose(d, f);
   const bool in_part = prop.ok && sorted_subset(std::span<const u32>(prop.s.data(), prop.q), f);
   clock.lap(kProfileProposal);
-  const auto t1 = in_part ? lem_t1(d, f, std::span<const u32>(prop.s.data(), prop.q)) : std::nullopt;
+  bool table_miss = false;  // la table a repondu << absent >> pour le support propose
+  const auto t1 = in_part ? lem_t1(d, f, std::span<const u32>(prop.s.data(), prop.q), &table_miss) : std::nullopt;
   clock.lap(kProfileT1);
   std::optional<Certified> cert;
   if (!prop.ok) ++n.fallback_no_proposal;
@@ -149,7 +150,13 @@ Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n, Section
   }
   std::array<SiteIdx, 4> key{};
   for (u32 i = 0; i < cert->arity; ++i) key[i] = make_id<SiteIdx>(cert->support[i]);
-  const auto b = cat.find_support(std::span<const SiteIdx>(key.data(), cert->arity));
+  // T2-d-B2 : support certifie egal au support propose, que la table vient de dire absent : meme requete, meme reponse,
+  // sans la relire (en position generale, chaque echec de LEM-T1 mene ici au census ; sur ng00 K5, 252 152 recherches
+  // par passe). Un support canonique different (sites de F cosphericaux) est cherche comme avant.
+  const bool same_key = table_miss && !fallback && cert->arity == prop.q &&
+                        std::equal(cert->support.begin(), cert->support.begin() + cert->arity, prop.s.begin());
+  const auto b =
+      same_key ? std::optional<BallIdx>{} : cat.find_support(std::span<const SiteIdx>(key.data(), cert->arity));
   if (b && !part_in_population(cat, f, idx(*b))) return fail(Reason::tower_invariant);  // meme sphere : F dans P_b
   clock.lap(fallback ? kProfileFallback : kProfileCertificate);
   if (b) {
@@ -227,11 +234,14 @@ struct CensusStep {
 
 }  // namespace
 
-std::optional<u32> lem_t1(const Domain& d, const Part& f, std::span<const u32> support) noexcept {
+// table_miss (T2-d-B2) : vrai si S, dans F, a ete cherche dans la table et n'y est pas (aucune boule de S* = S).
+std::optional<u32> lem_t1(const Domain& d, const Part& f, std::span<const u32> support, bool* table_miss) noexcept {
+  if (table_miss != nullptr) *table_miss = false;
   if (support.size() < 2 || support.size() > 4 || !sorted_subset(support, f)) return std::nullopt;  // S dans F
   std::array<SiteIdx, 4> key{};
   for (std::size_t i = 0; i < support.size(); ++i) key[i] = make_id<SiteIdx>(support[i]);
   const auto b = d.catalogue.find_support(std::span<const SiteIdx>(key.data(), support.size()));
+  if (!b && table_miss != nullptr) *table_miss = true;
   if (!b || !part_in_population(d.catalogue, f, idx(*b))) return std::nullopt;  // S = S*(b) et F dans P_b
   return idx(*b);
 }

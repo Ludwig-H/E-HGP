@@ -16,7 +16,9 @@
 // Les tampons sont gardes d'un ordre a l'autre (croissance seulement) : l'etage construit l'index de chaque ordre dans
 // le meme objet. Toute reponse exige l'egalite exacte des SiteIdx.
 #include <algorithm>
+#include <atomic>
 #include <bit>
+#include <optional>
 
 #include "tower/internal.hpp"
 
@@ -93,6 +95,38 @@ struct Build {
   }
 };
 
+// Phase commune a plusieurs tables (T2-d-B2) : l'unite u est la tranche u - first[j] de la table j. Les corps de phase
+// ne refusent que par tower_invariant de l'ordre de leur table : une tranche en echec marque sa table (failed), et la
+// table marquee est sautee aux phases suivantes ; le Pool joue toujours toutes les tranches. L'issue finale est celle
+// de la premiere table marquee (plus petit ordre), comme la construction ordre par ordre qui s'arrete au premier.
+struct Phase {
+  std::array<void*, kMaxRadixJobs> contexts{};
+  std::array<u32, kMaxRadixJobs> table{};
+  std::array<u64, kMaxRadixJobs + 1> first{};
+  u8* failed = nullptr;
+  u32 count = 0;
+  Outcome (*body_of)(void*, u64, u64, u32) = nullptr;
+  void add(u32 j, void* context, u64 units) noexcept {
+    contexts[count] = context;
+    table[count] = j;
+    first[count + 1] = first[count] + units;
+    ++count;
+  }
+  Outcome play(sched::Pool& pool) noexcept { return pool.parallel_for(first[count], 1, this, &Phase::body); }
+  static Outcome body(void* raw, u64 begin, u64 end, u32 worker) noexcept {
+    auto& s = *static_cast<Phase*>(raw);
+    u32 i = 0;
+    for (u64 u = begin; u < end;) {
+      while (s.first[i + 1] <= u) ++i;
+      const u64 stop = std::min(end, s.first[i + 1]);
+      if (!s.body_of(s.contexts[i], u - s.first[i], stop - s.first[i], worker).ok())
+        std::atomic_ref<u8>(s.failed[s.table[i]]).store(1, std::memory_order_relaxed);
+      u = stop;
+    }
+    return {};
+  }
+};
+
 }  // namespace
 
 u64 PopulationTable::bytes_for(u64 entries, Order k) noexcept {
@@ -106,43 +140,88 @@ u64 PopulationTable::bytes_for(u64 entries, Order k) noexcept {
 Outcome PopulationTable::build(const Catalogue& catalogue, std::span<const u32> birth_keys,
                                std::span<const LevelRank> birth_ranks, Order k, MemoryBudget& budget,
                                sched::Pool& pool, u64 key_mask) noexcept {
-  if (k < 2 || k > kMaxPart || birth_keys.size() > kMaxOrderBirths || birth_ranks.size() != birth_keys.size())
-    return fail(Reason::tower_invariant, k);
-  k_ = k;
-  width_ = kHeaderWords + k;
-  key_mask_ = key_mask;
-  entries_ = 0;
-  const u64 blocks = (birth_keys.size() + kBirthBlock - 1) / kBirthBlock;
-  MHGP12_TRY(grow(block_start_, blocks + 1, budget));
-  block_start_[0] = 0;
-  Build fill{catalogue, birth_keys, k, key_mask, block_start_.span(), {}, {}};
-  MHGP12_TRY(pool.parallel_for(blocks, 1, &fill, &Build::count));
-  for (u64 b = 0; b < blocks; ++b) block_start_[b + 1] += block_start_[b];
-  const u64 entries = block_start_[blocks];
-  const u32 bits = entries <= 1 ? 0u : static_cast<u32>(std::bit_width(entries - 1));
-  MHGP12_TRY(grow(made_, entries, budget));
-  MHGP12_TRY(grow(scratch_, entries, budget));
-  MHGP12_TRY(grow(dense_rows_, entries * k, budget));
-  MHGP12_TRY(grow(records_, entries * width_, budget));
-  MHGP12_TRY(grow(directory_, (u64{1} << bits) + 1, budget));
-  fill.entries = made_.span().first(entries);
-  fill.dense_rows = dense_rows_.span().first(entries * k);
-  MHGP12_TRY(pool.parallel_for(blocks, 1, &fill, &Build::fill));
-  shift_ = 64 - bits;
-  directory_size_ = (u64{1} << bits) + 1;
-  auto sorted = radix_sort(made_.span().first(entries), scratch_.span().first(entries), shift_, places_, budget,
-                           pool);
-  if (!sorted.ok()) return sorted.outcome();
-  MHGP12_TRY(lay_out(sorted.value(), birth_ranks, pool));
-  entries_ = entries;
+  PopulationTable* self = this;
+  const PopulationSource source{birth_keys, birth_ranks, k};
+  return build_all(std::span<PopulationTable* const>(&self, 1), std::span<const PopulationSource>(&source, 1),
+                   catalogue, budget, pool, key_mask);
+}
+
+// Index de plusieurs ordres, phase par phase pour toutes les tables a la fois : comptage, sommes prefixes et tampons
+// par table, remplissage, tri par base commun (radix_sort_many), repertoire, tri des seaux et fiches (lay_out).
+Outcome PopulationTable::build_all(std::span<PopulationTable* const> tables, std::span<const PopulationSource> sources,
+                                   const Catalogue& catalogue, MemoryBudget& budget, sched::Pool& pool,
+                                   u64 key_mask) noexcept {
+  const u32 n = static_cast<u32>(tables.size());
+  if (n > kMaxRadixJobs || sources.size() != n) return fail(Reason::tower_invariant);
+  std::array<u8, kMaxRadixJobs> failed{};  // table en echec : sautee aux phases suivantes
+  std::array<u64, kMaxRadixJobs> blocks{};
+  std::array<std::optional<Build>, kMaxRadixJobs> fills;
+  Phase counting{{}, {}, {}, failed.data(), 0, &Build::count};
+  for (u32 j = 0; j < n; ++j) {
+    const PopulationSource& s = sources[j];
+    PopulationTable& t = *tables[j];
+    t.entries_ = 0;
+    if (s.k < 2 || s.k > kMaxPart || s.birth_keys.size() > kMaxOrderBirths ||
+        s.birth_ranks.size() != s.birth_keys.size()) {
+      failed[j] = 1;
+      continue;
+    }
+    t.k_ = s.k;
+    t.width_ = kHeaderWords + s.k;
+    t.key_mask_ = key_mask;
+    blocks[j] = (s.birth_keys.size() + kBirthBlock - 1) / kBirthBlock;
+    MHGP12_TRY(grow(t.block_start_, blocks[j] + 1, budget));
+    t.block_start_[0] = 0;
+    fills[j].emplace(Build{catalogue, s.birth_keys, s.k, key_mask, t.block_start_.span(), {}, {}});
+    counting.add(j, &*fills[j], blocks[j]);
+  }
+  MHGP12_TRY(counting.play(pool));
+  Phase filling{{}, {}, {}, failed.data(), 0, &Build::fill};
+  for (u32 j = 0; j < n; ++j) {
+    if (failed[j]) continue;
+    PopulationTable& t = *tables[j];
+    for (u64 b = 0; b < blocks[j]; ++b) t.block_start_[b + 1] += t.block_start_[b];
+    const u64 entries = t.block_start_[blocks[j]];
+    const u32 bits = entries <= 1 ? 0u : static_cast<u32>(std::bit_width(entries - 1));
+    MHGP12_TRY(grow(t.made_, entries, budget));
+    MHGP12_TRY(grow(t.scratch_, entries, budget));
+    MHGP12_TRY(grow(t.dense_rows_, entries * t.k_, budget));
+    MHGP12_TRY(grow(t.records_, entries * t.width_, budget));
+    MHGP12_TRY(grow(t.directory_, (u64{1} << bits) + 1, budget));
+    fills[j]->entries = t.made_.span().first(entries);
+    fills[j]->dense_rows = t.dense_rows_.span().first(entries * t.k_);
+    t.shift_ = 64 - bits;
+    t.directory_size_ = (u64{1} << bits) + 1;
+    filling.add(j, &*fills[j], blocks[j]);
+  }
+  MHGP12_TRY(filling.play(pool));
+  std::array<RadixJob, kMaxRadixJobs> jobs{};
+  std::array<u32, kMaxRadixJobs> job_table{};
+  u32 sorting = 0;
+  for (u32 j = 0; j < n; ++j) {
+    if (failed[j]) continue;
+    PopulationTable& t = *tables[j];
+    const u64 entries = t.block_start_[blocks[j]];
+    jobs[sorting] = RadixJob{t.made_.span().first(entries), t.scratch_.span().first(entries), t.shift_, &t.places_, {}};
+    job_table[sorting++] = j;
+  }
+  MHGP12_TRY(radix_sort_many(std::span<RadixJob>(jobs.data(), sorting), budget, pool));
+  std::array<std::span<KeyedEntry>, kMaxRadixJobs> sorted{};
+  for (u32 i = 0; i < sorting; ++i) sorted[job_table[i]] = jobs[i].sorted;
+  MHGP12_TRY(lay_out_all(tables, sources, std::span<std::span<KeyedEntry>>(sorted.data(), n), failed.data(), pool));
+  for (u32 j = 0; j < n; ++j) {
+    if (failed[j]) return fail(Reason::tower_invariant, sources[j].k);  // premiere table en echec : plus petit ordre
+    tables[j]->entries_ = sorted[j].size();
+  }
   return {};
 }
 
 // Places triees par seau -> repertoire, tri de chaque seau sur (empreinte, population), fiches et controle de l'ordre
 // canonique strict : seaux croissants, puis (empreinte, population) strictement croissant (population repetee
-// refusee).
-Outcome PopulationTable::lay_out(std::span<KeyedEntry> sorted, std::span<const LevelRank> birth_ranks,
-                                 sched::Pool& pool) noexcept {
+// refusee) ; chaque phase en une invocation pour toutes les tables encore saines.
+Outcome PopulationTable::lay_out_all(std::span<PopulationTable* const> tables,
+                                     std::span<const PopulationSource> sources, std::span<std::span<KeyedEntry>> sorted,
+                                     u8* failed, sched::Pool& pool) noexcept {
   struct Layout {
     PopulationTable& table;
     std::span<KeyedEntry> sorted;
@@ -193,15 +272,25 @@ Outcome PopulationTable::lay_out(std::span<KeyedEntry> sorted, std::span<const L
       }
       return {};
     }
-  } layout{*this, sorted, birth_ranks};
-  if (sorted.empty()) {
-    for (u64 j = 0; j < directory_size_; ++j) directory_[j] = 0;
-    return {};
+  };
+  std::array<std::optional<Layout>, kMaxRadixJobs> layouts;
+  std::array<u64, kMaxRadixJobs> places{}, bucket_units{};
+  for (u32 j = 0; j < tables.size(); ++j) {
+    if (failed[j]) continue;
+    PopulationTable& t = *tables[j];
+    layouts[j].emplace(Layout{t, sorted[j], sources[j].birth_ranks});
+    if (sorted[j].empty())
+      for (u64 b = 0; b < t.directory_size_; ++b) t.directory_[b] = 0;
+    places[j] = sorted[j].empty() ? 0 : (sorted[j].size() + kPlaceGrain - 1) / kPlaceGrain;
+    bucket_units[j] = sorted[j].empty() ? 0 : (t.directory_size_ - 1 + kBucketGrain - 1) / kBucketGrain;
   }
-  const u64 places = (sorted.size() + kPlaceGrain - 1) / kPlaceGrain;
-  MHGP12_TRY(pool.parallel_for(places, 1, &layout, &Layout::directory));
-  MHGP12_TRY(pool.parallel_for((directory_size_ - 1 + kBucketGrain - 1) / kBucketGrain, 1, &layout, &Layout::buckets));
-  return pool.parallel_for(places, 1, &layout, &Layout::records);
+  for (Outcome (*body)(void*, u64, u64, u32) : {&Layout::directory, &Layout::buckets, &Layout::records}) {
+    Phase phase{{}, {}, {}, failed, 0, body};
+    for (u32 j = 0; j < tables.size(); ++j)
+      if (!failed[j]) phase.add(j, &*layouts[j], body == &Layout::buckets ? bucket_units[j] : places[j]);
+    MHGP12_TRY(phase.play(pool));
+  }
+  return {};
 }
 
 u64 PopulationTable::key_of(const Part& f) const noexcept {

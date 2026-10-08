@@ -61,16 +61,30 @@ Outcome staff(Pipeline& p, const GlobalIndex& index, MemoryBudget& budget) noexc
   return {};
 }
 
-// Index des naissances des ordres 2 .. K, un objet par ordre (chronos table_ns de l'ordre).
+// Index des naissances des ordres 2 .. K, un objet par ordre, construits ENSEMBLE (T2-d-B2) : chaque phase de la
+// construction joue toutes les tables dans une invocation du Pool (PopulationTable::build_all) au lieu d'une suite de
+// constructions ordre par ordre (environ dix invocations chacune). Memes tables, meme refus (premier ordre en echec).
+// Les phases etant communes, la duree n'est plus separable par ordre : tables_ns est le mur de l'ensemble et
+// table_ns[k] reste nul dans la Session (la voie sequentielle, resolve_tower, garde un index par ordre et ses chronos).
 Outcome build_tables(Pipeline& p, MemoryBudget& budget, sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {
-  for (Order k = 2; k <= p.orders; ++k) {
-    const Stopwatch watch;
+  if (p.orders < 2) return {};
+  const Stopwatch watch;
+  std::array<tower_detail::PopulationTable*, kMaxOrder> tables{};
+  std::array<tower_detail::PopulationSource, kMaxOrder> sources{};
+  const u32 count = p.orders - 1;
+  for (u32 i = 0; i < count; ++i) {
+    const Order k = static_cast<Order>(i + 2);
     const ResolvedOrder& order = p.out.order(k);
-    MHGP12_TRY(p.tables[k - 1].build(p.domain.catalogue, order.birth_keys(), order.birth_ranks(), k, budget, pool));
-    diag.table_ns[k] = watch.nanoseconds();
-    diag.tables_ns += diag.table_ns[k];
-    diag.table_bytes += p.tables[k - 1].bytes();
+    tables[i] = &p.tables[k - 1];
+    sources[i] = tower_detail::PopulationSource{order.birth_keys(), order.birth_ranks(), k};
   }
+  using tower_detail::PopulationSource;
+  using tower_detail::PopulationTable;
+  MHGP12_TRY(PopulationTable::build_all(std::span<PopulationTable* const>(tables.data(), count),
+                                        std::span<const PopulationSource>(sources.data(), count), p.domain.catalogue,
+                                        budget, pool));
+  diag.tables_ns += watch.nanoseconds();
+  for (u32 i = 0; i < count; ++i) diag.table_bytes += tables[i]->bytes();
   return {};
 }
 

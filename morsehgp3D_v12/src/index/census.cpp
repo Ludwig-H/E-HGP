@@ -1,5 +1,6 @@
 // Deux parcours sans pile : comptage saturant, puis allocation exacte et remplissage transactionnel.
-// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere).
+// Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere),
+// a plat (T2-d-B2, index/bounds.hpp).
 #include "index/index.hpp"
 #include "index/access.hpp"
 #include "index/bounds.hpp"
@@ -26,16 +27,15 @@ struct Pass {
   }
 
   Outcome points(const Cloud& cloud, u32 begin, u32 end, const Bounds& lattice) noexcept {
+    const u32 *x = cloud.x().data(), *y = cloud.y().data(), *z = cloud.z().data();
     for (u32 i = begin; i < end && p < threshold; ++i) {
       ++ledger.point_tests;
-      auto point = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
-      if (!point.ok()) return point.outcome();
-      auto side = lattice.side(point.value(), ledger);
-      if (!side.ok()) return side.outcome();
-      if (side.value() < 0) {
+      int side = 0;
+      MHGP12_TRY(lattice.side_at(x[i], y[i], z[i], side, ledger));
+      if (side < 0) {
         if (fill) interior[p] = SiteIdx{i};
         ++p;
-      } else if (side.value() == 0 && keep_shell) {
+      } else if (side == 0 && keep_shell) {
         if (fill) shell[m] = SiteIdx{i};
         ++m;
       }
@@ -51,12 +51,12 @@ struct Pass {
       const auto& node = nodes[cursor];
       ++ledger.nodes;
       ++ledger.bounds;
-      auto signs = lattice.bound_signs(node.box, ledger);
-      if (!signs.ok()) return signs.outcome();
-      if (signs.value().lower > 0) {
+      num::PowerBoundSigns signs;
+      MHGP12_TRY(lattice.bound_signs(node.box, signs, ledger));
+      if (signs.lower > 0) {
         ++ledger.outside_blocks;
         cursor = node.escape;
-      } else if (signs.value().upper < 0) {
+      } else if (signs.upper < 0) {
         ++ledger.inside_blocks;
         accept_range(node.begin, node.end);
         cursor = node.escape;

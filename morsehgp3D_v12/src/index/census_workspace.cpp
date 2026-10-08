@@ -1,4 +1,5 @@
-// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete.
+// Un seul parcours : I croissant a gauche, U empilee a droite puis inversee. Aucune allocation par requete. Parcours a
+// plat (T2-d-B2) : aucune fonction appelee ni Result construit par noeud ou par site dans la voie gardee.
 // Le meme parcours sert le census generique (LatticeSphere) et le census garde d'une boule certifiee (GuardedSphere),
 // avec ou sans temoins sur la sphere (index.hpp : un noeud qui contient un temoin est raffine sans bornes evaluees).
 #include "index/access.hpp"
@@ -41,14 +42,13 @@ struct BorrowedPass {
     return {};
   }
   Outcome points(const Cloud& cloud, u32 begin, u32 end, const Bounds& lattice) noexcept {
+    const u32 *x = cloud.x().data(), *y = cloud.y().data(), *z = cloud.z().data();
     for (u32 i = begin; i < end && p < threshold; ++i) {
       ++ledger.point_tests;
-      auto point = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
-      if (!point.ok()) return point.outcome();
-      auto side = lattice.side(point.value(), ledger);
-      if (!side.ok()) return side.outcome();
-      if (side.value() < 0) { MHGP12_TRY(inside(i, i + 1)); }
-      else if (side.value() == 0) {
+      int side = 0;
+      MHGP12_TRY(lattice.side_at(x[i], y[i], z[i], side, ledger));
+      if (side < 0) { MHGP12_TRY(inside(i, i + 1)); }
+      else if (side == 0) {
         if (p > storage.size() || m >= storage.size() - p) return fail(Reason::arithmetic_invariant);
         storage[storage.size() - 1 - m] = SiteIdx{i}; ++m;
       }
@@ -69,11 +69,11 @@ struct BorrowedPass {
         } else { ++cursor; }
         continue;
       }
-      auto signs = lattice.bound_signs(node.box, ledger);
-      if (!signs.ok()) return signs.outcome();
-      if (signs.value().lower > 0) {
+      num::PowerBoundSigns signs;
+      MHGP12_TRY(lattice.bound_signs(node.box, signs, ledger));
+      if (signs.lower > 0) {
         ++ledger.outside_blocks; cursor = node.escape;
-      } else if (signs.value().upper < 0) {
+      } else if (signs.upper < 0) {
         ++ledger.inside_blocks;
         MHGP12_TRY(inside(node.begin, node.end)); cursor = node.escape;
       } else if (node.end - node.begin <= index.leaf_size()) {

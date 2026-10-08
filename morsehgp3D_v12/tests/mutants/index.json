@@ -1,20 +1,20 @@
 {
   "module": "index",
-  "plancher": 22,
+  "plancher": 25,
   "mutants": [
     {
       "id": "contact_exterieur",
       "fichier": "src/index/census.cpp",
-      "cherche": "if (signs.value().lower > 0) {",
-      "remplace": "if (signs.value().lower >= 0) {",
+      "cherche": "if (signs.lower > 0) {",
+      "remplace": "if (signs.lower >= 0) {",
       "porte": "mhgp12_index_fraction",
       "note": "egalite de borne exclut abusivement les contacts/coquilles"
     },
     {
       "id": "contact_interieur",
       "fichier": "src/index/census.cpp",
-      "cherche": "} else if (signs.value().upper < 0) {",
-      "remplace": "} else if (signs.value().upper <= 0) {",
+      "cherche": "} else if (signs.upper < 0) {",
+      "remplace": "} else if (signs.upper <= 0) {",
       "porte": "mhgp12_index_fraction",
       "note": "egalite de borne devient un certificat strict faux"
     },
@@ -29,8 +29,8 @@
     {
       "id": "coquille_limitee_a_k",
       "fichier": "src/index/census.cpp",
-      "cherche": "side.value() == 0 && keep_shell",
-      "remplace": "side.value() == 0 && keep_shell && m < threshold",
+      "cherche": "side == 0 && keep_shell",
+      "remplace": "side == 0 && keep_shell && m < threshold",
       "porte": "mhgp12_index_fraction",
       "note": "une coquille complete peut depasser le seuil saturant"
     },
@@ -93,16 +93,16 @@
     {
       "id": "census_borne_continue",
       "fichier": "src/index/census.cpp",
-      "cherche": "auto signs = lattice.bound_signs(node.box, ledger);",
-      "remplace": "auto signs = num::power_bound_signs(lattice.sphere(), node.box);",
+      "cherche": "MHGP12_TRY(lattice.bound_signs(node.box, signs, ledger));",
+      "remplace": "{ const auto made = num::power_bound_signs(lattice.sphere(), node.box); if (!made.ok()) return made.outcome(); signs = made.value(); }",
       "porte": "mhgp12_index_unit_lattice",
       "note": "levier V3 retire du census possede : memes listes, mais la racine n'est plus decidee (registres absolus)"
     },
     {
       "id": "census_emprunte_borne_continue",
       "fichier": "src/index/census_workspace.cpp",
-      "cherche": "auto signs = lattice.bound_signs(node.box, ledger);",
-      "remplace": "auto signs = num::power_bound_signs(lattice.sphere(), node.box);",
+      "cherche": "MHGP12_TRY(lattice.bound_signs(node.box, signs, ledger));",
+      "remplace": "{ const auto made = num::power_bound_signs(lattice.sphere(), node.box); if (!made.ok()) return made.outcome(); signs = made.value(); }",
       "porte": "mhgp12_index_borrowed_lattice",
       "note": "levier V3 retire du census emprunte (chemin des descentes FULL) : registres absolus d'une passe"
     },
@@ -177,6 +177,30 @@
       "remplace": "      if (idx(w) >= node.begin && idx(w) <= node.end) return true;",
       "porte": "mhgp12_index_guarded_witness_census",
       "note": "T2-d : plage du noeud lue fermee a droite : un noeud voisin sans temoin serait raffine sans bornes (noeuds et sites testes differents de ceux du census sans temoins, resultats egaux)"
+    },
+    {
+      "id": "plat_site_permute_emprunte",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "MHGP12_TRY(lattice.side_at(x[i], y[i], z[i], side, ledger));",
+      "remplace": "MHGP12_TRY(lattice.side_at(y[i], x[i], z[i], side, ledger));",
+      "porte": "mhgp12_index_guarded_fixtures",
+      "note": "census a plat (T2-d-B2) : site lu par ses coordonnees, axes permutes (parcours emprunte) ; porte : census emprunte contre census possede sur le nuage etale (les fixtures du census emprunte sont symetriques en x et y)"
+    },
+    {
+      "id": "plat_site_permute_possede",
+      "fichier": "src/index/census.cpp",
+      "cherche": "MHGP12_TRY(lattice.side_at(x[i], y[i], z[i], side, ledger));",
+      "remplace": "MHGP12_TRY(lattice.side_at(y[i], x[i], z[i], side, ledger));",
+      "porte": "mhgp12_index_guarded_fixtures",
+      "note": "census a plat : site lu par ses coordonnees, axes permutes (census possede)"
+    },
+    {
+      "id": "plat_registre_garde_absent",
+      "fichier": "src/index/bounds.hpp",
+      "cherche": "return guard_.bound_signs(box, signs, &guard_ledger_);",
+      "remplace": "return guard_.bound_signs(box, signs, nullptr);",
+      "porte": "mhgp12_index_guarded_witnesses",
+      "note": "census a plat : decisions de boites prises hors du registre de la garde (voies, disjointes et partielles perdues)"
     }
   ]
 }

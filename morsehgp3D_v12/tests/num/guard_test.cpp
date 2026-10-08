@@ -2,6 +2,7 @@
 // l'auditeur Codex (receipts/audit_contrats_20261007/numerique/witness.py) et du contrat, paragraphe 7.
 #include <array>
 #include <cstdio>
+#include <vector>
 
 #include "local_reference.hpp"
 #include "num/power_certificate.hpp"
@@ -278,6 +279,57 @@ MHGP12_TEST(guard_certificate, 40) {
     GuardLedger l;
     CHECK_EQ(g.side_offset({edge, edge, edge}, &l).value(), local_test::power(worst.sphere(), {edge, edge, edge}).sign());
     CHECK(l.lanes == (span == 16 ? LaneCount{1, 0, 0, 0} : LaneCount{0, 1, 0, 0}));
+  }
+}
+
+// Census a plat (T2-d-B2, levier B2-C) : le cote d'un site lu par ses coordonnees (side_site, entree du parcours du
+// census, sans Point::make) est celui de side_offset et de la voie generique exacte, registres egaux, sur les quatre
+// voies : natif (s = 16), certifie (s = 17 et 19), controle (s = 20), large (s = 21, temoin de l'auditeur au coin
+// (h,h,h)). Sites : support (sur la sphere), centre de gravite, coins du pave et du domaine, juste hors du pave ; une
+// coordonnee hors du profil rend le refus de Point::make.
+MHGP12_TEST(guard_site_lanes, 140) {
+  const i64 top = kCoordMax;
+  for (const int span : {16, 17, 19, 20, 21}) {
+    if (span > kCoordBits) continue;
+    const i64 m = i64{1} << span, h = m - 1;
+    const auto corner = acute_corner(span);
+    const auto ball = certified({corner[0], corner[1], corner[2]});
+    const GuardedSphere guard(ball);
+    const auto anchor = ball.sphere().anchor().coordinates();
+    std::vector<std::array<i64, 3>> sites{{0, 0, 0}, {h, h, 0}, {h, 0, h}, {2 * h / 3, h / 3, h / 3}, {h, h, h},
+                                          {std::min(2 * m - 1, top), 0, 0}, {0, std::min(2 * m, top), 0}};
+    GuardLedger by_site, by_offset;
+    for (const auto& p : sites) {
+      int flat = 2;
+      const Outcome read = guard.side_site(static_cast<u32>(p[0]), static_cast<u32>(p[1]), static_cast<u32>(p[2]), flat,
+                                           &by_site);
+      const auto local = guard.side_offset({p[0] - anchor[0], p[1] - anchor[1], p[2] - anchor[2]}, &by_offset);
+      const auto generic = side(ball.sphere(), point(p[0], p[1], p[2]));
+      REQUIRE(read.ok() && local.ok() && generic.ok());
+      CHECK_EQ(flat, local.value());
+      CHECK_EQ(flat, generic.value());
+    }
+    CHECK(by_site == by_offset);
+    CHECK_EQ(by_site.outside_sites, 2 * m <= top ? 1u : 0u);
+    const LaneCount& lanes = by_site.lanes;
+    if (span == 16) CHECK(lanes.native > 0 && lanes.certified + lanes.checked + lanes.wide == 0);
+    if (span == 17 || span == 19) CHECK(lanes.certified > 0 && lanes.native + lanes.checked + lanes.wide == 0);
+    if (span == 20) CHECK(lanes.checked + lanes.wide > 0 && lanes.native + lanes.certified == 0);
+    if (span == 21) CHECK(lanes.wide > 0 && lanes.native + lanes.certified == 0);
+    // Sites du support : sur la sphere.
+    for (const Point& p : corner) {
+      int on = 2;
+      REQUIRE(guard.side_site(p.x(), p.y(), p.z(), on, nullptr).ok());
+      CHECK_EQ(on, 0);
+    }
+    // Hors du domaine du profil : le refus de Point::make, avant tout calcul ni compte.
+    if constexpr (kCoordBits < 32) {
+      int out = 2;
+      GuardLedger untouched;
+      CHECK_EQ(guard.side_site(kCoordMax + 1, 0, 0, out, &untouched).reason, Reason::coordinate_out_of_domain);
+      CHECK_EQ(guard.side_site(0, 0, kCoordMax + 1, out, &untouched).reason, Reason::coordinate_out_of_domain);
+      CHECK(untouched == GuardLedger{});
+    }
   }
 }
 

@@ -171,6 +171,18 @@ struct KeyedEntry {
 [[nodiscard]] Result<std::span<KeyedEntry>> radix_sort(std::span<KeyedEntry> data, std::span<KeyedEntry> scratch,
                                                        u32 low_bit, Buffer<u64>& places, MemoryBudget& budget,
                                                        sched::Pool& pool) noexcept;
+// Le meme tri pour plusieurs tableaux independants dans des passes communes (T2-d-B2 : une invocation du Pool par
+// phase pour tous les tableaux, au lieu d'une par tableau) : chaque tableau subit exactement les passes, les
+// histogrammes, les places et les dispersions de radix_sort seul (memes octets) ; radix_sort est le cas d'un tableau.
+// Au plus kMaxRadixJobs tableaux ; sorted rend celui de data ou scratch qui porte le resultat.
+struct RadixJob {
+  std::span<KeyedEntry> data, scratch;
+  u32 low_bit = 64;
+  Buffer<u64>* places = nullptr;
+  std::span<KeyedEntry> sorted;
+};
+inline constexpr std::size_t kMaxRadixJobs = 12;
+[[nodiscard]] Outcome radix_sort_many(std::span<RadixJob> jobs, MemoryBudget& budget, sched::Pool& pool) noexcept;
 u64 radix_bytes(u64 entries) noexcept;
 
 // ---- populations.cpp : index des naissances de l'ordre k (LEM-POP) ---------------------------------------------------
@@ -193,6 +205,13 @@ struct PopulationHit {
 // Naissances (b, k) de population exacte k (p + m = k) dans l'ordre canonique (empreinte, population) ; repertoire des
 // seaux (bits de tete de l'empreinte) ; une fiche contigue par place : empreinte, naissance, rang, population
 // (populations.cpp). Un meme objet sert a tous les ordres : ses tampons grandissent et sont gardes.
+// Naissances d'un ordre pour sa table : cles (BallIdx), rangs, ordre k.
+struct PopulationSource {
+  std::span<const u32> birth_keys;
+  std::span<const LevelRank> birth_ranks;
+  Order k = 0;
+};
+
 class PopulationTable {
  public:
   // Construction parallele et deterministe pour l'ordre k ; refus tower_invariant (population de taille differente de
@@ -200,6 +219,14 @@ class PopulationTable {
   [[nodiscard]] Outcome build(const Catalogue& catalogue, std::span<const u32> birth_keys,
                               std::span<const LevelRank> birth_ranks, Order k, MemoryBudget& budget, sched::Pool& pool,
                               u64 key_mask = ~u64{0}) noexcept;
+  // Tables de plusieurs ordres construites ensemble (T2-d-B2, Session recouverte : index de tous les ordres a
+  // l'ouverture) : chaque phase (comptage, remplissage, tri par base, repertoire, seaux, fiches) en une invocation du
+  // Pool pour toutes les tables ; chaque table est identique a celle de build seul ; build est le cas d'une table.
+  // Refus : celui de la construction ordre par ordre, la premiere table en echec dans l'ordre de sources (tower_invariant
+  // de son ordre), memory_budget. Au plus kMaxRadixJobs tables.
+  [[nodiscard]] static Outcome build_all(std::span<PopulationTable* const> tables,
+                                         std::span<const PopulationSource> sources, const Catalogue& catalogue,
+                                         MemoryBudget& budget, sched::Pool& pool, u64 key_mask = ~u64{0}) noexcept;
   // Empreinte de la partie F (k SiteIdx croissants).
   u64 key_of(const Part& f) const noexcept;
   u64 key_mask() const noexcept { return key_mask_; }
@@ -227,7 +254,8 @@ class PopulationTable {
 
  private:
   static constexpr u32 kHeaderWords = 4;  // fiche : empreinte (deux mots), naissance, rang, puis k SiteIdx
-  Outcome lay_out(std::span<KeyedEntry> sorted, std::span<const LevelRank> birth_ranks, sched::Pool& pool) noexcept;
+  static Outcome lay_out_all(std::span<PopulationTable* const> tables, std::span<const PopulationSource> sources,
+                             std::span<std::span<KeyedEntry>> sorted, u8* failed, sched::Pool& pool) noexcept;
   const u32* record(u64 pos) const noexcept { return records_.data() + pos * width_; }
   u64 key_at(u64 pos) const noexcept { return u64{record(pos)[0]} | (u64{record(pos)[1]} << 32); }
   int compare_at(u64 pos, u64 key, const Part& f) const noexcept;
@@ -281,7 +309,8 @@ struct ResolveContext {
 // LEM-T1 (CONTRAT_TOUR.md, paragraphe 4.1 ; CST-0101, WIT-T1-CARRE) : si le support propose S (SiteIdx croissants)
 // est dans F, si S = S*(b) pour une boule b du catalogue et si F est dans P_b, alors la plus petite boule de F est b,
 // sans arithmetique ; les deux inclusions sont testees sur les identifiants. Sinon rien.
-std::optional<u32> lem_t1(const Domain& d, const Part& f, std::span<const u32> support) noexcept;
+std::optional<u32> lem_t1(const Domain& d, const Part& f, std::span<const u32> support,
+                          bool* table_miss = nullptr) noexcept;
 // Cible de la partie f, trace stricte d'une cellule de rang junction_rank de l'ordre k >= 2 (date initiale controlee).
 [[nodiscard]] Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_rank,
                                        CensusWorkspace& workspace, OrderCounters& counters) noexcept;

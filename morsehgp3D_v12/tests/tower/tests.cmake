@@ -15,7 +15,7 @@ mhgp12_expect_code(mhgp12_tower_probe_usage 2 mhgp12_tower_probe --k=5 LABELS fa
 # sous la fenetre), cibles et capacite, plafonds declares, budget, determinisme a 1 et 8 fils.
 mhgp12_add_unit(mhgp12_tower_unit SOURCES unit.cpp
                 GROUPS targets_capacity witness_d2 witness_memo witness_t1_square fact_saturated inert_below_window
-                       capacity_refusals budget determinism
+                       capacity_refusals budget determinism lem_t1_table
                 LABELS fast TIMEOUT 300)
 
 # Index des naissances et premieres sondes (T2-c) : tri par base stable et deterministe (1 et 8 fils), index contre une
@@ -24,7 +24,7 @@ mhgp12_add_unit(mhgp12_tower_unit SOURCES unit.cpp
 # representant, resolution rejouee avec un index a collisions (G-L5 et file G-L7) : memes cibles et memes compteurs ;
 # table S* -> boule du catalogue contre une table ordonnee ; population repetee refusee.
 mhgp12_add_unit(mhgp12_tower_index SOURCES index_unit.cpp
-                GROUPS radix_stable index_reference weak_key_resolution support_table duplicate_population
+                GROUPS radix_stable index_reference weak_key_resolution support_table duplicate_population build_all
                 LABELS fast TIMEOUT 300)
 
 # Oracle borne : chaque cible egale a celle de resolve_v12 (politique v12_indices) et dans la composante attendue a la

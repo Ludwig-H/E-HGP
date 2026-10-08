@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 40,
+  "plancher": 49,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -349,6 +349,78 @@
       ],
       "porte": "mhgp12_tower_region_terminaison",
       "note": "meme retour a l'ancienne regle, juge par la porte native (a_terminaison_porte) : A suspendu apres son retrait 1 -> 0, B annonce 0 -> 1, A relache relit 1 et attend ; l'assertion attente_A == 0 echoue"
+    },
+    {
+      "id": "tables_refus_ignore",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "    if (failed[j]) return fail(Reason::tower_invariant, sources[j].k);  // premiere table en echec : plus petit ordre",
+      "remplace": "    if (failed[j] && false) return fail(Reason::tower_invariant, sources[j].k);",
+      "porte": "mhgp12_tower_index_build_all",
+      "note": "T2-d-B2 : une table marquee en echec (population repetee) serait publiee comme construite : refus perdu"
+    },
+    {
+      "id": "tables_tranche_non_marquee",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "        std::atomic_ref<u8>(s.failed[s.table[i]]).store(1, std::memory_order_relaxed);",
+      "remplace": "        (void)s.failed;",
+      "porte": "mhgp12_tower_index_build_all",
+      "note": "T2-d-B2 : une tranche en echec d'une phase commune ne marquerait pas sa table : refus tower_invariant perdu"
+    },
+    {
+      "id": "tables_derniere_en_echec",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "  for (u32 j = 0; j < n; ++j) {\n    if (failed[j]) return fail(Reason::tower_invariant, sources[j].k);",
+      "remplace": "  for (u32 j = n; j-- > 0;) {\n    if (failed[j]) return fail(Reason::tower_invariant, sources[j].k);",
+      "porte": "mhgp12_tower_index_build_all",
+      "note": "T2-d-B2 : l'issue serait celle de la DERNIERE table en echec (ordre 4) au lieu de la premiere (ordre 3), contrairement a la construction ordre par ordre"
+    },
+    {
+      "id": "tables_masque_ignore",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "    t.key_mask_ = key_mask;",
+      "remplace": "    t.key_mask_ = ~u64{0};",
+      "porte": "mhgp12_tower_index_build_all",
+      "note": "T2-d-B2 : la table garderait le masque du produit alors que ses entrees sont rangees avec le masque demande (masque nul : aucune population retrouvee)"
+    },
+    {
+      "id": "radix_many_sans_echange",
+      "fichier": "src/tower/radix.cpp",
+      "cherche": "        if (scatters.passes[i] == &pass[j]) std::swap(from[j], to[j]);",
+      "remplace": "        if (scatters.passes[i] == &pass[j]) (void)0;",
+      "porte": "mhgp12_tower_index_radix_stable",
+      "note": "T2-d-B2 : apres une dispersion commune, le tableau source ne serait pas echange avec la destination : resultat lu dans le mauvais tampon"
+    },
+    {
+      "id": "radix_many_chiffre_decale",
+      "fichier": "src/tower/radix.cpp",
+      "cherche": "      pass[j].shift = jobs[j].low_bit + kDigitBits * round;",
+      "remplace": "      pass[j].shift = jobs[j].low_bit + kDigitBits * (round + 1);",
+      "porte": "mhgp12_tower_index_radix_stable",
+      "note": "T2-d-B2 : les passes communes sauteraient le chiffre de poids faible : ordre different de std::stable_sort"
+    },
+    {
+      "id": "relecture_sans_egalite",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "  const bool same_key = table_miss && !fallback && cert->arity == prop.q &&\n                        std::equal(cert->support.begin(), cert->support.begin() + cert->arity, prop.s.begin());",
+      "remplace": "  const bool same_key = table_miss && !fallback;",
+      "porte": "mhgp12_tower_unit_lem_t1_table",
+      "note": "T2-d-B2 : la seconde recherche serait evitee meme quand le support canonique certifie differe du support propose (losange : la boule du catalogue n'est plus trouvee, census au lieu de la table)"
+    },
+    {
+      "id": "lem_t1_manque_toujours",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "  if (!b && table_miss != nullptr) *table_miss = true;",
+      "remplace": "  if (table_miss != nullptr) *table_miss = true;",
+      "porte": "mhgp12_tower_unit_lem_t1_table",
+      "note": "T2-d-B2 : lem_t1 signalerait << absent >> meme quand la table repond (S = S* du cercle)"
+    },
+    {
+      "id": "radix_many_inactif_vide",
+      "fichier": "src/tower/radix.cpp",
+      "cherche": "    if (active[j]) jobs[j].sorted = from[j];  // inactif (moins de deux entrees, low_bit = 64) : data, inchange",
+      "remplace": "    jobs[j].sorted = from[j];",
+      "porte": "mhgp12_tower_index_radix_stable",
+      "note": "T2-d-B2, defaut trouve par les portes existantes le 8 octobre : un tableau inactif (moins de deux entrees, low_bit = 64) recevrait un resultat vide (rien a trier, rien rendu) ; aussi tue par duplicate_population et build_all"
     }
   ]
 }

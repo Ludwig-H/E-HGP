@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 76,
+  "plancher": 80,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -616,9 +616,9 @@
     },
     {
       "id": "garde_boite_partielle_rejetee",
-      "fichier": "src/num/guard.cpp",
-      "cherche": "return PowerBoundSigns{.lower = lower.value(), .upper = 1};",
-      "remplace": "return PowerBoundSigns{.lower = 1, .upper = 1};",
+      "fichier": "src/num/guard.hpp",
+      "cherche": "signs = PowerBoundSigns{.lower = lower, .upper = 1};",
+      "remplace": "signs = PowerBoundSigns{.lower = 1, .upper = 1};",
       "porte": "mhgp12_num_local_guard_boxes",
       "note": "une boite partiellement dans le pave serait rejetee au lieu d'etre raffinee (support q2 (100,100,100),(102,100,100), boite [0,200]^3)"
     },
@@ -648,7 +648,7 @@
     },
     {
       "id": "garde_coin_proche",
-      "fichier": "src/num/guard.cpp",
+      "fichier": "src/num/guard.hpp",
       "cherche": "far[j] = (i64{lo[j]} + hi[j] - 2 * anchor_[j] >= threshold_[j] ? i64{hi[j]} : i64{lo[j]}) - anchor_[j];",
       "remplace": "far[j] = (i64{lo[j]} + hi[j] - 2 * anchor_[j] >= threshold_[j] ? i64{lo[j]} : i64{hi[j]}) - anchor_[j];",
       "porte": "mhgp12_num_local_guard_boxes",
@@ -713,6 +713,38 @@
       "attendu": "construction",
       "jeton": "num : palier etroit, orientation et cotes natifs",
       "note": "palier etroit elargi a 17 : l'orientation avec centre (7s+9 = 128) ne tient plus en i128, refus a la compilation"
+    },
+    {
+      "id": "plat_site_hors_pave_sur_sphere",
+      "fichier": "src/num/guard.hpp",
+      "cherche": "const std::array<i64, 3> point{x, y, z};\n  if (!in_guard(point)) {\n    if (ledger != nullptr) ++ledger->outside_sites;\n    side = 1;",
+      "remplace": "const std::array<i64, 3> point{x, y, z};\n  if (!in_guard(point)) {\n    if (ledger != nullptr) ++ledger->outside_sites;\n    side = 0;",
+      "porte": "mhgp12_num_local_guard_site_lanes",
+      "note": "census a plat (T2-d-B2) : un site hors du pave lu par ses coordonnees serait declare sur la sphere"
+    },
+    {
+      "id": "plat_voie_en_ligne_partout",
+      "fichier": "src/num/guard.cpp",
+      "cherche": "inline_lane_ = !broken_ && (lane_ == Lane::native || lane_ == Lane::certified);",
+      "remplace": "inline_lane_ = !broken_;",
+      "porte": "mhgp12_num_local_guard_site_lanes",
+      "note": "census a plat : voies controlee et large calculees en ligne, sans essai controle ni repli large"
+    },
+    {
+      "id": "plat_voie_non_comptee",
+      "fichier": "src/num/guard.hpp",
+      "cherche": "if (ledger != nullptr) ledger->lanes.add(lane_);",
+      "remplace": "if (ledger != nullptr) (void)lane_;",
+      "porte": "mhgp12_num_local_guard_sites",
+      "note": "census a plat : evaluation en ligne non comptee dans le registre des voies"
+    },
+    {
+      "id": "plat_site_hors_domaine_admis",
+      "fichier": "src/num/guard.hpp",
+      "cherche": "if ((x | y | z) > kCoordMax) return fail(Reason::coordinate_out_of_domain);",
+      "remplace": "if ((x | y | z) > kCoordMax) (void)0;",
+      "porte": "mhgp12_num_local_guard_site_lanes",
+      "note": "census a plat : une coordonnee hors du profil ne rend plus le refus de Point::make"
     }
   ]
 }

@@ -274,4 +274,56 @@ MHGP12_TEST(determinism, 60) {
   }
 }
 
+// LEM-T1 et la seconde recherche du support (T2-d-B2) : lem_t1 signale (table_miss) que la table a repondu << absent >>
+// pour le support propose, et seulement dans ce cas (S hors de F : aucune recherche ; S = S* : succes). Apres le
+// certificat, la recherche n'est evitee que si le support certifie EGALE le support propose : un carre ABCD et un
+// losange (le carre tourne de 45 degres), chacun avec son centre (la plus petite boule de F = ABCD est le cercle, S* = la
+// diagonale de plus petites positions), dans les six permutations des axes et quatre translations. DWelzl part du site
+// de plus petit SiteIdx (ordre de Morton) : sur le carre il propose S* (route_t1), sur le losange l'autre diagonale
+// (table absente) : le support canonique differe et la boule est trouvee dans la table (route_cert_table). Jamais de
+// census ni de repli. La jonction est le plus grand rang du catalogue.
+MHGP12_TEST(lem_t1_table, 150) {
+  {
+    const Xyz a{0, 0, 0}, b{2, 0, 0}, cc{2, 2, 0}, d{0, 2, 0}, e{40, 40, 40};
+    auto c = build({a, b, cc, d, e}, 5);
+    REQUIRE(c->outcome.ok());
+    const auto domain = c->domain();
+    const auto ac = c->part({a, cc}), ab = c->part({a, b}), bd = c->part({b, d});
+    const std::span<const u32> s_ac(ac.id.data(), 2), s_bd(bd.id.data(), 2);
+    bool miss = true;
+    CHECK(!tower_detail::lem_t1(domain, ab, s_ac, &miss).has_value());
+    CHECK(!miss);  // S hors de F : aucune recherche
+    CHECK(tower_detail::lem_t1(domain, ac, s_ac, &miss).has_value());
+    CHECK(!miss);  // S = S* du cercle : la table repond
+    CHECK(!tower_detail::lem_t1(domain, bd, s_bd, &miss).has_value());
+    CHECK(miss);  // diagonale non canonique : la table repond << absent >>
+  }
+  const int perms[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+  const Xyz shapes[2][4] = {{{0, 0, 0}, {4, 0, 0}, {4, 4, 0}, {0, 4, 0}}, {{2, 0, 0}, {4, 2, 0}, {2, 4, 0}, {0, 2, 0}}};
+  u64 by_table = 0, by_t1 = 0;
+  for (const auto& shape : shapes)
+    for (const auto& perm : perms)
+      for (const u32 shift : {0u, 3u, 7u, 12u}) {
+        auto at = [&](const Xyz& p) {
+          return Xyz{p[perm[0]] + shift, p[perm[1]] + shift, p[perm[2]] + shift};
+        };
+        const Xyz a = at(shape[0]), b = at(shape[1]), cc = at(shape[2]), d = at(shape[3]), m = at({2, 2, 0});
+        const Xyz e = at({60, 60, 60});
+        auto c = build({a, b, cc, d, m, e}, 5);
+        REQUIRE(c->outcome.ok());
+        u32 top = 0;
+        for (u32 x = 0; x < c->catalogue->balls(); ++x) top = std::max(top, idx(c->catalogue->balls_data()[x].rank));
+        auto direct = resolve_direct(*c, c->part({a, b, cc, d}), 4, make_id<LevelRank>(top));
+        REQUIRE(direct.target.ok());
+        const OrderCounters& n = direct.counters;
+        CHECK_EQ(n.route_t1 + n.route_cert_table, 1u);
+        CHECK_EQ(n.route_cert_census + n.route_fallback_table + n.route_fallback_census, 0u);
+        by_table += n.route_cert_table;
+        by_t1 += n.route_t1;
+      }
+  std::printf("lem_t1_table placements=48 route_t1=%llu route_cert_table=%llu\n", static_cast<unsigned long long>(by_t1),
+              static_cast<unsigned long long>(by_table));
+  CHECK(by_table >= 1 && by_t1 >= 1);
+}
+
 MHGP12_TEST_MAIN()
