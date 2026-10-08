@@ -1,0 +1,28 @@
+{
+ "adapted_worktree_sha256": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e",
+ "base_pin": "b24c256541ffdbe8327f894cd9efebdd7476b51c",
+ "captured_source_status": "initial_worktree_copy_then_matched_to_git_object",
+ "catalogue_producer": {
+  "commit": "8ba7d728711995e73913487adb46dea9e7dcc2a6",
+  "path": "morsehgp3D_v12/bench/catalogue_probe.cpp",
+  "sha256": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356"
+ },
+ "delivered_commit": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+ "delivered_object_sha256": "48f40fd6107f75dea52c0b9f40a2d88ff6a40eb18d2ba1683035a0444231173e",
+ "dependencies": {
+  "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/check.py": "44ca5e392b7c0c0d5b8de7069d36b19d52e150f9958fa01ae2a3faaa0d9c38a9",
+  "morsehgp3D_v12/receipts/audit_d6_20261007/pilotage/proposition.patch": "e18e46a7535cbaec74acbb2b973e74753316c30bf4508155ac2327101685496a",
+  "morsehgp3D_v12/receipts/audit_reponses_20261007/cuda_juge_proposition/cpu_format.jsonl": "3b6c4261acd93fff79018706d9bd2c9b91e4a1d5fdc519dcf392b1982c9b365e",
+  "morsehgp3D_v12/receipts/audit_reponses_20261007/d6_admission_proposition/proposition.patch": "0ae8653d0b0ecd62e5c02ee040fcbb8f6c10fb44f530adabf7830bd29e08ce53",
+  "morsehgp3D_v12/receipts/audit_reponses_20261007/d6_admission_proposition/sources.json": "89c4f33225e5c98fcba84682353973b874fcd5bc5a9fddb66a1dd4f66ebe6239",
+  "morsehgp3D_v12/receipts/audit_reponses_20261007/t2c_pilote_proposition/before.jsonl": "613f36bf9383a789b890af1879464836654a740c838b985ee3478a5fbdb21572"
+ },
+ "observed_head": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+ "shared_schema": {
+  "commit": "781fbe8d13e943bc67cbcf3996d6791523f1a422",
+  "path": "morsehgp3D_v12/bench/g4_catalogue_schema.py",
+  "sha256": "20d0cc8b9f66e571b7ad9d06d092ac5bf5f9ff66af2632aebdfd4e8659feefad"
+ },
+ "source": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+ "strict_proposal_sha256": "4d9e6a457d188d740c64fc04abb172d0158242a2ae537746bcd9453686e778c1"
+}

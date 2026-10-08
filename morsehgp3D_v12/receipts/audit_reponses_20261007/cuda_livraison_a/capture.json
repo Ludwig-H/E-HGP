@@ -1,0 +1,76 @@
+{
+  "A_prose_prefix_unchanged": true,
+  "A_result_unchanged_after_B_metadata": true,
+  "artifact_hashes": {
+    "build_v12_u21.build_gpuA.log": "32aadd0398f7d248d16d0197f669da652f039627765c58083521963c3d29a644",
+    "build_v12_u21.conf_gpuA.log": "56fa11bae828f0cfc55438f9f3f2daa8698b4998c92ea6365733c859aca4c238",
+    "build_v12_u21.ctest_gpuA.log": "8e823028aff76806790160070d6fd9e6b804bb93cce054f87a02488318d85d7f",
+    "v12_gpu/mutA3/campagne.log": "b0771aa2d7d21182d774ddf9ecf306e8ca0705f8c46006e1575c79f0ce220616",
+    "v12_gpu/mutA3/campagne_core.log": "885bc11e55ec7f60ba150820aecbed406cc6220e2a37e83e9055b59dedbea96a",
+    "v12_gpu/mutA3/report.json": "6fa150cc541ba4d2ef96306965f25b456200715da6a7fb1c21a45e4f1247941e",
+    "v12_gpu/mutA3/report_core.json": "16949c1af4789f2aba6e2ed216cb932afbbd50f3e02e56a0a3944895b70d391c"
+  },
+  "local_files_sha256": {
+    "README.md": "ce61574ad30431ebcc5bff50c45096338b4020a1a2d6bf2f7e8fe5e7a47900c0",
+    "check.py": "6678174dab41dc718dc19a0d88168a0707dca37de055ee8819f6653258dab26b"
+  },
+  "normal_exit_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_exit_code": 0,
+  "result": {
+    "A_mutants": {
+      "catalogue": {
+        "code": 14,
+        "construction": 0,
+        "delai": 0,
+        "signal": 1
+      },
+      "core": {
+        "code": 1,
+        "construction": 0,
+        "delai": 0,
+        "signal": 0
+      }
+    },
+    "A_tree_files": 352,
+    "A_tree_sha256": "abbe985c9cca0f8a838280ba2581538085d6a561de5932f63400da1383de386b",
+    "B_source_identity_only": {
+      "changed_files_identical": 4,
+      "delivery": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+      "new_native_campaign": false,
+      "new_timing_qualification": false,
+      "prototype": "3b445b763057adc405141a6650efa14bfd4e276a",
+      "whole_modules_identical": {
+        "catalogue": 33,
+        "core": 9
+      }
+    },
+    "artifact_hashes_verified_before_after": 7,
+    "changed_files_identical_to_A": 43,
+    "deleted_in_both": 2,
+    "delivery": "8ba7d728711995e73913487adb46dea9e7dcc2a6",
+    "fast_cpu": {
+      "bits": 21,
+      "cuda_enabled": false,
+      "passed": 686,
+      "selected": 687,
+      "skipped": [
+        "mhgp12_support_lidar_sentinel"
+      ]
+    },
+    "native_executed_by_auditor": false,
+    "new_reason_indices": {
+      "device_fault": 30,
+      "device_unavailable": 29
+    },
+    "old_reasons_preserved": 29,
+    "prototype": "66c41ede461dcc7a235a2414079c916841c4fb46",
+    "status": "ok",
+    "whole_modules_identical": {
+      "catalogue": 33,
+      "core": 9
+    }
+  },
+  "result_sha256": "cf10cda886929846e5cc729aba6b671e0564e5bc4d342b099423e643dfa53e6e",
+  "scope": "A delivered at 8ba7d7287 only; no B transfer, no native run"
+}

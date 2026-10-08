@@ -1,0 +1,58 @@
+{
+ "commit": "781fbe8d13e943bc67cbcf3996d6791523f1a422",
+ "constat": "CST-0018",
+ "date_utc": "2026-10-08",
+ "plan": {
+  "passes_k5": 10,
+  "path_role": "prototype plan_t1b_g4.json",
+  "processes_k5": 5,
+  "sha256": "f2a7690bdb1eafc9a11ca0966486bbe8041639a392844eab0e636f8dc078f3c8",
+  "threads": 48
+ },
+ "python_replay": {
+  "additional_cases": 31,
+  "all_passed": true,
+  "cases_equal_published_result": true,
+  "method": "judge.selftest(); published check.test(judge, driver, schema) on immutable copy of then-uncommitted sources; exact byte equality now verified with commit",
+  "no_repeat_after_commit": true,
+  "normal_equals_optimized": true,
+  "official_injections": 18,
+  "output_scope_at_execution": "working_tree_uncommitted",
+  "output_sha256": "0b721a305ccb4c327bac31c1d6e5368d4ce28f5f828b39dc3003a9ca7e36df65",
+  "reader": "morsehgp3D_v12/receipts/audit_reponses_20261007/cuda_juge_proposition/check.py",
+  "reader_sha256": "57bc4ff9ec96a3d7891cb2c1a5aea07071bf1f4b21cacd1aaa3189d9de44a9e0",
+  "source_hashes_stable_during_execution": true
+ },
+ "scope": {
+  "cpp_device_open_text_only": true,
+  "gcp_used": false,
+  "gpu_run": false,
+  "native_engine_run": false,
+  "no_actual_timing_adoption": true,
+  "python_admission_delivery_verified": true
+ },
+ "source_reference": "morsehgp3D_v12/receipts/audit_reponses_20261007/cuda_juge_proposition/capture.json",
+ "sources": {
+  "morsehgp3D_v12/bench/g4_catalogue_device.py": {
+   "bytes": 22097,
+   "matches_published_proposal": true,
+   "sha256": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677"
+  },
+  "morsehgp3D_v12/bench/g4_catalogue_judge.py": {
+   "bytes": 23250,
+   "matches_published_proposal": true,
+   "sha256": "62f8832ff9571219a2d8953a797ecfd68fddf02f192b74519c105bbbfbf07483"
+  },
+  "morsehgp3D_v12/bench/g4_catalogue_schema.py": {
+   "bytes": 11713,
+   "matches_published_proposal": true,
+   "sha256": "20d0cc8b9f66e571b7ad9d06d092ac5bf5f9ff66af2632aebdfd4e8659feefad"
+  },
+  "morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp": {
+   "bytes": 9029,
+   "matches_published_proposal": true,
+   "sha256": "10647f43df275b39f573035f33aef072354f642aa0c926803b22fc5d149ff128"
+  }
+ },
+ "supersedes_current_status_only": "receipts/audit_reponses_20261007/livraison_juges/README.md remains immutable evidence of 8ba7d7287"
+}

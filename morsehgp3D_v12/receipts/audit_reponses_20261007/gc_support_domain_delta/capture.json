@@ -1,0 +1,76 @@
+{
+  "artifact_hashes": {
+    "RAPPORT.md": "f7db261961c2554a59543a3c65f2685d16d17a0c7e0a12618440db5d1e2d597a",
+    "patch_tour_Gc_1_empreinte.diff": "499a2588bebcd8f5986f69a4b3044f114db4472160be230d960abbf7b97dc0c8",
+    "patch_tour_Gc_2_leviers.diff": "89d7b4f4383dace6c294e8513458469f8fa3e51ef11db92254b2ef4150d93f1e",
+    "repo3/morsehgp3D_v12/microbancs/mes_t2c_g/pilote_t2c.py": "06f10189651b1f9d42c563c4cc07bc674f1df780630a17a469598aa968fa0e96",
+    "repo3/morsehgp3D_v12/src/catalogue/table.cpp": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396",
+    "repo3/morsehgp3D_v12/tests/tower/index_unit.cpp": "78e0e6fa959252012c82e1d49a17c4444298d8175ac648f20d58c7114d38bad8"
+  },
+  "guard_patch_apply_check": {
+    "code": 0,
+    "target": "main table unchanged from 781fbe8d13e943bc67cbcf3996d6791523f1a422"
+  },
+  "historical_source_hashes": {
+    "1b562defb3e77748693ea7cebecdfa1f3da72ac9": {
+      "src/catalogue/table.cpp": "26bb9d205d5065a9352e847a0da86fb73b5a3bd8f8cf3a7463eeba7417233a7c",
+      "tests/tower/index_unit.cpp": "b9309ee7611687ae66eaf539ce5f2a3510382dc9dfb11451c101f0e0cd943171"
+    },
+    "d9ec6727da5c03f48a83b75981fc352d3656f98f": {
+      "src/catalogue/table.cpp": "56151f85c0137b9e3f5888e76156848e17b92933715c5f0a7f3c7f7466c248a3",
+      "tests/tower/index_unit.cpp": "658ab9ea0102f9aefab6a282b158982140a49c8c7647921ba9f2be091fd3e49b"
+    }
+  },
+  "local_files_sha256": {
+    "README.md": "4cb8a6808cc66007080b30084e6c5ea5ba01eff1b8e04d2a03b0f75c8162014f",
+    "check.py": "fb530a5c57be9efa18ab44865f4b3fb1c788d531a6f7e43b49c8eb082adb4d70",
+    "proposition_garde.patch": "0b95efae6ca703abb9d6fb0da804b07c9782d25938777c7d3fc76dec5e6141f3"
+  },
+  "normal_exit_code": 0,
+  "normal_optimized_identical": true,
+  "optimized_exit_code": 0,
+  "result": {
+    "aliases": [
+      {
+        "after": null,
+        "before": 7,
+        "canonical_support": [
+          0,
+          1
+        ],
+        "invalid_query": [
+          0,
+          1,
+          4294967295
+        ]
+      },
+      {
+        "after": null,
+        "before": 11,
+        "canonical_support": [
+          0,
+          2,
+          4
+        ],
+        "invalid_query": [
+          0,
+          2,
+          4,
+          4294967295
+        ]
+      }
+    ],
+    "native_executed": false,
+    "queries_checked": 19608,
+    "source_check": {
+      "base_main": "781fbe8d13e943bc67cbcf3996d6791523f1a422",
+      "catalogue_core_identical": true,
+      "patch2_sha256": "89d7b4f4383dace6c294e8513458469f8fa3e51ef11db92254b2ef4150d93f1e",
+      "prototype": "45976be8ddc489f14494937b13e43d0ca5fa0a55"
+    },
+    "status": "ok",
+    "valid_queries_unchanged": 25
+  },
+  "result_sha256": "a30a16356f741ae9d98c1fa5adbfa871af89a0dcd3c1fa9f0bbd1677d7dfe39c",
+  "source_hashes_before_after_identical": true
+}

@@ -1,0 +1,147 @@
+{
+ "after_plan_sha256": "1ced91d172f977c57d5657deedb88cbc81c9621b23532607ff9b1b475e9a8dd4",
+ "catalogue_cases": {
+  "bool_device": false,
+  "device_nonzero": false,
+  "device_path": false,
+  "missing_chain_counter": false,
+  "native_cpu_t1b": true,
+  "synthetic_profile_24": true,
+  "synthetic_profile_32": true
+ },
+ "compatibility": {
+  "adapted_native_cpu": true,
+  "native_G_format": true,
+  "old_reader_native_cpu": false,
+  "shared_schema_lists_equal": true
+ },
+ "native_engine_run": false,
+ "plan": [
+  {
+   "after": {
+    "baseline_takes": 1,
+    "code": 0,
+    "duplicate_tags": 0,
+    "issues": [],
+    "ratios": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "takes": 6
+   },
+   "before": {
+    "baseline_takes": 1,
+    "code": 0,
+    "duplicate_tags": 0,
+    "issues": [],
+    "ratios": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "takes": 6
+   },
+   "case": "reference_present"
+  },
+  {
+   "after": {
+    "baseline_takes": 0,
+    "code": 2,
+    "duplicate_tags": 0,
+    "issues": null,
+    "ratios": [],
+    "takes": 0
+   },
+   "before": {
+    "baseline_takes": 0,
+    "code": 0,
+    "duplicate_tags": 0,
+    "issues": [],
+    "ratios": [
+     null
+    ],
+    "takes": 1
+   },
+   "case": "u21_absent_u24_present"
+  },
+  {
+   "after": {
+    "baseline_takes": 0,
+    "code": 2,
+    "duplicate_tags": 0,
+    "issues": null,
+    "ratios": [],
+    "takes": 0
+   },
+   "before": {
+    "baseline_takes": 0,
+    "code": "ZeroDivisionError",
+    "duplicate_tags": 0,
+    "issues": null,
+    "ratios": [],
+    "takes": 0
+   },
+   "case": "all_combinations_absent"
+  },
+  {
+   "after": {
+    "baseline_takes": 0,
+    "code": 2,
+    "duplicate_tags": 0,
+    "issues": null,
+    "ratios": [],
+    "takes": 0
+   },
+   "before": {
+    "baseline_takes": 2,
+    "code": 0,
+    "duplicate_tags": 3,
+    "issues": [],
+    "ratios": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "takes": 9
+   },
+   "case": "duplicate_profile"
+  },
+  {
+   "after": {
+    "baseline_takes": 0,
+    "code": 2,
+    "duplicate_tags": 0,
+    "issues": null,
+    "ratios": [],
+    "takes": 0
+   },
+   "before": {
+    "baseline_takes": 2,
+    "code": 0,
+    "duplicate_tags": 6,
+    "issues": [],
+    "ratios": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "takes": 12
+   },
+   "case": "duplicate_case"
+  }
+ ],
+ "plan_patch_applies": true
+}

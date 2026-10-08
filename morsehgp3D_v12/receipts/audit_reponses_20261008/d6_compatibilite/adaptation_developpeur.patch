@@ -1,0 +1,57 @@
+--- a/morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py
++++ b/morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py
+@@ -111,13 +111,19 @@
+     return code, lines
+ 
+ 
+-# Schema produit par bench/catalogue_probe.cpp et bench/tower_probe.cpp.
++# Schema produit par bench/catalogue_probe.cpp et bench/tower_probe.cpp. Adaptation declaree du 8 octobre (raccord de
++# la voie appareil du catalogue, commit 8ba7d7287) : la ligne du catalogue porte desormais `path` ("cpu" ici), les
++# diagnostics chains_repaired et chain_elements, et un objet `device` de seize compteurs, tous nuls sur la voie CPU
++# (meme regle que bench/g4_catalogue_schema.py).
+ LEDGER_KEYS = ('nodes leaves filter_tests max_depth max_leaf dominance_tests prefixes judged census_tests emitted '
+                'incidences q4_candidates q4_levels region_pair_tests region_pair_rejects region_line_tests '
+                'region_line_rejects region_line_evaluations region_line_cache_hits region_line_fallbacks').split()
+ CAT_DIAG_KEYS = ('levels tasks candidates leaves_narrow leaves_medium leaves_wide leaves_exact leaves_virtual_warp '
+                 'leaves_rewritten max_leaf_span traversal_ns count_ns fill_ns levels_ns sort_ns assemble_ns '
+-                'table_ns peak_bytes').split()
++                'table_ns peak_bytes chains_repaired chain_elements').split()
++DEVICE_KEYS = ('batches replayed_leaves replayed_balls replayed_wide replayed_span rewritten_device rewritten_host '
++               'device_bytes pinned_bytes allocations arena_bytes transfer_ns transfer_h2d_bytes transfer_d2h_bytes '
++               'transfer_ops publish_ns').split()
+ G_DIAG_KEYS = 'count_ns fill_ns tables_ns resolve_ns workspace_bytes table_bytes peak_bytes'.split()
+ WORK_KEYS = ('probes first_probe_hits probe_hits_after_steps route_t1 route_cert_table route_cert_census '
+              'route_fallback_table route_fallback_census fallback_no_proposal fallback_not_in_part '
+@@ -159,23 +165,28 @@
+         return result
+     at, stages, digests, objects = 0, [], [], {}
+     common = 'phase pass status reason coord_bits kmax threads sites wall_ns'.split()
+-    extra = ['leaf', 'balls', 'incidences', 'levels', 'ledger', 'diagnostics'] if phase == 'catalogue' else \
+-        ['order', 'diagnostics']
++    extra = ['path', 'leaf', 'balls', 'incidences', 'levels', 'ledger', 'diagnostics', 'device'] \
++        if phase == 'catalogue' else ['order', 'diagnostics']
+     for number in range(expected['passes']):
+         if at >= len(lines) - 1:
+             return result
+         row = lines[at]
+         at += 1
+         if set(row) != set(common + extra) or row['phase'] != phase or row['status'] != 'ok' or \
+-                row['reason'] != 'none' or not all(uint(row[key]) for key in common[1:] if key not in ('status', 'reason')):
++                row['reason'] != 'none' or \
++                not all(uint(row[key]) for key in common[1:] if key not in ('status', 'reason')):
+             return result
+         if row['pass'] != number or any(row[key] != expected[key] for key in ('coord_bits', 'kmax', 'threads')) or \
+                 not 1 <= row['sites'] <= 0xFFFFFFFF or (stages and row['sites'] != stages[0]['sites']):
+             return result
+         if phase == 'catalogue':
++            if row['path'] != 'cpu' or not integer_record(row['device'], DEVICE_KEYS) or \
++                    any(row['device'][key] != 0 for key in DEVICE_KEYS):
++                return result
+             if not all(uint(row[key]) for key in ('leaf', 'balls', 'incidences', 'levels')) or \
+                     row['leaf'] != expected['leaf'] or not uint(row['balls'], 32) or \
+-                    not integer_record(row['ledger'], LEDGER_KEYS) or not integer_record(row['diagnostics'], CAT_DIAG_KEYS):
++                    not integer_record(row['ledger'], LEDGER_KEYS) or \
++                    not integer_record(row['diagnostics'], CAT_DIAG_KEYS):
+                 return result
+             if stages and any(row[key] != stages[0][key] for key in ('balls', 'incidences', 'levels')):
+                 return result

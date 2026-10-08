@@ -1,0 +1,79 @@
+{
+  "archive_report_sha256": "c9132bbcc78915d1f6d74383430a7af228caa7383db191b5cb6ba63746ee5dcb",
+  "commit": "5e5d5eb9a7711e4464cc26abd8807c245a316bd6",
+  "delivered_sha256": {
+    "analyse_p.py": "7514ace73635342e6dda58d389097c35c9d44716c301143c5b309e8f329c1584",
+    "pilote_p.py": "a5ca62fcdb3babd944f9ec0b60a526a9f73f7fd3e2b24d0657acfd8de3a4de0b",
+    "test_pilote_p.py": "c8e5c4bced71f181515046704e43596ec55c81f8c7e72ecb5f331b0c4ee4fc15"
+  },
+  "prior_sha256": {
+    "check.py": "de990fffd16d426e9b031e1acb776033afb4eb6276dde1459d75caa72cc1753a",
+    "proposition.patch": "0249f49b7cedcc549ed49e8573b664d0956287198754863a54e79ab427832886",
+    "results.json": "c77cc83a4c8e01c1236fdae46be786fb045f6581f21e75e057be95e238bebb85",
+    "sources.json": "f10dc9e21a90399494eb111fab8e8b2da700efe1ca07bf82b91573e36448db93"
+  },
+  "public_status": "not_claimed",
+  "published_jsonl": 54,
+  "result": {
+    "admission_cases": 28,
+    "builds": 0,
+    "code_zero_null_warm_analysis": {
+      "cohort_rows": [
+        "| 1 fils | 2 | 0 | 1.00 | 100.00 |",
+        "| 4 fils | 2 | 1 | 1.00 | 60.00 |",
+        "| 48 fils | 2 | 1 | 1.00 | 10.00 |"
+      ],
+      "common_cohort_unchanged": true,
+      "proposed_failure_row": "| knn_300 | 5 | 1 | 300 | 0 | processus_ou_protocole_invalide |",
+      "single_old_header": "Prises : 1 ; rendues : 0 ; en echec ou expirees : 0.",
+      "single_proposed_header": "Prises : 1 ; rendues : 0 ; en echec ou expirees : 1."
+    },
+    "delivered_equals_proposal": true,
+    "gcp_used": false,
+    "historical_selection": {
+      "admitted": 19,
+      "count": 20,
+      "refused": [
+        {
+          "file": "synth_lattice_n10000_k10_f48.jsonl",
+          "original_code": "expire",
+          "original_warm_was_present": true,
+          "replay_code": 0,
+          "replay_warm": null
+        }
+      ],
+      "warm_values_unchanged": 19
+    },
+    "native_runs": 0,
+    "negative_cases": 26,
+    "official_gate": {
+      "cas": 5,
+      "ecarts": 0,
+      "porte": "mes_p"
+    },
+    "positive_cases": 2
+  },
+  "selected_jsonl_sha256": {
+    "synth_clusters8_n10000_k10_f48.jsonl": "40aab5d836603510fc28cfa09148144afe436d1ec5b987f733e6fdd71fb18506",
+    "synth_clusters8_n10000_k5_f48.jsonl": "5ce9cd875603dc22cdd250de09314627db0f707ddaa53614c03b5058dc232f45",
+    "synth_clusters8_n1000_k10_f48.jsonl": "88ea221cdadf209ed9d4011a43c7282b730da791284a9737d4289cf2702f27c9",
+    "synth_clusters8_n1000_k5_f48.jsonl": "74b66829477a1a7d6d8f4a6c181adf22db39809612559c453ed1d8518f27b95b",
+    "synth_clusters8_n100_k10_f48.jsonl": "2b29af11b98f3cc3bb74b4dd29f65c6fd2574ef11da5746946b83f0ad064e35e",
+    "synth_clusters8_n100_k5_f48.jsonl": "00de30bfc433ba1da154da20c11bff11d125f67742f3d2121a728c43ba4e3b38",
+    "synth_clusters8_n3000_k10_f48.jsonl": "5d2f29f6c57b1429281f2660639bd7523a8f43fd9e27f61211d9b538d0a8240c",
+    "synth_clusters8_n3000_k5_f48.jsonl": "85fcac8ea15beb9031eaac1597108e090af689e5a7cf2f8aad3a65bacfd0f107",
+    "synth_clusters8_n300_k10_f48.jsonl": "3c2601e99896bcc7728ff6eb4716ea0b274298ed1ae296c3c93f746c5818c657",
+    "synth_clusters8_n300_k5_f48.jsonl": "066ba665c3d3aaa845804d21e50dcddb4571fe22f9ea6d3d8ce7e7eb03e812cb",
+    "synth_lattice_n10000_k10_f48.jsonl": "6f54774062a8113eedd3c39c96b3465efb14a6982369e6bfe5e72be919e73be1",
+    "synth_lattice_n10000_k5_f48.jsonl": "d13fa9184cfe6d5b92340d593491c75e11909c43edded6736f5370e30bffea66",
+    "synth_lattice_n1000_k10_f48.jsonl": "1eb0ab5017dd1f7dffb0dbf4a41de7527c5d09d055fc9f3fe17ac158c6530727",
+    "synth_lattice_n1000_k5_f48.jsonl": "2c28baad7b1805f530c89deff6bc805667cf29ee7b5555b5375ab6fe10ed1737",
+    "synth_lattice_n100_k10_f48.jsonl": "320e2e0adff3bf706d35456d4b1dd259542b3f26ab3c5751bd1682f01ca23ef6",
+    "synth_lattice_n100_k5_f48.jsonl": "c6b6a776dc3c472c4d660351516cbbfcd1a8e7b372b8a7c12ea741cfc1a5efcd",
+    "synth_lattice_n3000_k10_f48.jsonl": "c9e2b16affa99f8a2601a60244816523543fe09c8c037808f922342ce3218187",
+    "synth_lattice_n3000_k5_f48.jsonl": "6778b9280aaf69567cf00ca9c4eb90b54ae529a07601b87d8b0a65aeaa5b3606",
+    "synth_lattice_n300_k10_f48.jsonl": "0b341722c750b21903dd665402c0e66d67bfddb858ddf7b2b3b6b2de8630cefa",
+    "synth_lattice_n300_k5_f48.jsonl": "487352d53aa9cbddeef543e635ac7eb0ef9937e91c28d143e4ae957088206ad7"
+  },
+  "selection": "20 premiers noms de JSONL tries lexicographiquement ; choix explicite de cet audit"
+}

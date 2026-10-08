@@ -1,0 +1,14 @@
+diff --git a/morsehgp3D_v12/src/catalogue/table.cpp b/morsehgp3D_v12/src/catalogue/table.cpp
+--- a/morsehgp3D_v12/src/catalogue/table.cpp
++++ b/morsehgp3D_v12/src/catalogue/table.cpp
+@@ -22,8 +22,9 @@
+   if (support.size() < 2 || support.size() > 4 || table_.off.empty()) return std::nullopt;
+   for (u64 k = 1; k < support.size(); ++k)
+     if (idx(support[k - 1]) >= idx(support[k])) return std::nullopt;  // S* : SiteIdx strictement croissants
++  // Tous les SiteIdx doivent appartenir au nuage ; kNone ne prolonge pas un support.
++  if (u64{idx(support[support.size() - 1])} + 1 >= table_.off.size()) return std::nullopt;
+   const u32 first = idx(support[0]);
+-  if (u64{first} + 1 >= table_.off.size()) return std::nullopt;
+   CatalogueBall probe;
+   for (u32 k = 0; k < 4; ++k) probe.support[k] = k < support.size() ? support[k] : make_id<SiteIdx>(kNone);
+   const BallIdx* begin = table_.val.data() + table_.off[first];

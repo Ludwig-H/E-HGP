@@ -1,0 +1,58 @@
+{
+  "files_sha256": {
+    "mutant_admission.json": "800dfacbf7b93df47f5f5197ab13d63dbd6ddbe6061d7d1e86f82a1c56965006",
+    "mutant_admission.log": "d1018eb222f3b4299e9d299325cf03202cf78fa7673e4506576c29fa266aea58",
+    "outils/etape_final5.sh": "339b152115a7a18888833861fbd9f9c4e4cbb871eb8804d81ead606f7897e918",
+    "patch_tour_TMV.diff": "6f0643acca9d6c27755f1e3dde15b166c810371eb88662a32360f6d5c2136de9",
+    "repo5/morsehgp3D_v12/src/tower/forest_internal.hpp": "7566f35c0d7e44d6756d76f4e61086b3141313142974577277d7178bbe517c69",
+    "repo5/morsehgp3D_v12/src/tower/forest_validate.cpp": "f47c7fe23c1f942b2c16e280b3fab724c6810fdac68b6b049c479ca79e282228",
+    "repo5/morsehgp3D_v12/src/tower/registry_branches.cpp": "63a86cde27fe8108cf1e2e6753bcf6a4e49dd2b3ac5b7dcad9da179e48865e5a",
+    "repo5/morsehgp3D_v12/tests/mutants/tower.json": "4ae5cd079da7df81b4487d9ac9a073b4f4d0730abbf66fccc1759655575b321b",
+    "repo5/morsehgp3D_v12/tests/tower/forest_unit.cpp": "21bc9b9936459a49e60f0600bfa5eef869b2c26af7c3c059ff64bf48a22d36e4",
+    "repo5/morsehgp3D_v12/tests/tower/g_determinism.py": "c88be31c7bdb1c24154eeb98c353163bc54c590664e71f5d9ab8475d00abb9b9",
+    "repo5/morsehgp3D_v12/tests/tower/g_fausse_sonde.py": "9b52fd077d64295586dfa29492fe4c61d80ecd77f6eeeeac2422bc8ecaff9cc6"
+  },
+  "full_repo5_campaign": "en cours, aucun resultat qualifie dans ce recu",
+  "main_observed": "5e5d5eb9a7711e4464cc26abd8807c245a316bd6",
+  "patch_base": "c903774b1d16c3b18c15b86fa2a55d11d44b8bc8",
+  "previous_patch_sha256": "39622284eca0996150f08078a81c9f9dcdb079f5fd0f9e52ada57522ca71edc3",
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "applied_files_sha256": "ba37bf9a4f80cd82c12b4c6cb30dd6b3b45a51a8f12bf5196ee64e6091385429",
+    "changed_patch_files_since_repo3": [
+      "morsehgp3D_v12/docs/ARCHITECTURE.md",
+      "morsehgp3D_v12/src/core/reasons.def",
+      "morsehgp3D_v12/src/tower/forest_build.cpp",
+      "morsehgp3D_v12/src/tower/forest_internal.hpp",
+      "morsehgp3D_v12/src/tower/forest_stages.cpp",
+      "morsehgp3D_v12/src/tower/forest_validate.cpp",
+      "morsehgp3D_v12/src/tower/registry_branches.cpp",
+      "morsehgp3D_v12/tests/core/status_test.cpp",
+      "morsehgp3D_v12/tests/mutants/tower.json",
+      "morsehgp3D_v12/tests/tower/forest_unit.cpp",
+      "morsehgp3D_v12/tests/tower/tests.cmake"
+    ],
+    "gcp_used": false,
+    "mutant_repo4": "TUE/code, temoin vert",
+    "native_replayed": false,
+    "patched_files": 31,
+    "patched_files_equal_repo5": 31,
+    "payloads_read": false
+  },
+  "status": "prototype_repo5_non_integre",
+  "trees": {
+    "repo3": [
+      "c1950bb8826e0add0742da8d095664bc1a93d0494bc27b19dc46ac57701aaaf3",
+      357
+    ],
+    "repo4": [
+      "7f46679172e68afd5dd0b97fc4f3b5c533162a06cd1ae387fde8d4a33c653be5",
+      358
+    ],
+    "repo5": [
+      "848c7a0b771b2e69a8fb9e954b8f1c4e756f1bae3365335a16ab8cab421332d9",
+      376
+    ]
+  }
+}
