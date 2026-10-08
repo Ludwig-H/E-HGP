@@ -20,9 +20,32 @@
 // La passe p joue la trame p mod n (--trame repete : Session qui enchaine des trames successives). Une ligne JSON par
 // passe ; la premiere est publiee comme les autres (aucun prechauffage cache).
 //
+// --recouvert : la tour par build_tower (Session recouverte, decision D-F2 : G et T, M, V, R dans une seule region du
+// Pool) au lieu de resolve_tower puis build_forests ; meme objet (empreinte FUL1 egale, porte
+// mhgp12_full_probe_cpu_recouvert), autre schema, annonce par "etapes_schema" : "recouvert" (absent de la voie par
+// defaut, dont les lignes et les gardes, dont T + M + V + R <= TMVR et tables + resolution <= G, restent inchangees) :
+//   - etapes_ns, partition murale seule : P et C comme ci-dessus ; G = du debut de build_tower a la fin du DERNIER
+//     CALCUL de G (ouverture de l'etage, admission et index des naissances compris, taches de la foret jouees pendant G
+//     comprises ; la pre-passe des feuilles qu'un fil de G enchaine sur sa tranche est un travail de la foret) ;
+//     raccord = 0 (entrees de foret construites dans build_tower) ; TMVR = la queue, intervalle mural de cette fin a la
+//     tour complete (foret non recouverte par G, puis cloture) ; garde : P + C + G + raccord + TMVR <= mur ;
+//   - fenetres_ns : SOMMES DE FENETRES MURALES des taches (temps-fils), ni des murs ni du temps CPU (un fil preempte y
+//     compte son attente ; le temps CPU est cpu_ns) : G (calculs des tranches de G), foret (taches de T, M, V et R),
+//     foret_apres_g (part de ces fenetres posterieure a la fin de G, lue a la fin de chaque tache : une tache finie
+//     avant la publication de cette fin, par le fil qui acheve le dernier calcul, juste apres, compte avant), T, M, V,
+//     R (par etage) ; elles peuvent depasser TMVR comme le mur ;
+//   - g_ns : ouverture (avant la region : etage G ouvert, admission, index des naissances) et tables (index), murs ;
+//   - memoire_octets : P et C comme ci-dessus, tour = [usage a la fin de build_tower, pic pendant build_tower] ;
+//     pic_octets est le maximum de ces pics ;
+//   - recouvrement : tour_ns (duree de l'appel build_tower vu de la sonde, qui enveloppe fin_ns), ouverture_ns,
+//     fin_g_ns (= G), fin_ns (fin interne de la tour), queue_ns (= TMVR = fin_ns - fin_g_ns), noyau_reprises et
+//     noyau_arrets (reprises du noyau, dont arretees sur une tranche de G non terminee), admis_octets (admission unique
+//     de la region) ; fins_par_ordre_ns : par ordre, fins du dernier calcul de G, du noyau, de la contraction (M), des
+//     verticales (V, 0 a l'ordre 1) et du registre (R), depuis le debut de build_tower.
+//
 //   mhgp12_full_probe (--trame=<xyz.u32le>,<ids.u32le>[,NOM] ... | --uniform=N,GRAINE,BITS) [--k=K] [--leaf=L]
 //                     [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] [--cache=OCTETS]
-//                     [--budget-appareil=OCTETS]
+//                     [--budget-appareil=OCTETS] [--recouvert]
 //
 // Codes : 0 conforme ; 2 refus (usage, entree, ressources, appareil indisponible, degenerescence) ; 3 invariant viole.
 #include <algorithm>
@@ -59,7 +82,7 @@ struct Options {
   int kmax = 5;
   u32 leaf = 24, threads = 1;
   u64 passes = 1, budget = MemoryBudget::kUnlimited, cache = 0, device_budget = 0;
-  bool device = false, digest = false;
+  bool device = false, digest = false, overlapped = false;
 };
 
 struct Frame {
@@ -131,6 +154,7 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a.substr(0, 18) == "--budget-appareil=" && parse_u64(a.substr(18), v) && v > 0) o.device_budget = v;
     else if (a == "--device") o.device = true;
     else if (a == "--digest") o.digest = true;
+    else if (a == "--recouvert") o.overlapped = true;
     else return false;
   }
   return (o.uniform == 0) != o.frames.empty() && (o.device_budget == 0 || o.device);
@@ -170,9 +194,10 @@ inline constexpr int kMemStages = 5;  // P, C, G, raccord, TMVR
 inline constexpr std::array<const char*, kMemStages> kMemStageNames = {"P", "C", "G", "raccord", "TMVR"};
 
 struct PassTimes {
-  u64 wall = 0, p = 0, c = 0, g = 0, junction = 0, tmvr = 0;
+  u64 wall = 0, p = 0, c = 0, g = 0, junction = 0, tmvr = 0, tower = 0;
   u64 validation = 0, digest = 0, peak = 0, device_peak = 0;
   std::array<std::array<u64, 2>, kMemStages> mem{};  // par etage : octets en usage a la fin, pic pendant l'etage
+  std::array<u64, 2> mem_tower{};                    // --recouvert : usage a la fin de build_tower et pic pendant
   std::optional<u64> cpu, rss;  // vides si getrusage echoue, ou si le temps CPU reculerait
 };
 
@@ -186,11 +211,17 @@ struct PassState {
   CatalogueDiagnostics cat_diag;
   ResolutionDiagnostics res_diag;
   tower::ForestLedger ledger;
+  std::optional<Tower> tower;  // --recouvert
+  TowerDiagnostics tower_diag;
+  const tower::TowerForests& tower_forests() const { return tower ? tower->forests : *forests; }
 };
 
-// Le mur : de l'entree en memoire a la tour complete (verticales et registre).
+// Le mur : de l'entree en memoire a la tour complete (verticales et registre). --recouvert : run_overlapped_wall.
+Outcome run_overlapped_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::Pool& pool,
+                            CatalogueDevice* device, PassState& s, PassTimes& t);
 Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::Pool& pool, CatalogueDevice* device,
                  PassState& s, PassTimes& t) {
+  if (o.overlapped) return run_overlapped_wall(o, f, budget, pool, device, s, t);
   // Fin d'un etage : usage courant et pic de l'etage, puis le pic repart de l'usage courant (hors du chrono utile).
   const auto mark = [&](int stage) { t.mem[stage] = {budget.used(), budget.restart_peak()}; };
   const auto t0 = Clock::now();
@@ -234,15 +265,50 @@ Outcome run_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::
   return {};
 }
 
+// Mur de la Session recouverte (--recouvert) : P et C comme run_wall, puis build_tower ; memoire : P, C, puis la tour.
+Outcome run_overlapped_wall(const Options& o, const Frame& f, MemoryBudget& budget, sched::Pool& pool,
+                            CatalogueDevice* device, PassState& s, PassTimes& t) {
+  const auto mark = [&]() -> std::array<u64, 2> { return {budget.used(), budget.restart_peak()}; };
+  const auto t0 = Clock::now();
+  auto cloud = prepare_cloud(f.input.x.span(), f.input.y.span(), f.input.z.span(), f.input.ids.span(), CoordWidth(),
+                             budget);
+  if (!cloud.ok()) return cloud.outcome();
+  auto index = build_index(std::move(cloud).take(), IndexParams{}, budget);
+  if (!index.ok()) return index.outcome();
+  s.index.emplace(std::move(index).take());
+  t.p = since(t0);
+  t.mem[0] = mark();
+  CatalogueParams params;
+  params.kmax = o.kmax;
+  params.leaf_size = o.leaf;
+  auto c0 = Clock::now();
+  auto catalogue = device != nullptr ? build_catalogue_device(s.index->cloud(), params, *device, pool, &s.cat_diag)
+                                     : build_catalogue(s.index->cloud(), params, budget, pool, &s.cat_diag);
+  if (!catalogue.ok()) return catalogue.outcome();
+  s.catalogue.emplace(std::move(catalogue).take());
+  t.c = since(c0);
+  t.mem[1] = mark();
+  c0 = Clock::now();
+  auto tower = build_tower(*s.index, *s.catalogue, budget, pool, &s.tower_diag);
+  if (!tower.ok()) return tower.outcome();
+  s.tower.emplace(std::move(tower).take());
+  t.tower = since(c0);
+  t.wall = since(t0);
+  t.mem_tower = mark();
+  t.g = s.tower_diag.g_end_ns;
+  t.tmvr = s.tower_diag.end_ns - s.tower_diag.g_end_ns;
+  return {};
+}
+
 // Hors du mur : validation, empreinte FUL1 facultative.
 Outcome after_wall(const Options& o, MemoryBudget& budget, PassState& s, PassTimes& t, std::string& digest) {
   auto c0 = Clock::now();
-  MHGP12_TRY(tower::validate_forests(*s.forests, budget));
+  MHGP12_TRY(tower::validate_forests(s.tower_forests(), budget));
   t.validation = since(c0);
   if (!o.digest) return {};
   c0 = Clock::now();
   const tower::BallSource balls = tower::catalogue_balls(*s.catalogue);
-  const tower::FullSource source{&s.index->cloud(), s.catalogue->levels(), balls, &*s.forests};
+  const tower::FullSource source{&s.index->cloud(), s.catalogue->levels(), balls, &s.tower_forests()};
   u64 bytes = 0;
   auto d = tower::full_digest(source, &bytes);
   if (!d.ok()) return d.outcome();
@@ -252,8 +318,59 @@ Outcome after_wall(const Options& o, MemoryBudget& budget, PassState& s, PassTim
   return {};
 }
 
+// Ligne d'une passe de la Session recouverte (--recouvert ; schema en tete du fichier).
+void print_overlapped_pass(const Options& o, u64 pass, const Frame& f, const PassState& s, const PassTimes& t,
+                           const std::string& digest) {
+  const CatalogueDiagnostics& c = s.cat_diag;
+  const TowerDiagnostics& d = s.tower_diag;
+  const tower::ForestLedger& l = d.forest;
+  std::printf("{\"phase\":\"full\",\"pass\":%llu,\"trame\":\"%s\",\"voie\":\"%s\",\"status\":\"ok\","
+              "\"etapes_schema\":\"recouvert\",\"coord_bits\":%d,\"kmax\":%d,\"threads\":%u,\"sites\":%u,"
+              "\"wall_ns\":%llu,\"etapes_ns\":{\"P\":%llu,\"C\":%llu,\"G\":%llu,\"raccord\":0,\"TMVR\":%llu},",
+              (unsigned long long)pass, f.name.c_str(), o.device ? "device" : "cpu", kCoordBits, o.kmax, o.threads,
+              s.index->cloud().sites(), (unsigned long long)t.wall, (unsigned long long)t.p, (unsigned long long)t.c,
+              (unsigned long long)t.g, (unsigned long long)t.tmvr);
+  std::printf("\"fenetres_ns\":{\"G\":%llu,\"foret\":%llu,\"foret_apres_g\":%llu,\"T\":%llu,\"M\":%llu,\"V\":%llu,"
+              "\"R\":%llu},",
+              (unsigned long long)d.g_thread_ns, (unsigned long long)d.forest_thread_ns,
+              (unsigned long long)d.forest_after_g_ns, (unsigned long long)l.kernels_ns,
+              (unsigned long long)l.contraction_ns, (unsigned long long)(l.vertical_births_ns + l.vertical_merges_ns),
+              (unsigned long long)l.registry_ns);
+  std::printf("\"c_ns\":{\"parcours\":%llu,\"feuilles\":%llu,\"emission\":%llu,\"fin_etage\":%llu,"
+              "\"transferts\":%llu,\"publication\":%llu},\"g_ns\":{\"ouverture\":%llu,\"tables\":%llu},"
+              "\"hors_mur_ns\":{\"validation\":%llu,\"empreinte\":%llu},\"pic_octets\":%llu",
+              (unsigned long long)c.traversal_ns, (unsigned long long)c.count_ns, (unsigned long long)c.fill_ns,
+              (unsigned long long)(c.levels_ns + c.sort_ns + c.assemble_ns + c.table_ns),
+              (unsigned long long)c.transfer_ns, (unsigned long long)c.publish_ns, (unsigned long long)d.open_ns,
+              (unsigned long long)d.resolution.tables_ns, (unsigned long long)t.validation,
+              (unsigned long long)t.digest, (unsigned long long)t.peak);
+  std::printf(",\"cpu_ns\":%s,\"rss_max_octets\":%s,\"appareil_octets\":%llu,\"epinglee_octets\":%llu,"
+              "\"pic_appareil_octets\":%llu,\"memoire_octets\":{\"P\":[%llu,%llu],\"C\":[%llu,%llu],"
+              "\"tour\":[%llu,%llu]}",
+              json_u64(t.cpu).c_str(), json_u64(t.rss).c_str(), (unsigned long long)c.device_bytes,
+              (unsigned long long)c.pinned_bytes, (unsigned long long)t.device_peak, (unsigned long long)t.mem[0][0],
+              (unsigned long long)t.mem[0][1], (unsigned long long)t.mem[1][0], (unsigned long long)t.mem[1][1],
+              (unsigned long long)t.mem_tower[0], (unsigned long long)t.mem_tower[1]);
+  std::printf(",\"recouvrement\":{\"tour_ns\":%llu,\"ouverture_ns\":%llu,\"fin_g_ns\":%llu,\"fin_ns\":%llu,"
+              "\"queue_ns\":%llu,\"noyau_reprises\":%llu,\"noyau_arrets\":%llu,\"admis_octets\":%llu},"
+              "\"fins_par_ordre_ns\":[",
+              (unsigned long long)t.tower, (unsigned long long)d.open_ns, (unsigned long long)d.g_end_ns,
+              (unsigned long long)d.end_ns, (unsigned long long)(d.end_ns - d.g_end_ns),
+              (unsigned long long)d.kernel_jobs, (unsigned long long)d.kernel_stops,
+              (unsigned long long)d.admitted_bytes);
+  for (u32 i = 0; i < l.kmax; ++i)
+    std::printf("%s[%llu,%llu,%llu,%llu,%llu]", i ? "," : "", (unsigned long long)d.order_g_end_ns[i],
+                (unsigned long long)d.order_kernel_end_ns[i], (unsigned long long)d.order_m_end_ns[i],
+                (unsigned long long)d.order_v_end_ns[i], (unsigned long long)d.order_r_end_ns[i]);
+  std::printf("]");
+  if (o.digest) std::printf(",\"full_sha256\":\"%s\"", digest.c_str());
+  std::printf("}\n");
+  std::fflush(stdout);
+}
+
 void print_pass(const Options& o, u64 pass, const Frame& f, const PassState& s, const PassTimes& t,
                 const std::string& digest) {
+  if (o.overlapped) return print_overlapped_pass(o, pass, f, s, t, digest);
   const CatalogueDiagnostics& c = s.cat_diag;
   const tower::ForestLedger& l = s.ledger;
   std::printf("{\"phase\":\"full\",\"pass\":%llu,\"trame\":\"%s\",\"voie\":\"%s\",\"status\":\"ok\",\"coord_bits\":%d,"
@@ -300,6 +417,7 @@ Outcome passes(const Options& o, std::vector<Frame>& frames, MemoryBudget& budge
     if (cpu0 && cpu1 && *cpu1 >= *cpu0) t.cpu = *cpu1 - *cpu0;
     t.rss = process_rss_max_bytes();
     for (const auto& m : t.mem) t.peak = std::max(t.peak, m[1]);  // pic du mur : le plus haut des pics d'etage
+    t.peak = std::max(t.peak, t.mem_tower[1]);                    // --recouvert : P, C et la tour
     if (device_budget != nullptr) t.device_peak = device_budget->peak();
     MHGP12_TRY(after_wall(o, budget, *s, t, digest));
     print_pass(o, pass, f, *s, t, digest);
@@ -346,7 +464,7 @@ int main(int argc, char** argv) {
   if (!parse(argc, argv, o)) {
     std::fprintf(stderr, "usage : mhgp12_full_probe (--trame=<xyz>,<ids>[,NOM] ... | --uniform=N,GRAINE,BITS) "
                          "[--k=K] [--leaf=L] [--threads=W] [--passes=P] [--device] [--digest] [--budget=OCTETS] "
-                         "[--cache=OCTETS] [--budget-appareil=OCTETS (avec --device)]\n");
+                         "[--cache=OCTETS] [--budget-appareil=OCTETS (avec --device)] [--recouvert]\n");
     return 2;
   }
   const Outcome outcome = guarded([&]() { return run(o); });

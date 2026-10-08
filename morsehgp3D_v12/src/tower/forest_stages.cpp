@@ -1,7 +1,9 @@
-// Etages M et V de build_forests sur le Pool (forest.hpp) et grand livre. M : tranches alignees sur les rangs pour
-// tous les ordres a la fois, quatre phases paralleles (forest_contract.cpp), sommes prefixes par le pilote entre deux
-// phases. V : morceaux de naissances des ordres k >= 2 (LEM-T6), puis morceaux de fusions (LEM-T5) ; chaque morceau a
-// ses compteurs, sommes par le pilote dans l'ordre des morceaux.
+// Etages M et V sur le Pool (forest.hpp) et grand livre. Etapes par ordre (tranches de la contraction, premiers noeuds,
+// decalages des enfants, fin de l'ordre, verticales allouees), partagees par build_forests et la Session recouverte
+// (pipeline.cpp). Pilote etage par etage : M, tranches alignees sur les rangs pour tous les ordres a la fois, quatre
+// phases paralleles (forest_contract.cpp), etapes par ordre entre deux phases ; V, morceaux de naissances des ordres
+// k >= 2 (LEM-T6), puis morceaux de fusions (LEM-T5) ; chaque morceau a ses compteurs, sommes par le pilote dans
+// l'ordre des morceaux.
 #include <algorithm>
 
 #include "sched/sched.hpp"
@@ -20,69 +22,35 @@ u32 slice_end(const OrderWork& w, u32 lo, u32 events) noexcept {
   return hi;
 }
 
-Outcome make_slices(BuildState& s) noexcept {
-  u64 count = 0;
-  for (u64 i = 0; i < s.inputs.size(); ++i)
-    for (u32 lo = 0; lo < s.work[i].event_count; lo = slice_end(s.work[i], lo, s.params.slice_events)) ++count;
-  if (count > 0) MHGP12_TRY(s.slices.allocate(count, s.budget));
-  u64 j = 0;
-  for (u64 i = 0; i < s.inputs.size(); ++i)
-    for (u32 lo = 0; lo < s.work[i].event_count;) {
-      const u32 hi = slice_end(s.work[i], lo, s.params.slice_events);
-      s.slices[j++] = Slice{static_cast<u32>(i), lo, hi, 0, 0, 0, 0, 0};
-      lo = hi;
-    }
-  return {};
-}
+}  // namespace
 
-Outcome classes_body(void* context, u64 begin, u64 end, u32) noexcept {
-  auto& s = *static_cast<BuildState*>(context);
-  for (u64 j = begin; j < end; ++j) {
-    Stopwatch watch;
-    contract_classes(s.work[s.slices[j].order], s.slices[j]);
-    s.slices[j].ns += watch.nanoseconds();
+Outcome open_contraction(BuildState& s, u32 i) noexcept {
+  OrderWork& w = s.work[i];
+  const u32 ne = w.event_count;
+  u64 count = 0;
+  for (u32 lo = 0; lo < ne; lo = slice_end(w, lo, s.params.slice_events)) ++count;
+  if (count == 0) return {};
+  MHGP12_TRY(w.slices.allocate(count, s.budget));
+  for (u32 lo = 0, j = 0; lo < ne; ++j) {
+    const u32 hi = slice_end(w, lo, s.params.slice_events);
+    w.slices[j] = Slice{lo, hi, 0, 0, 0, 0, 0};
+    lo = hi;
   }
-  return {};
-}
-Outcome nodes_body(void* context, u64 begin, u64 end, u32) noexcept {
-  auto& s = *static_cast<BuildState*>(context);
-  for (u64 j = begin; j < end; ++j) {
-    Stopwatch watch;
-    Slice& slice = s.slices[j];
-    contract_nodes(s.work[slice.order], s.forests.orders[slice.order], slice);
-    slice.ns += watch.nanoseconds();
-  }
-  return {};
-}
-Outcome parents_body(void* context, u64 begin, u64 end, u32) noexcept {
-  auto& s = *static_cast<BuildState*>(context);
-  for (u64 j = begin; j < end; ++j) {
-    Stopwatch watch;
-    Slice& slice = s.slices[j];
-    contract_parents(s.work[slice.order], s.forests.orders[slice.order], slice);
-    slice.ns += watch.nanoseconds();
-  }
-  return {};
-}
-Outcome children_body(void* context, u64 begin, u64 end, u32) noexcept {
-  auto& s = *static_cast<BuildState*>(context);
-  for (u64 j = begin; j < end; ++j) {
-    Stopwatch watch;
-    Slice& slice = s.slices[j];
-    contract_children(s.work[slice.order], s.forests.orders[slice.order], slice);
-    slice.ns += watch.nanoseconds();
-  }
-  return {};
+  MHGP12_TRY(w.local.allocate(ne, s.budget));
+  MHGP12_TRY(w.class_min.allocate(ne, s.budget));
+  MHGP12_TRY(w.keys.allocate(ne, s.budget));
+  MHGP12_TRY(s.forests.orders[i].event_node.allocate(ne, s.budget));
+  return s.forests.orders[i].event_rank.allocate(ne, s.budget);
 }
 
 // Apres la phase A : identifiants des premiers noeuds des tranches, tableaux des noeuds, naissances.
-Outcome allocate_nodes(BuildState& s, u64 i, u64& slice) noexcept {
+Outcome allocate_nodes(BuildState& s, u32 i) noexcept {
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
   u64 next = f.births;
-  for (; slice < s.slices.size() && s.slices[slice].order == i; ++slice) {
-    s.slices[slice].node0 = static_cast<u32>(next);
-    next += s.slices[slice].classes;
+  for (u64 j = 0; j < w.slices.size(); ++j) {
+    w.slices[j].node0 = static_cast<u32>(next);
+    next += w.slices[j].classes;
   }
   if (next >= kNone) return fail(Reason::tower_capacity);
   const u64 nn = next;
@@ -106,20 +74,22 @@ Outcome allocate_nodes(BuildState& s, u64 i, u64& slice) noexcept {
 }
 
 // Apres la phase C : decalages des enfants par tranche, controle du compte (une arete par noeud sauf la racine).
-Outcome place_children(BuildState& s, u64 i, u64& slice) noexcept {
+Outcome place_children(BuildState& s, u32 i) noexcept {
   OrderForest& f = s.forests.orders[i];
+  OrderWork& w = s.work[i];
   u64 at = 0;
-  for (; slice < s.slices.size() && s.slices[slice].order == i; ++slice) {
-    s.slices[slice].child0 = at;
-    at += s.slices[slice].children;
+  for (u64 j = 0; j < w.slices.size(); ++j) {
+    w.slices[j].child0 = at;
+    at += w.slices[j].children;
   }
   if (at + 1 != f.nodes()) return fail(Reason::tower_invariant);
   f.children.off[f.nodes()] = at;
   return {};
 }
 
-// Apres la phase D : noeud du sommet de chaque cellule, racine unique ; liberation du travail de la contraction.
-Outcome finish_order(BuildState& s, u64 i) noexcept {
+// Apres la phase D : noeud du sommet de chaque cellule, racine unique ; liberation du travail de la contraction (les
+// tranches restent, pour le grand livre ; les evenements, lus aussi par l'historique, par release_events).
+Outcome finish_order(BuildState& s, u32 i) noexcept {
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
   const u64 nc = s.inputs[i].cell_ball.size();
@@ -138,8 +108,74 @@ Outcome finish_order(BuildState& s, u64 i) noexcept {
   w.class_min.reset();
   w.keys.reset();
   w.child_count.reset();
-  w.events.reset();
   w.cell_top.reset();
+  return {};
+}
+
+void release_events(BuildState& s, u32 i) noexcept { s.work[i].events.reset(); }
+
+Outcome open_verticals(BuildState& s, u32 i) noexcept {
+  OrderForest& f = s.forests.orders[i];
+  MHGP12_TRY(f.lower.allocate(f.nodes(), s.budget));
+  for (u32 v = 0; v < f.nodes(); ++v) f.lower[v] = kNone;
+  return {};
+}
+
+namespace {
+
+// Tranches de tous les ordres a plat : tranche globale j -> (ordre, tranche de l'ordre).
+struct AllSlices {
+  BuildState& state;
+  std::array<u64, kMaxOrder + 1> start{};
+  Slice& at(u64 j, u32& order) noexcept {
+    order = 0;
+    while (start[order + 1] <= j) ++order;
+    return state.work[order].slices[j - start[order]];
+  }
+};
+
+Outcome classes_body(void* context, u64 begin, u64 end, u32) noexcept {
+  auto& all = *static_cast<AllSlices*>(context);
+  for (u64 j = begin; j < end; ++j) {
+    u32 i = 0;
+    Slice& slice = all.at(j, i);
+    Stopwatch watch;
+    contract_classes(all.state.work[i], slice);
+    slice.ns += watch.nanoseconds();
+  }
+  return {};
+}
+Outcome nodes_body(void* context, u64 begin, u64 end, u32) noexcept {
+  auto& all = *static_cast<AllSlices*>(context);
+  for (u64 j = begin; j < end; ++j) {
+    u32 i = 0;
+    Slice& slice = all.at(j, i);
+    Stopwatch watch;
+    contract_nodes(all.state.work[i], all.state.forests.orders[i], slice);
+    slice.ns += watch.nanoseconds();
+  }
+  return {};
+}
+Outcome parents_body(void* context, u64 begin, u64 end, u32) noexcept {
+  auto& all = *static_cast<AllSlices*>(context);
+  for (u64 j = begin; j < end; ++j) {
+    u32 i = 0;
+    Slice& slice = all.at(j, i);
+    Stopwatch watch;
+    contract_parents(all.state.work[i], all.state.forests.orders[i], slice);
+    slice.ns += watch.nanoseconds();
+  }
+  return {};
+}
+Outcome children_body(void* context, u64 begin, u64 end, u32) noexcept {
+  auto& all = *static_cast<AllSlices*>(context);
+  for (u64 j = begin; j < end; ++j) {
+    u32 i = 0;
+    Slice& slice = all.at(j, i);
+    Stopwatch watch;
+    contract_children(all.state.work[i], all.state.forests.orders[i], slice);
+    slice.ns += watch.nanoseconds();
+  }
   return {};
 }
 
@@ -150,26 +186,27 @@ Outcome run_contraction(BuildState& s, sched::Pool& pool) noexcept {
   for (u64 i = 0; i < s.inputs.size(); ++i) bytes += contraction_bytes(s.inputs[i], s.work[i].event_count);
   MHGP12_TRY(admit_stage(s, kStageM, bytes));
   Stopwatch watch;
-  MHGP12_TRY(make_slices(s));
-  for (u64 i = 0; i < s.inputs.size(); ++i) {
-    const u64 ne = s.work[i].event_count;
-    if (ne == 0) continue;
-    MHGP12_TRY(s.work[i].local.allocate(ne, s.budget));
-    MHGP12_TRY(s.work[i].class_min.allocate(ne, s.budget));
-    MHGP12_TRY(s.work[i].keys.allocate(ne, s.budget));
-    MHGP12_TRY(s.forests.orders[i].event_node.allocate(ne, s.budget));
-    MHGP12_TRY(s.forests.orders[i].event_rank.allocate(ne, s.budget));
+  AllSlices all{s};
+  const u32 orders = static_cast<u32>(s.inputs.size());
+  for (u32 i = 0; i < orders; ++i) {
+    MHGP12_TRY(open_contraction(s, i));
+    all.start[i + 1] = all.start[i] + s.work[i].slices.size();
   }
-  const u64 n = s.slices.size();
-  MHGP12_TRY(pool.parallel_for(n, 1, &s, classes_body));
-  for (u64 i = 0, slice = 0; i < s.inputs.size(); ++i) MHGP12_TRY(allocate_nodes(s, i, slice));
-  MHGP12_TRY(pool.parallel_for(n, 1, &s, nodes_body));
-  MHGP12_TRY(pool.parallel_for(n, 1, &s, parents_body));
-  for (u64 i = 0, slice = 0; i < s.inputs.size(); ++i) MHGP12_TRY(place_children(s, i, slice));
-  MHGP12_TRY(pool.parallel_for(n, 1, &s, children_body));
-  for (u64 i = 0; i < s.inputs.size(); ++i) MHGP12_TRY(finish_order(s, i));
+  for (u32 i = orders; i < kMaxOrder; ++i) all.start[i + 1] = all.start[i];
+  const u64 n = all.start[orders];
+  MHGP12_TRY(pool.parallel_for(n, 1, &all, classes_body));
+  for (u32 i = 0; i < orders; ++i) MHGP12_TRY(allocate_nodes(s, i));
+  MHGP12_TRY(pool.parallel_for(n, 1, &all, nodes_body));
+  MHGP12_TRY(pool.parallel_for(n, 1, &all, parents_body));
+  for (u32 i = 0; i < orders; ++i) MHGP12_TRY(place_children(s, i));
+  MHGP12_TRY(pool.parallel_for(n, 1, &all, children_body));
+  for (u32 i = 0; i < orders; ++i) {
+    MHGP12_TRY(finish_order(s, i));
+    release_events(s, i);
+  }
   s.contraction_ns = watch.nanoseconds();
-  for (u64 j = 0; j < n; ++j) s.physical[s.slices[j].order].contraction_ns += s.slices[j].ns;
+  for (u32 i = 0; i < orders; ++i)
+    for (u64 j = 0; j < s.work[i].slices.size(); ++j) s.physical[i].contraction_ns += s.work[i].slices[j].ns;
   return {};
 }
 
@@ -250,11 +287,7 @@ Outcome run_verticals(BuildState& s, sched::Pool& pool) noexcept {
   u64 bytes = 0;
   for (u64 i = 1; i < s.inputs.size(); ++i) bytes += 4 * u64{s.forests.orders[i].nodes()};
   MHGP12_TRY(admit_stage(s, kStageV, bytes));
-  for (u64 i = 1; i < s.inputs.size(); ++i) {
-    OrderForest& f = s.forests.orders[i];
-    MHGP12_TRY(f.lower.allocate(f.nodes(), s.budget));
-    for (u32 v = 0; v < f.nodes(); ++v) f.lower[v] = kNone;
-  }
+  for (u64 i = 1; i < s.inputs.size(); ++i) MHGP12_TRY(open_verticals(s, static_cast<u32>(i)));
   Stopwatch births_watch;
   MHGP12_TRY(vertical_pass(s, pool, false));
   s.vertical_births_ns = births_watch.nanoseconds();
@@ -290,7 +323,7 @@ void fill_ledger(const BuildState& s, u32 threads, ForestLedger& ledger) noexcep
   ledger.vertical_births_ns = s.vertical_births_ns;
   ledger.vertical_merges_ns = s.vertical_merges_ns;
   ledger.registry_ns = s.registry_ns;
-  ledger.slices = s.slices.size();
+  for (u64 i = 0; i < s.inputs.size(); ++i) ledger.slices += s.work[i].slices.size();
   ledger.threads = threads;
 }
 

@@ -206,3 +206,48 @@ class Resolution {
 // registre, export ; entree : chaque ResolvedOrder ci-dessus, par l'adaptateur sans copie tower::forest_input.
 #include "tower/export_full.hpp"
 #include "tower/forest.hpp"
+
+// ---- Session recouverte (decision D-F2 ; CONTRAT_TOUR.md, paragraphe 4.4 ; src/tower/pipeline.hpp) ----------------
+namespace mhgp12 {
+
+// Tour complete d'une trame : resolution (etage G) et forets (T, M, V, R) ; proprietaire, deplacement seulement.
+struct Tower {
+  Resolution resolution;
+  tower::TowerForests forests;
+};
+
+// Diagnostics PHYSIQUES de build_tower (jamais dans une empreinte), instants depuis le debut de l'appel. Temps-fils :
+// somme, sur des taches, de leurs fenetres murales (ni un mur ni du temps CPU : un fil preempte y compte son attente).
+// resolution : ouverture de G et index des naissances comme resolve_tower, mais resolve_ns est le temps-fils des
+// calculs des tranches ; forest : objet et travail identiques a ceux de build_forests, physique en temps-fils (etages
+// du grand livre ; vertical_births_ns porte tout V). open_ns : ouverture, admission et index, avant la region.
+// g_end_ns : fin du DERNIER CALCUL de G (maximum des fins de calcul des tranches ; la pre-passe des feuilles qu'un fil
+// enchaine sur sa tranche est un travail de la foret, hors de G). end_ns : tour complete (region close, issues, grand
+// livre). end_ns - g_end_ns : la queue, intervalle mural pendant lequel il ne reste que la foret et la cloture, donc la
+// foret NON recouverte par G. g_thread_ns, forest_thread_ns : temps-fils de G et de la foret ; forest_after_g_ns : part
+// du second posterieure a g_end_ns, lue a la fin de chaque tache (une tache finie avant la publication de g_end_ns, par
+// le fil qui acheve le dernier calcul, juste apres, compte avant). kernel_jobs : reprises du noyau ; kernel_stops : dont
+// arretees sur une tranche de G non terminee. Par ordre (case k - 1) : fins du dernier calcul de G, du noyau, de la
+// contraction (M), des verticales (V, ordres k >= 2) et du registre (R).
+struct TowerDiagnostics {
+  ResolutionDiagnostics resolution;
+  tower::ForestLedger forest;
+  u64 open_ns = 0, g_end_ns = 0, end_ns = 0;
+  u64 g_thread_ns = 0, forest_thread_ns = 0, forest_after_g_ns = 0;
+  u64 kernel_jobs = 0, kernel_stops = 0, admitted_bytes = 0;
+  u32 threads = 0;
+  std::array<u64, 12> order_g_end_ns{}, order_kernel_end_ns{}, order_m_end_ns{}, order_v_end_ns{}, order_r_end_ns{};
+};
+
+// G, puis T, M, V et R recouverts dans une seule region du Pool (decision D-F2) : meme objet que resolve_tower suivi de
+// build_forests (porte d'identite : empreinte FUL1 egale), memes compteurs de l'objet et du travail. Index des
+// naissances : un par ordre (memoire somme des ordres et non maximum) ; admission unique de la region (G et foret y
+// coexistent), refus memory_budget avant tout calcul. Refus dans l'ordre de la voie sequentielle : ceux de G (le plus
+// petit ordre), puis ceux de la foret par etage (controle, numerotation, feuilles, noyau et historique, contraction,
+// verticales, registre), fusion merge ; toutes les tranches de G sont jouees, une etape de la foret ne part que si ses
+// predecesseurs ont reussi : l'issue ne depend pas de l'ordonnancement. Pool et budget empruntes pendant l'appel ;
+// diagnostics rempli seulement au succes.
+[[nodiscard]] Result<Tower> build_tower(const GlobalIndex& index, const Catalogue& catalogue, MemoryBudget& budget,
+                                        sched::Pool& pool, TowerDiagnostics* diagnostics = nullptr) noexcept;
+
+}  // namespace mhgp12

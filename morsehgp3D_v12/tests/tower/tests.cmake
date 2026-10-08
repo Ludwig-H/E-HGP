@@ -97,6 +97,19 @@ mhgp12_add_unit(mhgp12_tower_forest SOURCES forest_unit.cpp
                 GROUPS admission attache branches catalogue determinisme domaine hypergraphes refus requetes temoins
                        verticales
                 LABELS fast)
+# Session recouverte (build_tower, decision D-F2 ; src/tower/pipeline.hpp) : graphe des etapes contre les lectures de
+# chacune, identite avec la voie sequentielle (resolve_tower puis build_forests : empreinte FUL1, registres, compteurs
+# de l'objet et du travail, cibles) a 1, 2, 3 et 8 fils sur nuages aleatoires, grilles et droites, determinisme sur
+# 1 500 sites, admission unique de la region (pic au plus les octets admis ; limite exacte suffisante) et refus
+# transactionnel un octet en dessous.
+mhgp12_add_unit(mhgp12_tower_pipeline SOURCES pipeline_unit.cpp
+                GROUPS graphe identite determinisme admission refus LABELS fast TIMEOUT 600)
+# Session recouverte sous penurie injectee (operators new remplaces dans ce seul executable ; prelecture de l'auditeur
+# Codex du 8 octobre) : allocation, les trois new qui levent de build_tower (SessionRun, puis BuildState et Pipeline dans
+# open_session, qui n'est donc pas noexcept) echouent tour a tour : refus memory_budget, budget rendu, aucune
+# terminaison, reprise a l'identique ; penurie, chaque new sans exception de build_tower echoue tour a tour (un fil :
+# toutes ; trois fils : un echantillon) : refus memory_budget ou succes, budget rendu, ni terminaison ni attente.
+mhgp12_add_unit(mhgp12_tower_pipeline_fault SOURCES pipeline_fault.cpp GROUPS allocation penurie LABELS fast)
 # Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
 # MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
 # des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les
@@ -153,3 +166,9 @@ mhgp12_expect_code(mhgp12_full_probe_usage 2 mhgp12_full_probe --k=5 LABELS fast
 mhgp12_python_gate(mhgp12_full_probe_cpu 0 full_probe_check.py $<TARGET_FILE:mhgp12_full_probe>
                    $<TARGET_FILE:mhgp12_tower_chain> LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui"
                    LABELS fast TIMEOUT 600)
+# Meme porte sur la Session recouverte (--recouvert, build_tower, decision D-F2) : schema "recouvert" (partition murale,
+# fenetres murales des taches, memoire P, C, tour, recouvrement et fins par ordre coherents) et empreinte FUL1 EGALE a
+# celle de mhgp12_tower_chain (voie sequentielle).
+mhgp12_python_gate(mhgp12_full_probe_cpu_recouvert 0 full_probe_check.py $<TARGET_FILE:mhgp12_full_probe>
+                   $<TARGET_FILE:mhgp12_tower_chain> --recouvert
+                   LINE "full_probe_ok passes=7 trames=2 identite_chaine=oui schema=recouvert" LABELS fast TIMEOUT 600)

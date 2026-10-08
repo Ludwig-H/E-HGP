@@ -1,8 +1,9 @@
-// Orchestration des etages T, M et V (forest.hpp) sur le Pool : controle des entrees, admission memoire par etage,
-// puis trois regions paralleles. T : une tache par ordre (numerotation des naissances, noyau, historique : le
-// proprietaire de l'ordre, sequentiel). M : quatre phases sur les tranches de tous les ordres, sommes prefixes entre
-// les phases par le pilote. V : naissances de tous les ordres k >= 2 par morceaux, puis fusions. Toutes les sorties sont
-// a des positions fixees par l'entree ou par les sommes prefixes : rien ne depend de l'entrelacement des fils.
+// Orchestration etage par etage des etages T, M et V (forest.hpp) sur le Pool (build_forests ; la Session recouverte
+// rejoue les memes etapes par ordre, pipeline.cpp) : controle des entrees, admission memoire par etage, puis trois
+// regions paralleles. T : une tache par ordre (numerotation des naissances, noyau, historique : le proprietaire de
+// l'ordre, sequentiel). M : quatre phases sur les tranches de tous les ordres, sommes prefixes entre les phases par le
+// pilote. V : naissances de tous les ordres k >= 2 par morceaux, puis fusions. Toutes les sorties sont a des positions
+// fixees par l'entree ou par les sommes prefixes : rien ne depend de l'entrelacement des fils.
 #include <algorithm>
 #include <memory>
 
@@ -56,12 +57,8 @@ u64 contraction_bytes(const ForestInput& in, u64 ne) noexcept {
   return 24 * ne + 12 * nn + 8 * (nn + 1) + 4 * nn + 4 * nn + 4 * nc + sizeof(Slice) * (ne + 1);
 }
 
-namespace {
-
-inline constexpr u64 kLeafChunk = 4096;  // cellules par morceau de la pre-passe
-
 // Numerotation canonique des naissances de l'ordre i (M, avant T) et tampon des feuilles.
-Outcome numbering_task(BuildState& s, u32 i) noexcept {
+Outcome number_order(BuildState& s, u32 i) noexcept {
   const ForestInput& in = s.inputs[i];
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
@@ -78,6 +75,31 @@ Outcome numbering_task(BuildState& s, u32 i) noexcept {
   s.physical[i].births_ns = watch.nanoseconds();
   return {};
 }
+
+void add_work(ForestWork& t, const ForestWork& p) noexcept {
+  t.cohorts += p.cohorts;
+  t.max_cohort = std::max(t.max_cohort, p.max_cohort);
+  t.birth_targets += p.birth_targets;
+  t.cell_targets += p.cell_targets;
+  t.events += p.events;
+  t.attaches += p.attaches;
+  t.max_attach_depth = std::max(t.max_attach_depth, p.max_attach_depth);
+  t.retained_cells += p.retained_cells;
+  t.classes += p.classes;
+  t.t6_from_cell += p.t6_from_cell;
+  t.t6_climbs += p.t6_climbs;
+  t.t6_from_birth += p.t6_from_birth;
+  t.t5_queries += p.t5_queries;
+  t.t5_hops += p.t5_hops;
+  t.t5_max_hops = std::max(t.t5_max_hops, p.t5_max_hops);
+  t.t5_probes += p.t5_probes;
+  t.branch_reads += p.branch_reads;
+  t.branches += p.branches;
+}
+
+namespace {
+
+inline constexpr u64 kLeafChunk = 4096;  // cellules par morceau de la pre-passe
 
 // Noyau et historique de l'ordre i (un proprietaire par ordre, sequentiel).
 Outcome kernel_task(BuildState& s, u32 i) noexcept {
@@ -96,7 +118,7 @@ Outcome kernel_task(BuildState& s, u32 i) noexcept {
 Outcome numbering_body(void* context, u64 begin, u64 end, u32) noexcept {
   auto& s = *static_cast<BuildState*>(context);
   Outcome out;
-  for (u64 i = begin; i < end; ++i) out = merge(out, numbering_task(s, static_cast<u32>(i)));
+  for (u64 i = begin; i < end; ++i) out = merge(out, number_order(s, static_cast<u32>(i)));
   return out;
 }
 

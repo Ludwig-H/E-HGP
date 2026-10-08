@@ -2,7 +2,9 @@
 // sites), puis, pour chaque ordre k >= 2, index des naissances (populations.cpp, parallele), premieres sondes, passe de
 // resolution par tranches de cellules et controles globaux. Les tampons de l'index et de la jointure sont gardes d'un
 // ordre a l'autre (une seule allocation a la taille du plus grand ordre). Chaque representant a sa case, ecrite par un
-// seul fil ; compteurs par fil fusionnes dans l'ordre des fils (sommes et maxima : independants du decoupage).
+// seul fil ; compteurs par fil fusionnes dans l'ordre des fils (sommes et maxima : independants du decoupage). Les
+// memes corps (tranche de cellules, cloture d'un ordre) servent la Session recouverte (pipeline.cpp), qui joue les
+// tranches de tous les ordres dans une seule region, avec un index par ordre.
 //
 // Premieres sondes (contrat, paragraphe 4.3) : voie produit G-L7, une file de kLag representants par tranche (trace
 // formee et case du repertoire de l'index prechargee a l'entree, fiches du seau prechargees a mi-file, recherche exacte
@@ -16,8 +18,6 @@
 
 namespace mhgp12::tower_detail {
 namespace {
-
-constexpr u64 kCellGrain = 256;  // cellules par tranche de resolution
 
 // Ordre 1 : les naissances sont les sites, et la cible d'une trace (un site) est sa naissance.
 struct FirstOrder {
@@ -58,7 +58,9 @@ bool build_trace(std::span<const SiteIdx> inner, std::span<const SiteIdx> shell,
 struct OrderPass {
   const ResolveContext& context;
   ResolvedOrder& order;
-  Workers& workers;
+  Workers& workers;                    // espaces de census par fil
+  std::span<OrderCounters> counters;   // une case par fil, propre a l'ordre
+  std::span<SectionCycles> profiles;   // idem (construction MHGP12_TOWER_PROFILE)
   const PopulationTable& table;
   std::span<const u32> candidates;  // G-L5 ; vide : file de sondes prechargees (G-L7)
   static constexpr u64 kLag = 16, kHalf = kLag / 2;
@@ -94,10 +96,10 @@ struct OrderPass {
     const auto offsets = StageAccess::cell_offsets(self.order).span();
     const auto masks = StageAccess::trace_masks(self.order).span();
     const Order k = self.context.order.k;
-    SectionCycles* sink = kProfile ? &self.workers.profiles[worker] : nullptr;
+    SectionCycles* sink = kProfile ? &self.profiles[worker] : nullptr;
     const u64 start = profile_tick();
     SectionClock clock(sink);
-    Lane lane{self, self.workers.counters[worker], *self.workers.census[worker], clock,
+    Lane lane{self, self.counters[worker], *self.workers.census[worker], clock,
               StageAccess::cell_ranks(self.order).span(), StageAccess::targets(self.order).span()};
     std::array<Pending, kLag> file;
     std::array<u64, kMaxShell> shell_keys;  // empreintes des sites de U, une fois par cellule
@@ -165,7 +167,7 @@ Outcome resolve_order(const Domain& d, Resolution& out, Order k, OrderBuffers& b
   if constexpr (kProfile)
     for (u32 w = 0; w < pool.size(); ++w) workers.profiles[w] = SectionCycles{};
   const ResolveContext context{d, out, OrderView{k, order.birth_keys(), &table}};
-  OrderPass pass{context, order, workers, table, candidates};
+  OrderPass pass{context, order, workers, workers.counters.span(), workers.profiles.span(), table, candidates};
   MHGP12_TRY(pool.parallel_for(order.cells(), kCellGrain, &pass, &OrderPass::body));
   OrderCounters& total = StageAccess::counters(order);
   for (u32 w = 0; w < pool.size(); ++w) add_counters(total, workers.counters[w]);
@@ -181,6 +183,24 @@ Outcome resolve_order(const Domain& d, Resolution& out, Order k, OrderBuffers& b
 }
 
 }  // namespace
+
+Outcome first_order_cells(const Catalogue& catalogue, ResolvedOrder& order, u64 begin, u64 end) noexcept {
+  FirstOrder first{catalogue, order};
+  return FirstOrder::body(&first, begin, end, 0);
+}
+
+Outcome resolve_cells(const ResolveContext& context, ResolvedOrder& order, Workers& workers,
+                      std::span<OrderCounters> counters, std::span<SectionCycles> profiles,
+                      const PopulationTable& table, u64 begin, u64 end, u32 worker) noexcept {
+  OrderPass pass{context, order, workers, counters, profiles, table, std::span<const u32>{}};
+  return OrderPass::body(&pass, begin, end, worker);
+}
+
+Outcome close_order(ResolvedOrder& order, std::span<const OrderCounters> counters) noexcept {
+  OrderCounters& total = StageAccess::counters(order);
+  for (const OrderCounters& part : counters) add_counters(total, part);
+  return check_order(order, total);
+}
 
 Outcome resolve_orders(const Domain& d, Resolution& out, OrderBuffers& buffers, Workers& workers,
                        MemoryBudget& budget, sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {

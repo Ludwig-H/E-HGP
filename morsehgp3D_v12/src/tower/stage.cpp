@@ -166,34 +166,21 @@ u64 orders_bytes(const Resolution& out, u64 workers, u32 sites) noexcept {
   u64 table = 0;
   for (Order k = 2; k <= out.orders(); ++k)
     table = std::max(table, PopulationTable::bytes_for(out.order(k).births(), out.orders()));
-  return table + workers * (u64{sites} * sizeof(SiteIdx) + sizeof(OrderCounters) + sizeof(SectionCycles));
+  return table + workers_bytes(workers, sites);
 }
 
 Result<Resolution> run_stage(const GlobalIndex& index, const Catalogue& catalogue, MemoryBudget& budget,
                              sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {
-  const Order kmax = catalogue.kmax();
-  if (kmax < 1 || kmax > kMaxPart) return fail(Reason::kmax_out_of_range);
+  OpenedStage opened;
+  MHGP12_TRY(open_stage(index, catalogue, budget, pool, diag, opened));
+  const Domain d{index, catalogue, opened.points.span()};
+  Resolution& out = opened.out;
   const u32 n = index.cloud().sites();
-  if (n == 0) return fail(Reason::empty_input);
-  const Stopwatch preparing;
-  auto points = prepare(index.cloud(), catalogue, budget, pool);
-  if (!points.ok()) return points.outcome();
-  diag.prepare_ns = preparing.nanoseconds();
-  const Domain d{index, catalogue, points.value().span()};
-  Resolution out;
-  StageAccess::set_orders(out, kmax, static_cast<Order>(std::min<u32>(kmax, n)));
-  MHGP12_TRY(plan_and_fill(d, out, budget, pool, diag));
   const u64 workers = pool.size();
   const Stopwatch staffing;
   MHGP12_TRY(budget.admit(orders_bytes(out, workers, n)));
   Workers team;
-  MHGP12_TRY(team.counters.allocate(workers, budget));
-  if constexpr (kProfile) MHGP12_TRY(team.profiles.allocate(workers, budget));
-  for (u32 w = 0; w < workers; ++w) {
-    auto made = CensusWorkspace::make(index, budget);
-    if (!made.ok()) return made.outcome();
-    team.census[w] = std::move(made.value());
-  }
+  MHGP12_TRY(staff_workers(index, workers, budget, team));
   diag.workspace_ns = staffing.nanoseconds();
   OrderBuffers buffers;
   MHGP12_TRY(resolve_orders(d, out, buffers, team, budget, pool, diag));
@@ -201,10 +188,42 @@ Result<Resolution> run_stage(const GlobalIndex& index, const Catalogue& catalogu
   diag.profiled = kProfile;
   diag.workspace_bytes = workers * u64{n} * sizeof(SiteIdx);
   diag.peak_bytes = budget.peak();
-  return out;
+  return std::move(out);
 }
 
 }  // namespace
+
+u64 workers_bytes(u64 workers, u32 sites) noexcept {
+  return workers * (u64{sites} * sizeof(SiteIdx) + sizeof(OrderCounters) + sizeof(SectionCycles));
+}
+
+Outcome staff_workers(const GlobalIndex& index, u64 workers, MemoryBudget& budget, Workers& team) noexcept {
+  MHGP12_TRY(team.counters.allocate(workers, budget));
+  if constexpr (kProfile) MHGP12_TRY(team.profiles.allocate(workers, budget));
+  for (u32 w = 0; w < workers; ++w) {
+    auto made = CensusWorkspace::make(index, budget);
+    if (!made.ok()) return made.outcome();
+    team.census[w] = std::move(made.value());
+  }
+  return {};
+}
+
+Outcome open_stage(const GlobalIndex& index, const Catalogue& catalogue, MemoryBudget& budget, sched::Pool& pool,
+                   ResolutionDiagnostics& diag, OpenedStage& opened) noexcept {
+  const Order kmax = catalogue.kmax();
+  if (kmax < 1 || kmax > kMaxPart) return fail(Reason::kmax_out_of_range);
+  const u32 n = index.cloud().sites();
+  if (n == 0) return fail(Reason::empty_input);
+  const Stopwatch preparing;
+  auto points = prepare(index.cloud(), catalogue, budget, pool);
+  if (!points.ok()) return points.outcome();
+  opened.points = std::move(points.value());
+  diag.prepare_ns = preparing.nanoseconds();
+  const Domain d{index, catalogue, opened.points.span()};
+  StageAccess::set_orders(opened.out, kmax, static_cast<Order>(std::min<u32>(kmax, n)));
+  return plan_and_fill(d, opened.out, budget, pool, diag);
+}
+
 }  // namespace tower_detail
 
 Result<Resolution> resolve_tower(const GlobalIndex& index, const Catalogue& catalogue, MemoryBudget& budget,

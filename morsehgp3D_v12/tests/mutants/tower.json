@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 27,
+  "plancher": 37,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -192,6 +192,93 @@
       "remplace": "const u32 y = target_is_cell(leaves[p]) ? leaf : find(c, leaf);",
       "porte": "mhgp12_tower_forest_temoins",
       "note": "cible << cellule >> lue comme l'element de la cellule sans le relire a sa racine courante : sommet perime d'une composante absorbee"
+    },
+    {
+      "id": "noyau_sans_tranche_terminee",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    if (!(flag & kSliceDone)) break;",
+      "remplace": "    if (false) break;",
+      "porte": "mhgp12_tower_pipeline_identite",
+      "note": "Session recouverte : le noyau consomme une tranche de G non terminee (cibles non resolues) : foret fausse ou refus, la ou la voie sequentielle reussit"
+    },
+    {
+      "id": "noyau_rendu_sans_reprise",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "  st.flags.store(0, std::memory_order_release);  // rendu : un autre fil le reprendra quand la tranche sera publiee",
+      "remplace": "  st.flags.store(kStepBusy, std::memory_order_release);",
+      "porte": "mhgp12_tower_pipeline_identite",
+      "note": "Session recouverte : le noyau arrete sur une tranche non terminee n'est jamais repris (D-F2 sans reprise) : la region finit avec des etapes non terminees, refus tower_invariant"
+    },
+    {
+      "id": "verticales_sans_ordre_inferieur",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    case kLower: return {2, {{kFinish, false}, {kFinish, true}}};",
+      "remplace": "    case kLower: return {1, {{kFinish, false}}};",
+      "porte": "mhgp12_tower_pipeline_graphe",
+      "note": "Session recouverte : V de l'ordre k n'attend plus la contraction de l'ordre k - 1 (cell_node, parent, rang lus par LEM-T6)"
+    },
+    {
+      "id": "fusions_sans_historique_inferieur",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    case kMerges: return {2, {{kBirths, false}, {kHistory, true}}};",
+      "remplace": "    case kMerges: return {1, {{kBirths, false}}};",
+      "porte": "mhgp12_tower_pipeline_graphe",
+      "note": "Session recouverte : les images des fusions (LEM-T5) n'attendent plus l'historique d'attache de l'ordre k - 1 (survivor_events), construit en meme temps que la contraction"
+    },
+    {
+      "id": "registre_sans_historique",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "    case kRows: return {2, {{kFinish, false}, {kHistory, false}}};",
+      "remplace": "    case kRows: return {1, {{kFinish, false}}};",
+      "porte": "mhgp12_tower_pipeline_graphe",
+      "note": "Session recouverte : le registre (component_at) et la liberation des evenements n'attendent plus l'historique d'attache"
+    },
+    {
+      "id": "phases_sans_tranches",
+      "fichier": "src/tower/pipeline_run.cpp",
+      "cherche": "      for (const Step phase : {kClasses, kNodes, kParents, kChildren}) set_items(p, i, phase, work.slices.size());",
+      "remplace": "",
+      "porte": "mhgp12_tower_pipeline_determinisme",
+      "note": "Session recouverte : les phases de la contraction gardent un seul morceau : seule la premiere tranche d'evenements est contractee des qu'un ordre en a plusieurs"
+    },
+    {
+      "id": "admission_sans_contraction_ni_registre",
+      "fichier": "src/tower/pipeline.cpp",
+      "cherche": "    bytes += t_bytes[i] + contraction_bytes(in, ne) + registry_bytes_bound(in, ne) + p.g_items[i];",
+      "remplace": "    bytes += t_bytes[i] + p.g_items[i];",
+      "porte": "mhgp12_tower_pipeline_admission",
+      "note": "Session recouverte : admission unique sans les bornes de M et de R : le pic de la region depasse les octets admis, et une limite egale a l'usage plus les octets admis refuse en cours de region"
+    },
+    {
+      "id": "ordres_de_g_non_clos",
+      "fichier": "src/tower/pipeline.cpp",
+      "cherche": "    out = merge(out, tower_detail::close_order(order, p.g_counters.span().subspan(u64{i} * p.threads, p.threads)));",
+      "remplace": "    (void)order;",
+      "porte": "mhgp12_tower_pipeline_identite",
+      "note": "Session recouverte : compteurs de G par fil jamais fusionnes ni controles (check_order) : compteurs du travail de G differents de resolve_tower"
+    },
+    {
+      "id": "session_ouverte_noexcept",
+      "fichier": "src/tower/pipeline.cpp",
+      "cherche": "Outcome open_session(SessionRun& r) {  // peut lever std::bad_alloc (pipeline.hpp)",
+      "remplace": "Outcome open_session(SessionRun& r) noexcept {",
+      "aussi": [
+        {
+          "fichier": "src/tower/pipeline.hpp",
+          "cherche": "[[nodiscard]] Outcome open_session(SessionRun& run);",
+          "remplace": "[[nodiscard]] Outcome open_session(SessionRun& run) noexcept;"
+        }
+      ],
+      "porte": "mhgp12_tower_pipeline_fault_allocation",
+      "note": "Session recouverte : open_session redevient noexcept (prelecture de l'auditeur Codex du 8 octobre) : le std::bad_alloc injecte a l'allocation de BuildState (ou de Pipeline) termine le processus avant le guarded de build_tower"
+    },
+    {
+      "id": "tour_sans_garde",
+      "fichier": "src/tower/pipeline.cpp",
+      "cherche": "  return guarded([&]() -> Result<Tower> {",
+      "remplace": "  return [](auto run) { return run(); }([&]() -> Result<Tower> {",
+      "porte": "mhgp12_tower_pipeline_fault_allocation",
+      "note": "Session recouverte : build_tower sans guarded : le std::bad_alloc de l'allocation de SessionRun sort de la frontiere noexcept et termine le processus au lieu d'un refus memory_budget"
     },
     {
       "id": "naissances_par_cle",

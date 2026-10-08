@@ -1,5 +1,6 @@
 // Etage T : noyau union-find par TAILLE sans lots d'un ordre (D-F1, LEM-T4 ; CONCEPTION_TOUR.md de la v11, paragraphe
-// 4.1), port du noyau de MES-M4, en deux temps :
+// 4.1), port du noyau de MES-M4, en deux temps (le noyau est REPRENABLE par cellules croissantes : la Session recouverte
+// le fait avancer tranche de G par tranche de G, D-F2 ; build_forests le joue d'un trait) :
 //   pre-passe (parallele par morceaux de cellules, hors du passage sequentiel) : la cible de chaque representant devient
 //   sa feuille canonique (naissance, par son noeud) ou garde son codage << cellule >> ; la date de LEM-T3 est controlee
 //   (rang de la cible strictement inferieur a celui de la cellule, donc cellule cible deja traitee) ;
@@ -41,10 +42,11 @@ inline u32 leaf_of(const KernelView& v, u32 code) noexcept {
 }
 
 // Une cellule : unions de ses representants ; faux si une union deborderait (au plus naissances - 1 : jamais dans
-// le domaine).
-bool process_cell(const ForestInput& in, const u32* leaves, u32 nb, KernelView& v, u32 t, u32& count,
+// le domaine). Prechargement des feuilles suivantes borne a `ready` (representants dont les feuilles sont ecrites :
+// la Session ne lit jamais une tranche de G non terminee).
+bool process_cell(const ForestInput& in, const u32* leaves, u64 ready, u32 nb, KernelView& v, u32 t, u32& count,
                   u32& top_out) noexcept {
-  const u64 b0 = in.rep_offsets[t], e0 = in.rep_offsets[t + 1], nr = in.targets.size();
+  const u64 b0 = in.rep_offsets[t], e0 = in.rep_offsets[t + 1], nr = ready;
   const u32 r = idx(in.cell_rank[t]);
   UnionCell* c = v.cells;
   for (u64 p = b0 + 16; p < e0 + 16 && p < nr; ++p)
@@ -102,44 +104,68 @@ Outcome resolve_leaves(const ForestInput& in, const OrderForest& f, std::span<u3
   return {};
 }
 
-Outcome run_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest, OrderWork& work,
-                   ForestWork& counters, MemoryBudget& budget) noexcept {
+Outcome open_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work, MemoryBudget& budget) noexcept {
   const u32 nb = forest.births;
   const u64 nc = input.cell_ball.size();
   if (nb == 0 || !operand_domain(nb) || !operand_domain(nc)) return fail(Reason::tower_capacity);
-  if (leaves.size() != input.targets.size()) return fail(Reason::tower_invariant);
-  Buffer<UnionCell> cells;
-  Buffer<u32> element;
-  MHGP12_TRY(cells.allocate(nb, budget));
-  MHGP12_TRY(element.allocate(nc, budget));
+  MHGP12_TRY(work.cells.allocate(nb, budget));
+  MHGP12_TRY(work.element.allocate(nc, budget));
   MHGP12_TRY(work.events.allocate(nb - 1, budget));
   MHGP12_TRY(forest.event_cell.allocate(nb - 1, budget));
   MHGP12_TRY(work.cell_top.allocate(nc, budget));
   MHGP12_TRY(forest.attach_parent.allocate(nb, budget));
   MHGP12_TRY(forest.attach_rank.allocate(nb, budget));
   for (u32 i = 0; i < nb; ++i) {
-    cells[i] = UnionCell{i, 1, kNone, i};
+    work.cells[i] = UnionCell{i, 1, kNone, i};
     forest.attach_parent[i] = kNone;
     forest.attach_rank[i] = 0;
   }
-  KernelView view{cells.data(), work.events.data(), forest.event_cell.data(), forest.attach_parent.data(),
-                  forest.attach_rank.data(), element.data()};
-  u32 count = 0;
-  for (u64 t = 0; t < nc; ++t) {
+  work.next_cell = 0;
+  work.event_count = 0;
+  return {};
+}
+
+Outcome advance_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest, OrderWork& work,
+                       ForestWork& counters, u64 end_cell) noexcept {
+  const u32 nb = forest.births;
+  const u64 nc = input.cell_ball.size();
+  if (leaves.size() != input.targets.size() || end_cell > nc || work.cells.size() != nb)
+    return fail(Reason::tower_invariant);
+  KernelView view{work.cells.data(), work.events.data(), forest.event_cell.data(), forest.attach_parent.data(),
+                  forest.attach_rank.data(), work.element.data()};
+  u32 count = work.event_count;
+  const u64 ready = input.rep_offsets[end_cell];
+  for (u64 t = work.next_cell; t < end_cell; ++t) {
     if (input.rep_offsets[t + 1] <= input.rep_offsets[t]) return fail(Reason::tower_invariant);
     u32 top_node = kNone;
     const u32 before = count;
-    if (!process_cell(input, leaves.data(), nb, view, static_cast<u32>(t), count, top_node))
+    if (!process_cell(input, leaves.data(), ready, nb, view, static_cast<u32>(t), count, top_node))
       return fail(Reason::tower_invariant);
     work.cell_top[t] = top_node;
     counters.retained_cells += count != before;
   }
-  // Racine unique (contrat, paragraphe 5) : une union de moins que de naissances.
-  if (u64{count} + 1 != nb) return fail(Reason::tower_invariant);
   work.event_count = count;
-  counters.events = count;
-  counters.attaches = count;
+  work.next_cell = std::max(work.next_cell, end_cell);
   return {};
+}
+
+Outcome close_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work, ForestWork& counters) noexcept {
+  if (work.next_cell != input.cell_ball.size()) return fail(Reason::tower_invariant);
+  // Racine unique (contrat, paragraphe 5) : une union de moins que de naissances.
+  if (u64{work.event_count} + 1 != forest.births) return fail(Reason::tower_invariant);
+  counters.events = work.event_count;
+  counters.attaches = work.event_count;
+  work.cells.reset();
+  work.element.reset();
+  return {};
+}
+
+Outcome run_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest, OrderWork& work,
+                   ForestWork& counters, MemoryBudget& budget) noexcept {
+  if (leaves.size() != input.targets.size()) return fail(Reason::tower_invariant);
+  MHGP12_TRY(open_kernel(input, forest, work, budget));
+  MHGP12_TRY(advance_kernel(input, leaves, forest, work, counters, input.cell_ball.size()));
+  return close_kernel(input, forest, work, counters);
 }
 
 Outcome build_history(OrderForest& forest, const OrderWork& work, ForestWork& counters,

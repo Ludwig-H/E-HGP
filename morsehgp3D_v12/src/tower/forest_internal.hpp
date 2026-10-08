@@ -1,5 +1,7 @@
-// Interne aux etages T, M, V et R (forest.hpp) : evenements binaires du noyau, etat de travail d'un ordre, etapes
-// appelees par l'orchestration (forest_build.cpp). Port des structures du prototype de MES-M4.
+// Interne aux etages T, M, V et R (forest.hpp) : evenements binaires du noyau, etat de travail d'un ordre, etapes PAR
+// ORDRE partagees par les deux pilotes : build_forests (etage par etage sur tous les ordres, forest_build.cpp,
+// forest_stages.cpp, registry_branches.cpp) et la Session recouverte (pipeline.cpp, decision D-F2). Port des
+// structures du prototype de MES-M4.
 #pragma once
 
 #include "tower/tower.hpp"
@@ -26,14 +28,28 @@ struct UnionCell {
 };
 static_assert(sizeof(UnionCell) == 16, "tour : case d'union-find de 16 octets");
 
-// Etat de travail d'un ordre entre T et M (tampons du budget, rendus a la fin de build_forests).
+// Tranche de la contraction d'un ordre : evenements [lo, hi), alignes sur les rangs ; ses classes et ses noeuds.
+struct Slice {
+  u32 lo = 0, hi = 0;
+  u32 classes = 0, node0 = 0;
+  u64 children = 0, child0 = 0;
+  u64 ns = 0;                  // duree des quatre phases (diagnostic physique)
+};
+
+// Etat de travail d'un ordre entre T et R (tampons du budget, rendus au plus tard a la fin du pilote).
 struct OrderWork {
   Buffer<u32> birth_order;     // position canonique -> indice d'entree de la naissance
   Buffer<u32> leaves;          // par representant : feuille canonique, ou cible << cellule >> (pre-passe de T)
+  // Noyau reprenable (open_kernel, advance_kernel, close_kernel) : union-find, element de chaque cellule traitee,
+  // prochaine cellule a traiter.
+  Buffer<UnionCell> cells;
+  Buffer<u32> element;
+  u64 next_cell = 0;
   Buffer<Event> events;        // capacite naissances - 1 ; event_count ecrits
   u32 event_count = 0;
   Buffer<u32> cell_top;        // par cellule : sommet apres traitement (feuille, ou evenement | kEventBit)
-  // Contraction : union-find local, plus petite feuille et cle (rang, plus petite feuille, racine locale) par classe.
+  // Contraction : tranches de l'ordre ; union-find local, plus petite feuille et cle par classe.
+  Buffer<Slice> slices;
   Buffer<u32> local;
   Buffer<u32> class_min;
   Buffer<u64> keys;            // (plus petite feuille << 32) | indice local de la racine, tries par tranche
@@ -43,15 +59,6 @@ struct OrderWork {
   Buffer<u32> branch_nodes;
   Buffer<u64> branch_off;
   Buffer<u32> branch_count;
-};
-
-// Tranche de la contraction : evenements [lo, hi) d'un ordre, alignes sur les rangs ; ses classes et ses noeuds.
-struct Slice {
-  u32 order = 0;               // indice de l'ordre (k - 1)
-  u32 lo = 0, hi = 0;
-  u32 classes = 0, node0 = 0;
-  u64 children = 0, child0 = 0;
-  u64 ns = 0;                  // duree des quatre phases (diagnostic physique)
 };
 
 // Noeud d'un sommet de noyau (feuille ou evenement) une fois la contraction faite.
@@ -75,20 +82,29 @@ inline u32 node_of_top(u32 top, std::span<const u32> event_node) noexcept {
 [[nodiscard]] Outcome resolve_leaves(const ForestInput& input, const OrderForest& forest, std::span<u32> leaves,
                                      u64 begin, u64 end, ForestWork& counters) noexcept;
 
-// T : noyau d'un ordre (feuilles = naissances canoniques, de la pre-passe). Remplit work.events, work.cell_top,
-// l'historique d'attache et les cellules des evenements de forest, le nombre d'evenements ; refus tower_invariant
-// (racines multiples), memory_budget.
+// T : noyau d'un ordre (feuilles = naissances canoniques, de la pre-passe), REPRENABLE par cellules croissantes :
+// open_kernel alloue et initialise l'union-find, les evenements et l'historique d'attache ; advance_kernel traite les
+// cellules [work.next_cell, end_cell) (leurs feuilles doivent etre pretes) ; close_kernel exige la racine unique,
+// publie le nombre d'evenements et rend l'union-find. Refus tower_invariant (racines multiples, feuilles absentes),
+// tower_capacity, memory_budget. run_kernel enchaine les trois sur toutes les cellules.
+[[nodiscard]] Outcome open_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work,
+                                  MemoryBudget& budget) noexcept;
+[[nodiscard]] Outcome advance_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest,
+                                     OrderWork& work, ForestWork& counters, u64 end_cell) noexcept;
+[[nodiscard]] Outcome close_kernel(const ForestInput& input, OrderForest& forest, OrderWork& work,
+                                   ForestWork& counters) noexcept;
 [[nodiscard]] Outcome run_kernel(const ForestInput& input, std::span<const u32> leaves, OrderForest& forest,
                                  OrderWork& work, ForestWork& counters, MemoryBudget& budget) noexcept;
 
-// T, fin : profondeur d'attache maximale (compteur du travail) et evenements par survivant (CSR de LEM-T5).
+// T, fin : profondeur d'attache maximale (compteur du travail) et evenements par survivant (CSR de LEM-T5). Lit les
+// evenements du noyau, jamais l'etat de la contraction : peut tourner en meme temps qu'elle.
 [[nodiscard]] Outcome build_history(OrderForest& forest, const OrderWork& work, ForestWork& counters,
                                     MemoryBudget& budget) noexcept;
 
 // M, phases de la contraction d'une tranche (forest_contract.cpp). Phase A : classes et cles ; phase B : noeuds,
 // rangs, plus petites naissances, noeud de chaque evenement ; phase C : parents et nombres d'enfants ; phase D :
-// decalages et enfants tries. Les phases B, C et D lisent les tranches precedentes : chacune attend la fin de la
-// precedente pour toutes les tranches de tous les ordres.
+// decalages et enfants tries. Les phases B, C et D lisent les tranches precedentes du meme ordre : chacune attend la
+// fin de la precedente pour toutes les tranches de l'ordre.
 void contract_classes(OrderWork& work, Slice& slice) noexcept;
 void contract_nodes(const OrderWork& work, OrderForest& forest, const Slice& slice) noexcept;
 void contract_parents(OrderWork& work, OrderForest& forest, Slice& slice) noexcept;
@@ -105,7 +121,8 @@ void contract_children(OrderWork& work, OrderForest& forest, const Slice& slice)
 // Etages de build_forests, dans l'ordre d'execution (indices de BuildState::admitted).
 inline constexpr u32 kStageT = 0, kStageM = 1, kStageV = 2, kStageR = 3, kStages = 4;
 
-// Etat d'un appel de build_forests : entrees empruntees, registre en construction, travail et compteurs par ordre.
+// Etat d'un appel de build_forests ou de la Session recouverte : entrees empruntees, registre en construction, travail
+// et compteurs par ordre.
 struct BuildState {
   BuildState(const Cloud& c, const BallSource& b, std::span<const ForestInput> in, const ForestParams& p,
              MemoryBudget& m) noexcept
@@ -119,7 +136,6 @@ struct BuildState {
   std::array<OrderWork, kMaxOrder> work;
   std::array<ForestWork, kMaxOrder> counters{};
   std::array<ForestPhysical, kMaxOrder> physical{};
-  Buffer<Slice> slices;
   u64 kernels_ns = 0, contraction_ns = 0, vertical_births_ns = 0, vertical_merges_ns = 0, registry_ns = 0;
   std::array<u64, kStages> admitted{};  // octets admis par etage (admit_stage)
 };
@@ -135,11 +151,38 @@ struct BuildState {
 }
 
 // Octets admis par etage pour un ordre : T (naissances, spheres de la plus large cohorte, noyau, historique) ; M avec
-// ne evenements (noeuds au plus naissances + ne).
+// ne evenements (noeuds au plus naissances + ne) ; V (verticales, noeuds au plus nn) ; R au plus (lignes au plus ne,
+// representants relus au plus nr, branches au plus les representants relus, sortie comprise).
 u64 kernel_bytes(const ForestInput& input) noexcept;
 u64 contraction_bytes(const ForestInput& input, u64 events) noexcept;
+u64 registry_bytes_bound(const ForestInput& input, u64 events) noexcept;
 
-// Etages de build_forests (forest_build.cpp, forest_stages.cpp), chacun admis dans le budget avant ses allocations.
+// ---- Etapes par ordre i (k = i + 1), appelees par les deux pilotes ---------------------------------------------------
+// T : numerotation canonique des naissances et tampon des feuilles (compteurs de cohortes dans state.counters[i]).
+[[nodiscard]] Outcome number_order(BuildState& state, u32 i) noexcept;
+// M : tranches de l'ordre (au moins params.slice_events evenements, alignees sur les rangs) et tampons par evenement ;
+// apres la phase A, premiers noeuds et noeuds ; apres la phase C, decalages des enfants ; apres la phase D, sommet de
+// chaque cellule, racine unique, liberation du travail de la contraction (les evenements restent : l'historique peut
+// les lire ; liberes par release_events).
+[[nodiscard]] Outcome open_contraction(BuildState& state, u32 i) noexcept;
+[[nodiscard]] Outcome allocate_nodes(BuildState& state, u32 i) noexcept;
+[[nodiscard]] Outcome place_children(BuildState& state, u32 i) noexcept;
+[[nodiscard]] Outcome finish_order(BuildState& state, u32 i) noexcept;
+void release_events(BuildState& state, u32 i) noexcept;
+// V (i >= 1) : verticales de l'ordre allouees, initialisees a kNone.
+[[nodiscard]] Outcome open_verticals(BuildState& state, u32 i) noexcept;
+// R : lignes (cellules retenues) et decalages de leurs representants (reads : representants relus) ; passe 1 sur les
+// lignes [begin, end) ; decalages exacts et reservation de la sortie ; passe 2 ; liberation du travail.
+[[nodiscard]] Outcome prepare_rows(BuildState& state, u32 i, u64& reads) noexcept;
+[[nodiscard]] Outcome collect_rows(BuildState& state, u32 i, u64 begin, u64 end, ForestWork& counters) noexcept;
+[[nodiscard]] Outcome place_rows(BuildState& state, u32 i) noexcept;
+void fill_rows(BuildState& state, u32 i, u64 begin, u64 end) noexcept;
+void close_rows(BuildState& state, u32 i) noexcept;
+// Fusion d'un compteur du travail dans un total : sommes, et maxima pour max_cohort, max_attach_depth, t5_max_hops.
+void add_work(ForestWork& total, const ForestWork& part) noexcept;
+
+// Etages de build_forests (forest_build.cpp, forest_stages.cpp, registry_branches.cpp), chacun admis dans le budget
+// avant ses allocations.
 [[nodiscard]] Outcome run_kernels(BuildState& state, sched::Pool& pool) noexcept;
 [[nodiscard]] Outcome run_contraction(BuildState& state, sched::Pool& pool) noexcept;
 [[nodiscard]] Outcome run_verticals(BuildState& state, sched::Pool& pool) noexcept;

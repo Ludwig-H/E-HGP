@@ -12,7 +12,9 @@
 // naissances au meme plateau, cellules {0,1}, {0,1,2}, ..., {0,..,6} : six evenements, 27 branches) ; elle est
 // bornee par les representants relus. Deux passes paralleles par morceaux de lignes, ecritures disjointes. Deux
 // admissions : le travail et les lignes avant la premiere passe, puis la sortie (branches ET decalages de leur CSR,
-// recu audit_registre_branches_20261007) apres le comptage, quand tout le reste de l'etage est deja alloue.
+// recu audit_registre_branches_20261007) apres le comptage, quand tout le reste de l'etage est deja alloue. Etapes
+// par ordre (lignes, passe 1 par morceaux, decalages et sortie, passe 2, liberation) partagees par run_registry et la
+// Session recouverte (pipeline.cpp, admission unique bornee par registry_bytes_bound).
 #include <algorithm>
 
 #include "sched/sched.hpp"
@@ -21,21 +23,32 @@
 namespace mhgp12::tower::detail {
 namespace {
 
-inline constexpr u64 kBranchChunk = 2048;  // lignes (cellules retenues) par morceau
+// Passe 1 d'une ligne : noeud a la coupe ouverte de chaque representant, tri, doublons retires ; nombre de branches.
+Outcome collect_row(const ForestInput& in, const OrderForest& f, OrderWork& w, u64 j, ForestWork& c) noexcept {
+  const u32 t = f.retained_cell[j], r = f.retained_rank[j];
+  if (r == 0) return fail(Reason::tower_invariant);
+  u32* row = w.branch_nodes.data() + w.branch_off[j];
+  u64 n = 0;
+  for (u64 p = in.rep_offsets[t]; p < in.rep_offsets[t + 1]; ++p) {
+    const u32 target = in.targets[p], index = target_index(target);
+    const u32 witness = target_is_cell(target) ? f.minleaf[f.cell_node[index]] : f.birth_node[index];
+    auto open = component_at(f, witness, r - 1);
+    if (!open.ok()) return open.outcome();
+    row[n++] = open.value();
+  }
+  std::sort(row, row + n);
+  const u64 distinct = static_cast<u64>(std::unique(row, row + n) - row);
+  if (distinct < 2) return fail(Reason::tower_invariant);  // une cellule retenue unit au moins deux composantes
+  w.branch_count[j] = static_cast<u32>(distinct);
+  c.branch_reads += n;
+  c.branches += distinct;
+  return {};
+}
 
-struct BranchTask {
-  u32 order = 0;
-  u64 begin = 0, end = 0, ns = 0;
-};
-struct BranchRun {
-  BuildState& state;
-  std::span<BranchTask> tasks;
-  std::span<ForestWork> counters;
-  bool fill;
-};
+}  // namespace
 
 // Lignes de l'ordre i : cellules retenues (blocs consecutifs de event_cell) ; decalages de leurs representants.
-Outcome prepare_rows(BuildState& s, u64 i, u64& reads) noexcept {
+Outcome prepare_rows(BuildState& s, u32 i, u64& reads) noexcept {
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
   const ForestInput& in = s.inputs[i];
@@ -64,53 +77,14 @@ Outcome prepare_rows(BuildState& s, u64 i, u64& reads) noexcept {
   return {};
 }
 
-// Passe 1 d'une ligne : noeud a la coupe ouverte de chaque representant, tri, doublons retires ; nombre de branches.
-Outcome collect_row(const ForestInput& in, const OrderForest& f, OrderWork& w, u64 j, ForestWork& c) noexcept {
-  const u32 t = f.retained_cell[j], r = f.retained_rank[j];
-  if (r == 0) return fail(Reason::tower_invariant);
-  u32* row = w.branch_nodes.data() + w.branch_off[j];
-  u64 n = 0;
-  for (u64 p = in.rep_offsets[t]; p < in.rep_offsets[t + 1]; ++p) {
-    const u32 target = in.targets[p], index = target_index(target);
-    const u32 witness = target_is_cell(target) ? f.minleaf[f.cell_node[index]] : f.birth_node[index];
-    auto open = component_at(f, witness, r - 1);
-    if (!open.ok()) return open.outcome();
-    row[n++] = open.value();
-  }
-  std::sort(row, row + n);
-  const u64 distinct = static_cast<u64>(std::unique(row, row + n) - row);
-  if (distinct < 2) return fail(Reason::tower_invariant);  // une cellule retenue unit au moins deux composantes
-  w.branch_count[j] = static_cast<u32>(distinct);
-  c.branch_reads += n;
-  c.branches += distinct;
+Outcome collect_rows(BuildState& s, u32 i, u64 begin, u64 end, ForestWork& counters) noexcept {
+  for (u64 j = begin; j < end; ++j)
+    MHGP12_TRY(collect_row(s.inputs[i], s.forests.orders[i], s.work[i], j, counters));
   return {};
 }
 
-Outcome branch_body(void* context, u64 begin, u64 end, u32) noexcept {
-  auto& run = *static_cast<BranchRun*>(context);
-  BuildState& s = run.state;
-  Outcome out;
-  for (u64 k = begin; k < end; ++k) {
-    BranchTask& task = run.tasks[k];
-    const ForestInput& in = s.inputs[task.order];
-    OrderForest& f = s.forests.orders[task.order];
-    OrderWork& w = s.work[task.order];
-    Stopwatch watch;
-    for (u64 j = task.begin; j < task.end && out.ok(); ++j) {
-      if (!run.fill) {
-        out = merge(out, collect_row(in, f, w, j, run.counters[k]));
-      } else {
-        const u32* from = w.branch_nodes.data() + w.branch_off[j];
-        std::copy(from, from + w.branch_count[j], f.branches.val.data() + f.branches.off[j]);
-      }
-    }
-    task.ns += watch.nanoseconds();
-  }
-  return out;
-}
-
 // Decalages exacts des branches de l'ordre i (sommes prefixes), puis reservation de la sortie.
-Outcome place_rows(BuildState& s, u64 i) noexcept {
+Outcome place_rows(BuildState& s, u32 i) noexcept {
   OrderForest& f = s.forests.orders[i];
   OrderWork& w = s.work[i];
   const u64 rows = f.retained_cell.size();
@@ -119,6 +93,56 @@ Outcome place_rows(BuildState& s, u64 i) noexcept {
   for (u64 j = 0; j < rows; ++j) f.branches.off[j + 1] = f.branches.off[j] + w.branch_count[j];
   if (f.branches.off[rows] > 0) MHGP12_TRY(f.branches.val.allocate(f.branches.off[rows], s.budget));
   return {};
+}
+
+void fill_rows(BuildState& s, u32 i, u64 begin, u64 end) noexcept {
+  OrderForest& f = s.forests.orders[i];
+  const OrderWork& w = s.work[i];
+  for (u64 j = begin; j < end; ++j) {
+    const u32* from = w.branch_nodes.data() + w.branch_off[j];
+    std::copy(from, from + w.branch_count[j], f.branches.val.data() + f.branches.off[j]);
+  }
+}
+
+void close_rows(BuildState& s, u32 i) noexcept {
+  s.work[i].branch_nodes.reset();
+  s.work[i].branch_off.reset();
+  s.work[i].branch_count.reset();
+}
+
+u64 registry_bytes_bound(const ForestInput& in, u64 events) noexcept {
+  const u64 rows = events, reads = in.targets.size();
+  // lignes (cellule, boule, rang), decalages, noeuds relus, comptes ; sortie : branches et decalages de leur CSR
+  return 12 * rows + 8 * (rows + 1) + 4 * reads + 4 * rows + 4 * reads + 8 * (rows + 1);
+}
+
+namespace {
+
+inline constexpr u64 kBranchChunk = 2048;  // lignes (cellules retenues) par morceau
+
+struct BranchTask {
+  u32 order = 0;
+  u64 begin = 0, end = 0, ns = 0;
+};
+struct BranchRun {
+  BuildState& state;
+  std::span<BranchTask> tasks;
+  std::span<ForestWork> counters;
+  bool fill;
+};
+
+Outcome branch_body(void* context, u64 begin, u64 end, u32) noexcept {
+  auto& run = *static_cast<BranchRun*>(context);
+  BuildState& s = run.state;
+  Outcome out;
+  for (u64 k = begin; k < end; ++k) {
+    BranchTask& task = run.tasks[k];
+    Stopwatch watch;
+    if (!run.fill) out = merge(out, collect_rows(s, task.order, task.begin, task.end, run.counters[k]));
+    else fill_rows(s, task.order, task.begin, task.end);
+    task.ns += watch.nanoseconds();
+  }
+  return out;
 }
 
 }  // namespace
@@ -140,7 +164,7 @@ Outcome run_registry(BuildState& s, sched::Pool& pool) noexcept {
   MHGP12_TRY(admit_stage(s, kStageR, bytes + tasks_count * (sizeof(BranchTask) + sizeof(ForestWork))));
   for (u64 i = 0; i < s.inputs.size(); ++i) {
     u64 reads = 0;
-    MHGP12_TRY(prepare_rows(s, i, reads));
+    MHGP12_TRY(prepare_rows(s, static_cast<u32>(i), reads));
   }
   Buffer<BranchTask> tasks;
   Buffer<ForestWork> counters;
@@ -163,7 +187,7 @@ Outcome run_registry(BuildState& s, sched::Pool& pool) noexcept {
   }
   // sortie exacte : 4 octets par branche, et les decalages de la CSR (8 octets par ligne, plus un, meme sans ligne)
   MHGP12_TRY(admit_stage(s, kStageR, 4 * output + output_offsets));
-  for (u64 i = 0; i < s.inputs.size(); ++i) MHGP12_TRY(place_rows(s, i));
+  for (u64 i = 0; i < s.inputs.size(); ++i) MHGP12_TRY(place_rows(s, static_cast<u32>(i)));
   run.fill = true;
   MHGP12_TRY(pool.parallel_for(tasks_count, 1, &run, branch_body));
   for (u64 k = 0; k < tasks_count; ++k) {
@@ -172,11 +196,7 @@ Outcome run_registry(BuildState& s, sched::Pool& pool) noexcept {
     c.branches += counters[k].branches;
     s.physical[tasks[k].order].registry_ns += tasks[k].ns;
   }
-  for (u64 i = 0; i < s.inputs.size(); ++i) {
-    s.work[i].branch_nodes.reset();
-    s.work[i].branch_off.reset();
-    s.work[i].branch_count.reset();
-  }
+  for (u64 i = 0; i < s.inputs.size(); ++i) close_rows(s, static_cast<u32>(i));
   s.registry_ns = watch.nanoseconds();
   return {};
 }
