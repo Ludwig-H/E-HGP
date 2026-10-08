@@ -1,0 +1,108 @@
+{
+  "chaudes_par_nuage": 2,
+  "cohortes_reelles_MES_P_K5_W48": {
+    "G": 132,
+    "H": 123
+  },
+  "exemples_algebriques_pas_chronos": [
+    {
+      "a_ns": "1000000",
+      "b_ns_par_site": "3000",
+      "max_ns_par_site": "13000",
+      "nom": "affine",
+      "points_ns": [
+        [
+          100,
+          1300000
+        ],
+        [
+          1000,
+          4000000
+        ],
+        [
+          10000,
+          31000000
+        ]
+      ],
+      "residus_ns": [
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "a_ns": "1900000",
+      "b_ns_par_site": "3000",
+      "max_ns_par_site": "7100",
+      "nom": "residu",
+      "points_ns": [
+        [
+          100,
+          200000
+        ],
+        [
+          1000,
+          7100000
+        ],
+        [
+          10000,
+          31700000
+        ]
+      ],
+      "residus_ns": [
+        "-2000000",
+        "2200000",
+        "-200000"
+      ]
+    },
+    {
+      "a_ns": "-100000/3",
+      "b_ns_par_site": "400",
+      "max_ns_par_site": "300",
+      "nom": "quadratique",
+      "points_ns": [
+        [
+          100,
+          10000
+        ],
+        [
+          200,
+          40000
+        ],
+        [
+          300,
+          90000
+        ]
+      ],
+      "residus_ns": [
+        "10000/3",
+        "-20000/3",
+        "10000/3"
+      ]
+    }
+  ],
+  "groupes": {
+    "clusters8": 5,
+    "lattice": 5,
+    "line": 2,
+    "reel": 132,
+    "slab": 5,
+    "sphere": 5,
+    "uniform": 5
+  },
+  "mesures_MES_C_lues": false,
+  "moteur_execute": false,
+  "nuages_session": 147,
+  "passes_session": 441,
+  "reference_K": {
+    "max_rapport_ns_par_site": "77629587/15931",
+    "mediane_rapports_ns_par_site": "127233145/36213",
+    "mediane_sites": 64740,
+    "mediane_temps_ns": 241309401,
+    "medianes_sur_meme_trame": false,
+    "rapport_medianes_ns_par_site": "80436467/21580",
+    "seuil_fige_ns_par_site": "12065000/3237",
+    "trames": 37
+  },
+  "tours": 3
+}

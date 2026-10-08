@@ -1,0 +1,950 @@
+{
+  "conditional_accounting_only": true,
+  "groupes": {
+    "k5_appareil": {
+      "agregats": {
+        "P_C": {
+          "maxima_plus_100ms": 0,
+          "maximum_contractuel_ns": 39645192,
+          "mediane_des_medianes_ns": 36682290,
+          "medianes_plus_100ms": 0
+        },
+        "avec_residu": {
+          "maxima_plus_100ms": 2,
+          "maximum_contractuel_ns": 112661105,
+          "mediane_des_medianes_ns": 102132048,
+          "medianes_plus_100ms": 2
+        },
+        "original": {
+          "maxima_plus_100ms": 3,
+          "maximum_contractuel_ns": 164635953,
+          "mediane_des_medianes_ns": 159302836,
+          "medianes_plus_100ms": 3
+        },
+        "sans_residu": {
+          "maxima_plus_100ms": 2,
+          "maximum_contractuel_ns": 112660955,
+          "mediane_des_medianes_ns": 102131908,
+          "medianes_plus_100ms": 2
+        }
+      },
+      "par_trame": {
+        "ng00": {
+          "P_C": {
+            "max_brut_ns": 37890729,
+            "max_medianes_processus_ns": 36785247,
+            "mediane_ns": 36682290
+          },
+          "avec_residu": {
+            "max_brut_ns": 107285735,
+            "max_medianes_processus_ns": 103374863,
+            "mediane_ns": 102132048
+          },
+          "original": {
+            "max_brut_ns": 164457942,
+            "max_medianes_processus_ns": 160760208,
+            "mediane_ns": 159302836
+          },
+          "sans_residu": {
+            "max_brut_ns": 107285605,
+            "max_medianes_processus_ns": 103374733,
+            "mediane_ns": 102131908
+          }
+        },
+        "ng01": {
+          "P_C": {
+            "max_brut_ns": 33013201,
+            "max_medianes_processus_ns": 32441861,
+            "mediane_ns": 32244689
+          },
+          "avec_residu": {
+            "max_brut_ns": 89368635,
+            "max_medianes_processus_ns": 84161545,
+            "mediane_ns": 83865142
+          },
+          "original": {
+            "max_brut_ns": 132950482,
+            "max_medianes_processus_ns": 127803949,
+            "mediane_ns": 127626536
+          },
+          "sans_residu": {
+            "max_brut_ns": 89368515,
+            "max_medianes_processus_ns": 84161395,
+            "mediane_ns": 83864982
+          }
+        },
+        "ng02": {
+          "P_C": {
+            "max_brut_ns": 40692883,
+            "max_medianes_processus_ns": 39645192,
+            "mediane_ns": 39313731
+          },
+          "avec_residu": {
+            "max_brut_ns": 122117330,
+            "max_medianes_processus_ns": 112661105,
+            "mediane_ns": 111673759
+          },
+          "original": {
+            "max_brut_ns": 173552070,
+            "max_medianes_processus_ns": 164635953,
+            "mediane_ns": 163268927
+          },
+          "sans_residu": {
+            "max_brut_ns": 122117170,
+            "max_medianes_processus_ns": 112660955,
+            "mediane_ns": 111673409
+          }
+        }
+      },
+      "passes_chaudes": 135,
+      "trames": 3
+    },
+    "v12set": {
+      "agregats": {
+        "P_C": {
+          "maxima_plus_100ms": 0,
+          "maximum_contractuel_ns": 96864863,
+          "mediane_des_medianes_ns": 55303026,
+          "medianes_plus_100ms": 0
+        },
+        "avec_residu": {
+          "maxima_plus_100ms": 31,
+          "maximum_contractuel_ns": 311049219,
+          "mediane_des_medianes_ns": 169498160,
+          "medianes_plus_100ms": 29
+        },
+        "original": {
+          "maxima_plus_100ms": 37,
+          "maximum_contractuel_ns": 467920453,
+          "mediane_des_medianes_ns": 241309401,
+          "medianes_plus_100ms": 37
+        },
+        "sans_residu": {
+          "maxima_plus_100ms": 31,
+          "maximum_contractuel_ns": 311049069,
+          "mediane_des_medianes_ns": 169498030,
+          "medianes_plus_100ms": 29
+        }
+      },
+      "par_trame": {
+        "kitti_ng_00_000648": {
+          "P_C": {
+            "max_brut_ns": 56387867,
+            "max_medianes_processus_ns": 56387867,
+            "mediane_ns": 56299806
+          },
+          "avec_residu": {
+            "max_brut_ns": 191717344,
+            "max_medianes_processus_ns": 191717344,
+            "mediane_ns": 180045750
+          },
+          "original": {
+            "max_brut_ns": 262551394,
+            "max_medianes_processus_ns": 262551394,
+            "mediane_ns": 250239767
+          },
+          "sans_residu": {
+            "max_brut_ns": 191717214,
+            "max_medianes_processus_ns": 191717214,
+            "mediane_ns": 180045640
+          }
+        },
+        "kitti_ng_00_000660": {
+          "P_C": {
+            "max_brut_ns": 55724158,
+            "max_medianes_processus_ns": 55724158,
+            "mediane_ns": 55430437
+          },
+          "avec_residu": {
+            "max_brut_ns": 187989631,
+            "max_medianes_processus_ns": 187989631,
+            "mediane_ns": 170655351
+          },
+          "original": {
+            "max_brut_ns": 260337809,
+            "max_medianes_processus_ns": 260337809,
+            "mediane_ns": 242713899
+          },
+          "sans_residu": {
+            "max_brut_ns": 187989451,
+            "max_medianes_processus_ns": 187989451,
+            "mediane_ns": 170655231
+          }
+        },
+        "kitti_ng_00_001464": {
+          "P_C": {
+            "max_brut_ns": 57342879,
+            "max_medianes_processus_ns": 57342879,
+            "mediane_ns": 56992757
+          },
+          "avec_residu": {
+            "max_brut_ns": 181260010,
+            "max_medianes_processus_ns": 181260010,
+            "mediane_ns": 177453936
+          },
+          "original": {
+            "max_brut_ns": 256809229,
+            "max_medianes_processus_ns": 256809229,
+            "mediane_ns": 252965567
+          },
+          "sans_residu": {
+            "max_brut_ns": 181259880,
+            "max_medianes_processus_ns": 181259880,
+            "mediane_ns": 177453806
+          }
+        },
+        "kitti_ng_00_001502": {
+          "P_C": {
+            "max_brut_ns": 50360417,
+            "max_medianes_processus_ns": 50360417,
+            "mediane_ns": 50001935
+          },
+          "avec_residu": {
+            "max_brut_ns": 164475608,
+            "max_medianes_processus_ns": 164475608,
+            "mediane_ns": 151944560
+          },
+          "original": {
+            "max_brut_ns": 225898465,
+            "max_medianes_processus_ns": 225898465,
+            "mediane_ns": 213621038
+          },
+          "sans_residu": {
+            "max_brut_ns": 164475508,
+            "max_medianes_processus_ns": 164475508,
+            "mediane_ns": 151944440
+          }
+        },
+        "kitti_ng_00_001880": {
+          "P_C": {
+            "max_brut_ns": 72007178,
+            "max_medianes_processus_ns": 72007178,
+            "mediane_ns": 70977031
+          },
+          "avec_residu": {
+            "max_brut_ns": 231107657,
+            "max_medianes_processus_ns": 231107657,
+            "mediane_ns": 224398113
+          },
+          "original": {
+            "max_brut_ns": 340906550,
+            "max_medianes_processus_ns": 340906550,
+            "mediane_ns": 333944839
+          },
+          "sans_residu": {
+            "max_brut_ns": 231107517,
+            "max_medianes_processus_ns": 231107517,
+            "mediane_ns": 224397983
+          }
+        },
+        "kitti_ng_00_001896": {
+          "P_C": {
+            "max_brut_ns": 94217900,
+            "max_medianes_processus_ns": 94217900,
+            "mediane_ns": 93634811
+          },
+          "avec_residu": {
+            "max_brut_ns": 304283764,
+            "max_medianes_processus_ns": 304283764,
+            "mediane_ns": 302725254
+          },
+          "original": {
+            "max_brut_ns": 467920453,
+            "max_medianes_processus_ns": 467920453,
+            "mediane_ns": 465777522
+          },
+          "sans_residu": {
+            "max_brut_ns": 304283624,
+            "max_medianes_processus_ns": 304283624,
+            "mediane_ns": 302725014
+          }
+        },
+        "kitti_ng_00_003612": {
+          "P_C": {
+            "max_brut_ns": 53905167,
+            "max_medianes_processus_ns": 53905167,
+            "mediane_ns": 53553356
+          },
+          "avec_residu": {
+            "max_brut_ns": 168528622,
+            "max_medianes_processus_ns": 168528622,
+            "mediane_ns": 163241308
+          },
+          "original": {
+            "max_brut_ns": 235631031,
+            "max_medianes_processus_ns": 235631031,
+            "mediane_ns": 230587406
+          },
+          "sans_residu": {
+            "max_brut_ns": 168528512,
+            "max_medianes_processus_ns": 168528512,
+            "mediane_ns": 163241178
+          }
+        },
+        "kitti_ng_00_003624": {
+          "P_C": {
+            "max_brut_ns": 55984818,
+            "max_medianes_processus_ns": 55984818,
+            "mediane_ns": 55303026
+          },
+          "avec_residu": {
+            "max_brut_ns": 178440379,
+            "max_medianes_processus_ns": 178440379,
+            "mediane_ns": 170679202
+          },
+          "original": {
+            "max_brut_ns": 249490067,
+            "max_medianes_processus_ns": 249490067,
+            "mediane_ns": 241309401
+          },
+          "sans_residu": {
+            "max_brut_ns": 178440229,
+            "max_medianes_processus_ns": 178440229,
+            "mediane_ns": 170679082
+          }
+        },
+        "kitti_ng_02_000620": {
+          "P_C": {
+            "max_brut_ns": 51365407,
+            "max_medianes_processus_ns": 51365407,
+            "mediane_ns": 51170545
+          },
+          "avec_residu": {
+            "max_brut_ns": 146691486,
+            "max_medianes_processus_ns": 146691486,
+            "mediane_ns": 144583726
+          },
+          "original": {
+            "max_brut_ns": 220049274,
+            "max_medianes_processus_ns": 220049274,
+            "mediane_ns": 218342095
+          },
+          "sans_residu": {
+            "max_brut_ns": 146691366,
+            "max_medianes_processus_ns": 146691366,
+            "mediane_ns": 144583586
+          }
+        },
+        "kitti_ng_02_001600": {
+          "P_C": {
+            "max_brut_ns": 61859897,
+            "max_medianes_processus_ns": 61859897,
+            "mediane_ns": 61414528
+          },
+          "avec_residu": {
+            "max_brut_ns": 180205030,
+            "max_medianes_processus_ns": 180205030,
+            "mediane_ns": 172809770
+          },
+          "original": {
+            "max_brut_ns": 260628239,
+            "max_medianes_processus_ns": 260628239,
+            "mediane_ns": 253456143
+          },
+          "sans_residu": {
+            "max_brut_ns": 180204910,
+            "max_medianes_processus_ns": 180204910,
+            "mediane_ns": 172809570
+          }
+        },
+        "kitti_ng_02_001604": {
+          "P_C": {
+            "max_brut_ns": 60777787,
+            "max_medianes_processus_ns": 60777787,
+            "mediane_ns": 60604497
+          },
+          "avec_residu": {
+            "max_brut_ns": 187109041,
+            "max_medianes_processus_ns": 187109041,
+            "mediane_ns": 178596893
+          },
+          "original": {
+            "max_brut_ns": 271498450,
+            "max_medianes_processus_ns": 271498450,
+            "mediane_ns": 263299033
+          },
+          "sans_residu": {
+            "max_brut_ns": 187108931,
+            "max_medianes_processus_ns": 187108931,
+            "mediane_ns": 178596743
+          }
+        },
+        "kitti_ng_02_001606": {
+          "P_C": {
+            "max_brut_ns": 57273576,
+            "max_medianes_processus_ns": 57273576,
+            "mediane_ns": 56806237
+          },
+          "avec_residu": {
+            "max_brut_ns": 176708820,
+            "max_medianes_processus_ns": 176708820,
+            "mediane_ns": 169498160
+          },
+          "original": {
+            "max_brut_ns": 256246989,
+            "max_medianes_processus_ns": 256246989,
+            "mediane_ns": 248513068
+          },
+          "sans_residu": {
+            "max_brut_ns": 176708700,
+            "max_medianes_processus_ns": 176708700,
+            "mediane_ns": 169498030
+          }
+        },
+        "kitti_ng_02_001610": {
+          "P_C": {
+            "max_brut_ns": 58556617,
+            "max_medianes_processus_ns": 58556617,
+            "mediane_ns": 58158897
+          },
+          "avec_residu": {
+            "max_brut_ns": 176946323,
+            "max_medianes_processus_ns": 176946323,
+            "mediane_ns": 170870359
+          },
+          "original": {
+            "max_brut_ns": 257730913,
+            "max_medianes_processus_ns": 257730913,
+            "mediane_ns": 251451558
+          },
+          "sans_residu": {
+            "max_brut_ns": 176946203,
+            "max_medianes_processus_ns": 176946203,
+            "mediane_ns": 170870239
+          }
+        },
+        "kitti_ng_05_002060": {
+          "P_C": {
+            "max_brut_ns": 65336739,
+            "max_medianes_processus_ns": 65336739,
+            "mediane_ns": 64789828
+          },
+          "avec_residu": {
+            "max_brut_ns": 193636342,
+            "max_medianes_processus_ns": 193636342,
+            "mediane_ns": 190908462
+          },
+          "original": {
+            "max_brut_ns": 295547673,
+            "max_medianes_processus_ns": 295547673,
+            "mediane_ns": 292506503
+          },
+          "sans_residu": {
+            "max_brut_ns": 193636162,
+            "max_medianes_processus_ns": 193636162,
+            "mediane_ns": 190908332
+          }
+        },
+        "kitti_ng_05_002064": {
+          "P_C": {
+            "max_brut_ns": 62225267,
+            "max_medianes_processus_ns": 62225267,
+            "mediane_ns": 61739677
+          },
+          "avec_residu": {
+            "max_brut_ns": 185688531,
+            "max_medianes_processus_ns": 185688531,
+            "mediane_ns": 176414689
+          },
+          "original": {
+            "max_brut_ns": 284245492,
+            "max_medianes_processus_ns": 284245492,
+            "mediane_ns": 274376312
+          },
+          "sans_residu": {
+            "max_brut_ns": 185688411,
+            "max_medianes_processus_ns": 185688411,
+            "mediane_ns": 176414569
+          }
+        },
+        "kitti_ng_05_002748": {
+          "P_C": {
+            "max_brut_ns": 41213615,
+            "max_medianes_processus_ns": 41213615,
+            "mediane_ns": 40813574
+          },
+          "avec_residu": {
+            "max_brut_ns": 114928943,
+            "max_medianes_processus_ns": 114928943,
+            "mediane_ns": 112028035
+          },
+          "original": {
+            "max_brut_ns": 167120449,
+            "max_medianes_processus_ns": 167120449,
+            "mediane_ns": 164412738
+          },
+          "sans_residu": {
+            "max_brut_ns": 114928763,
+            "max_medianes_processus_ns": 114928763,
+            "mediane_ns": 112027925
+          }
+        },
+        "kitti_ng_06_000770": {
+          "P_C": {
+            "max_brut_ns": 34586254,
+            "max_medianes_processus_ns": 34586254,
+            "mediane_ns": 33573474
+          },
+          "avec_residu": {
+            "max_brut_ns": 100087641,
+            "max_medianes_processus_ns": 100087641,
+            "mediane_ns": 97466071
+          },
+          "original": {
+            "max_brut_ns": 142056186,
+            "max_medianes_processus_ns": 142056186,
+            "mediane_ns": 139577246
+          },
+          "sans_residu": {
+            "max_brut_ns": 100087521,
+            "max_medianes_processus_ns": 100087521,
+            "mediane_ns": 97465971
+          }
+        },
+        "kitti_ng_06_000772": {
+          "P_C": {
+            "max_brut_ns": 38010295,
+            "max_medianes_processus_ns": 38010295,
+            "mediane_ns": 37559624
+          },
+          "avec_residu": {
+            "max_brut_ns": 105905702,
+            "max_medianes_processus_ns": 105905702,
+            "mediane_ns": 103190432
+          },
+          "original": {
+            "max_brut_ns": 151098347,
+            "max_medianes_processus_ns": 151098347,
+            "mediane_ns": 148528358
+          },
+          "sans_residu": {
+            "max_brut_ns": 105905532,
+            "max_medianes_processus_ns": 105905532,
+            "mediane_ns": 103190322
+          }
+        },
+        "kitti_ng_06_000774": {
+          "P_C": {
+            "max_brut_ns": 42447555,
+            "max_medianes_processus_ns": 42447555,
+            "mediane_ns": 42244835
+          },
+          "avec_residu": {
+            "max_brut_ns": 121883305,
+            "max_medianes_processus_ns": 121883305,
+            "mediane_ns": 115308944
+          },
+          "original": {
+            "max_brut_ns": 169934970,
+            "max_medianes_processus_ns": 169934970,
+            "mediane_ns": 162881971
+          },
+          "sans_residu": {
+            "max_brut_ns": 121883175,
+            "max_medianes_processus_ns": 121883175,
+            "mediane_ns": 115308784
+          }
+        },
+        "kitti_ng_06_000780": {
+          "P_C": {
+            "max_brut_ns": 37577584,
+            "max_medianes_processus_ns": 37577584,
+            "mediane_ns": 36433514
+          },
+          "avec_residu": {
+            "max_brut_ns": 103680271,
+            "max_medianes_processus_ns": 103680271,
+            "mediane_ns": 102500761
+          },
+          "original": {
+            "max_brut_ns": 147372676,
+            "max_medianes_processus_ns": 147372676,
+            "mediane_ns": 146792106
+          },
+          "sans_residu": {
+            "max_brut_ns": 103680151,
+            "max_medianes_processus_ns": 103680151,
+            "mediane_ns": 102500611
+          }
+        },
+        "kitti_ng_06_000798": {
+          "P_C": {
+            "max_brut_ns": 28096093,
+            "max_medianes_processus_ns": 28096093,
+            "mediane_ns": 28037084
+          },
+          "avec_residu": {
+            "max_brut_ns": 74514159,
+            "max_medianes_processus_ns": 74514159,
+            "mediane_ns": 73535018
+          },
+          "original": {
+            "max_brut_ns": 106551602,
+            "max_medianes_processus_ns": 106551602,
+            "mediane_ns": 105441231
+          },
+          "sans_residu": {
+            "max_brut_ns": 74514059,
+            "max_medianes_processus_ns": 74514059,
+            "mediane_ns": 73534918
+          }
+        },
+        "kitti_ng_06_000800": {
+          "P_C": {
+            "max_brut_ns": 27943433,
+            "max_medianes_processus_ns": 27943433,
+            "mediane_ns": 27709873
+          },
+          "avec_residu": {
+            "max_brut_ns": 77446539,
+            "max_medianes_processus_ns": 77446539,
+            "mediane_ns": 76370869
+          },
+          "original": {
+            "max_brut_ns": 111344252,
+            "max_medianes_processus_ns": 111344252,
+            "mediane_ns": 110589783
+          },
+          "sans_residu": {
+            "max_brut_ns": 77446369,
+            "max_medianes_processus_ns": 77446369,
+            "mediane_ns": 76370699
+          }
+        },
+        "kitti_ng_06_000804": {
+          "P_C": {
+            "max_brut_ns": 35202374,
+            "max_medianes_processus_ns": 35202374,
+            "mediane_ns": 34436164
+          },
+          "avec_residu": {
+            "max_brut_ns": 97584001,
+            "max_medianes_processus_ns": 97584001,
+            "mediane_ns": 96164601
+          },
+          "original": {
+            "max_brut_ns": 141020186,
+            "max_medianes_processus_ns": 141020186,
+            "mediane_ns": 139918067
+          },
+          "sans_residu": {
+            "max_brut_ns": 97583881,
+            "max_medianes_processus_ns": 97583881,
+            "mediane_ns": 96164461
+          }
+        },
+        "kitti_ng_06_000806": {
+          "P_C": {
+            "max_brut_ns": 37535304,
+            "max_medianes_processus_ns": 37535304,
+            "mediane_ns": 37229645
+          },
+          "avec_residu": {
+            "max_brut_ns": 110061154,
+            "max_medianes_processus_ns": 110061154,
+            "mediane_ns": 106319053
+          },
+          "original": {
+            "max_brut_ns": 157299030,
+            "max_medianes_processus_ns": 157299030,
+            "mediane_ns": 154432138
+          },
+          "sans_residu": {
+            "max_brut_ns": 110061034,
+            "max_medianes_processus_ns": 110061034,
+            "mediane_ns": 106318943
+          }
+        },
+        "kitti_ng_08_000000": {
+          "P_C": {
+            "max_brut_ns": 36434924,
+            "max_medianes_processus_ns": 36434924,
+            "mediane_ns": 36293134
+          },
+          "avec_residu": {
+            "max_brut_ns": 96176650,
+            "max_medianes_processus_ns": 96176650,
+            "mediane_ns": 95748490
+          },
+          "original": {
+            "max_brut_ns": 151213288,
+            "max_medianes_processus_ns": 151213288,
+            "mediane_ns": 150652987
+          },
+          "sans_residu": {
+            "max_brut_ns": 96176450,
+            "max_medianes_processus_ns": 96176450,
+            "mediane_ns": 95748390
+          }
+        },
+        "kitti_ng_08_000100": {
+          "P_C": {
+            "max_brut_ns": 33338494,
+            "max_medianes_processus_ns": 33338494,
+            "mediane_ns": 31901404
+          },
+          "avec_residu": {
+            "max_brut_ns": 81981710,
+            "max_medianes_processus_ns": 81981710,
+            "mediane_ns": 80278049
+          },
+          "original": {
+            "max_brut_ns": 125341205,
+            "max_medianes_processus_ns": 125341205,
+            "mediane_ns": 123377744
+          },
+          "sans_residu": {
+            "max_brut_ns": 81981600,
+            "max_medianes_processus_ns": 81981600,
+            "mediane_ns": 80277909
+          }
+        },
+        "kitti_ng_08_000200": {
+          "P_C": {
+            "max_brut_ns": 41393815,
+            "max_medianes_processus_ns": 41393815,
+            "mediane_ns": 40975904
+          },
+          "avec_residu": {
+            "max_brut_ns": 111226772,
+            "max_medianes_processus_ns": 111226772,
+            "mediane_ns": 106621802
+          },
+          "original": {
+            "max_brut_ns": 161237508,
+            "max_medianes_processus_ns": 161237508,
+            "mediane_ns": 156116257
+          },
+          "sans_residu": {
+            "max_brut_ns": 111226662,
+            "max_medianes_processus_ns": 111226662,
+            "mediane_ns": 106621672
+          }
+        },
+        "kitti_ng_08_000246": {
+          "P_C": {
+            "max_brut_ns": 39406404,
+            "max_medianes_processus_ns": 39406404,
+            "mediane_ns": 38673604
+          },
+          "avec_residu": {
+            "max_brut_ns": 106111961,
+            "max_medianes_processus_ns": 106111961,
+            "mediane_ns": 99739291
+          },
+          "original": {
+            "max_brut_ns": 157986197,
+            "max_medianes_processus_ns": 157986197,
+            "mediane_ns": 152106687
+          },
+          "sans_residu": {
+            "max_brut_ns": 106111801,
+            "max_medianes_processus_ns": 106111801,
+            "mediane_ns": 99739181
+          }
+        },
+        "kitti_ng_08_000691": {
+          "P_C": {
+            "max_brut_ns": 60960027,
+            "max_medianes_processus_ns": 60960027,
+            "mediane_ns": 60693977
+          },
+          "avec_residu": {
+            "max_brut_ns": 179147331,
+            "max_medianes_processus_ns": 179147331,
+            "mediane_ns": 172704769
+          },
+          "original": {
+            "max_brut_ns": 268369792,
+            "max_medianes_processus_ns": 268369792,
+            "mediane_ns": 261471099
+          },
+          "sans_residu": {
+            "max_brut_ns": 179147221,
+            "max_medianes_processus_ns": 179147221,
+            "mediane_ns": 172704639
+          }
+        },
+        "kitti_ng_08_001176": {
+          "P_C": {
+            "max_brut_ns": 62561367,
+            "max_medianes_processus_ns": 62561367,
+            "mediane_ns": 62222557
+          },
+          "avec_residu": {
+            "max_brut_ns": 190809842,
+            "max_medianes_processus_ns": 190809842,
+            "mediane_ns": 183155623
+          },
+          "original": {
+            "max_brut_ns": 285860304,
+            "max_medianes_processus_ns": 285860304,
+            "mediane_ns": 278014266
+          },
+          "sans_residu": {
+            "max_brut_ns": 190809712,
+            "max_medianes_processus_ns": 190809712,
+            "mediane_ns": 183155483
+          }
+        },
+        "kitti_ng_08_001193": {
+          "P_C": {
+            "max_brut_ns": 76912859,
+            "max_medianes_processus_ns": 76912859,
+            "mediane_ns": 76232419
+          },
+          "avec_residu": {
+            "max_brut_ns": 253405603,
+            "max_medianes_processus_ns": 253405603,
+            "mediane_ns": 241152669
+          },
+          "original": {
+            "max_brut_ns": 377162798,
+            "max_medianes_processus_ns": 377162798,
+            "mediane_ns": 364668056
+          },
+          "sans_residu": {
+            "max_brut_ns": 253405463,
+            "max_medianes_processus_ns": 253405463,
+            "mediane_ns": 241152549
+          }
+        },
+        "kitti_ng_08_001302": {
+          "P_C": {
+            "max_brut_ns": 45538776,
+            "max_medianes_processus_ns": 45538776,
+            "mediane_ns": 45213675
+          },
+          "avec_residu": {
+            "max_brut_ns": 120943156,
+            "max_medianes_processus_ns": 120943156,
+            "mediane_ns": 117096673
+          },
+          "original": {
+            "max_brut_ns": 180153013,
+            "max_medianes_processus_ns": 180153013,
+            "mediane_ns": 177129699
+          },
+          "sans_residu": {
+            "max_brut_ns": 120943046,
+            "max_medianes_processus_ns": 120943046,
+            "mediane_ns": 117096523
+          }
+        },
+        "kitti_ng_08_001847": {
+          "P_C": {
+            "max_brut_ns": 28121264,
+            "max_medianes_processus_ns": 28121264,
+            "mediane_ns": 27530334
+          },
+          "avec_residu": {
+            "max_brut_ns": 70657150,
+            "max_medianes_processus_ns": 70657150,
+            "mediane_ns": 68261568
+          },
+          "original": {
+            "max_brut_ns": 106157994,
+            "max_medianes_processus_ns": 106157994,
+            "mediane_ns": 103799112
+          },
+          "sans_residu": {
+            "max_brut_ns": 70656960,
+            "max_medianes_processus_ns": 70656960,
+            "mediane_ns": 68261448
+          }
+        },
+        "kitti_ng_08_002119": {
+          "P_C": {
+            "max_brut_ns": 96864863,
+            "max_medianes_processus_ns": 96864863,
+            "mediane_ns": 96377951
+          },
+          "avec_residu": {
+            "max_brut_ns": 311049219,
+            "max_medianes_processus_ns": 311049219,
+            "mediane_ns": 301807905
+          },
+          "original": {
+            "max_brut_ns": 466729469,
+            "max_medianes_processus_ns": 466729469,
+            "mediane_ns": 461318093
+          },
+          "sans_residu": {
+            "max_brut_ns": 311049069,
+            "max_medianes_processus_ns": 311049069,
+            "mediane_ns": 301807795
+          }
+        },
+        "kitti_ng_08_002554": {
+          "P_C": {
+            "max_brut_ns": 58492147,
+            "max_medianes_processus_ns": 58492147,
+            "mediane_ns": 58073417
+          },
+          "avec_residu": {
+            "max_brut_ns": 188455101,
+            "max_medianes_processus_ns": 188455101,
+            "mediane_ns": 174875989
+          },
+          "original": {
+            "max_brut_ns": 268329460,
+            "max_medianes_processus_ns": 268329460,
+            "mediane_ns": 254466290
+          },
+          "sans_residu": {
+            "max_brut_ns": 188454971,
+            "max_medianes_processus_ns": 188454971,
+            "mediane_ns": 174875789
+          }
+        },
+        "kitti_ng_10_000424": {
+          "P_C": {
+            "max_brut_ns": 60025957,
+            "max_medianes_processus_ns": 60025957,
+            "mediane_ns": 59379916
+          },
+          "avec_residu": {
+            "max_brut_ns": 190907523,
+            "max_medianes_processus_ns": 190907523,
+            "mediane_ns": 177475703
+          },
+          "original": {
+            "max_brut_ns": 275211162,
+            "max_medianes_processus_ns": 275211162,
+            "mediane_ns": 262103514
+          },
+          "sans_residu": {
+            "max_brut_ns": 190907413,
+            "max_medianes_processus_ns": 190907413,
+            "mediane_ns": 177475563
+          }
+        },
+        "kitti_ng_10_000430": {
+          "P_C": {
+            "max_brut_ns": 67991709,
+            "max_medianes_processus_ns": 67991709,
+            "mediane_ns": 67650617
+          },
+          "avec_residu": {
+            "max_brut_ns": 204889897,
+            "max_medianes_processus_ns": 204889897,
+            "mediane_ns": 202661272
+          },
+          "original": {
+            "max_brut_ns": 307932850,
+            "max_medianes_processus_ns": 307932850,
+            "mediane_ns": 304844348
+          },
+          "sans_residu": {
+            "max_brut_ns": 204889767,
+            "max_medianes_processus_ns": 204889767,
+            "mediane_ns": 202661152
+          }
+        }
+      },
+      "passes_chaudes": 185,
+      "trames": 37
+    }
+  },
+  "native_execution": false
+}

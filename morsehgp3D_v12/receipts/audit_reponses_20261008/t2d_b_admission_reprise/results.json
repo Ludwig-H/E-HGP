@@ -1,0 +1,260 @@
+{
+  "campaign": [
+    {
+      "aa": {
+        "dans_la_fenetre": true,
+        "moyennes": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "case": "nominal",
+      "refus": [],
+      "verdicts": {
+        "census_combine": "adopte",
+        "garde_seule": "adopte",
+        "lot_t2d_b": "adopte",
+        "proposition": "adopte",
+        "report_seul": "adopte",
+        "temoins_seuls": "adopte"
+      }
+    },
+    {
+      "aa": null,
+      "case": "bad_threads",
+      "refus": [
+        "admission des journaux : configuration differente de la commande"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": null,
+      "case": "duplicate_journal",
+      "refus": [
+        "admission des journaux : journal externe ou reutilise"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": null,
+      "case": "missing_frame",
+      "refus": [
+        "admission des journaux : cohorte de trames incomplete ou inconnue"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": {
+        "dans_la_fenetre": true,
+        "moyennes": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "case": "different_identity",
+      "refus": [],
+      "verdicts": {
+        "census_combine": "rejete",
+        "garde_seule": "rejete",
+        "lot_t2d_b": "rejete",
+        "proposition": "rejete",
+        "report_seul": "rejete",
+        "temoins_seuls": "rejete"
+      }
+    },
+    {
+      "aa": null,
+      "case": "stage_exceeds_wall",
+      "first_diag_count_ns": 8165,
+      "mutated_wall_ns": 1,
+      "refus": [
+        "admission des journaux : partition du mur de G fausse"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    },
+    {
+      "aa": {
+        "dans_la_fenetre": false,
+        "moyennes": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "case": "aa_outside",
+      "refus": [
+        "controle A/A hors de la fenetre de +/- 1.5 %"
+      ],
+      "verdicts": {
+        "census_combine": "refuse",
+        "garde_seule": "refuse",
+        "lot_t2d_b": "refuse",
+        "proposition": "refuse",
+        "report_seul": "refuse",
+        "temoins_seuls": "refuse"
+      }
+    }
+  ],
+  "developer_auto_test": {
+    "code": 0,
+    "summary": "pilote_t2d_b_auto_test_ok cas=6 lectures=13 verdicts=adopte,rejete,refuse"
+  },
+  "fixture_sha256": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb",
+  "full": {
+    "missing_configuration_and_release": {
+      "admitted": false,
+      "reason": "sequence open, (full, liberation) x passes, exit absente"
+    },
+    "only_literal_changed": {
+      "admitted": false,
+      "reason": "passe full invalide ou hors de la voie appareil"
+    },
+    "producer_device": {
+      "admitted": true,
+      "summary": {
+        "ful1": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "g_ns": 1,
+        "mur_ns": 1000,
+        "valide": true
+      }
+    }
+  },
+  "full_residuals": [
+    {
+      "admitted": true,
+      "case": "nominal"
+    },
+    {
+      "admitted": true,
+      "case": "ignored_blocks"
+    },
+    {
+      "admitted": true,
+      "case": "memory_used_gt_peak"
+    },
+    {
+      "admitted": true,
+      "case": "tmvr_substages_gt_envelope"
+    },
+    {
+      "admitted": true,
+      "case": "G_parts_gt_envelope"
+    }
+  ],
+  "native_G_admitted": true,
+  "source_transforms": 31,
+  "ten_turn_position_counts": {
+    "apres": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2
+    ],
+    "avant": [
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2
+    ],
+    "avant_bis": [
+      2,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "census": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      1,
+      1
+    ],
+    "garde": [
+      1,
+      2,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "proposition": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      1
+    ],
+    "report": [
+      1,
+      1,
+      2,
+      2,
+      1,
+      1,
+      1,
+      1
+    ],
+    "temoins": [
+      1,
+      1,
+      1,
+      2,
+      2,
+      1,
+      1,
+      1
+    ]
+  }
+}

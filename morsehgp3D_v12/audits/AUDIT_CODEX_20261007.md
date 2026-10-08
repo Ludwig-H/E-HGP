@@ -18,7 +18,8 @@ u21/W48, ng00–02 : 39 885 / 35 551 / 45 845 sites.
 FUL1 et libération exclus. [342 sources identiques au pin](../receipts/audit_reponses_20261008/session_k_sources/README.md),
 [arrêt vérifié](../receipts/audit_reponses_20261008/session_k_provenance/README.md) ; hash binaire/journal de compilation,
 CPU·s et CPU K10 absents. Face à la v11 : GPU plus rapide, CPU plus lent (historique non apparié).
-R seul retiré laisse 116–148 ms médians si le reste reste inchangé.
+[Recouvrement parfait à coûts inchangés](../receipts/audit_reponses_20261008/session_k_recouvrement_modele/README.md) :
+31/37 maxima resteraient >100 ms ; scénario comptable, aucune borne sur A refondu.
 
 **LiDAR massifs : derniers murs FULL K5, u21/W48.** L1r : une seule passe chaude par ligne ci-dessous ;
 L2 : une seule passe initiale, donc froide. Aucun gain causal entre L1 et L1r.
@@ -54,13 +55,15 @@ chronométriques, poste des refus et projections ; les chronos réels restent in
   [patch des instants des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md) proposé, sans modifier le mur FULL.
 - **B** : [proposition entière prouvée](../receipts/audit_reponses_20261008/t2d_b_proposition/README.md), bornes B≤32 ;
   [698 portes + une sautée](../receipts/audit_reponses_20261008/t2d_b_traces/README.md), [39 mutants clos](../receipts/audit_reponses_20261008/t2d_b_mutants/README.md).
-  [Pilote](../receipts/audit_reponses_20261008/t2d_b_admission/README.md) : mur G, FULL device, A/A et ordre des bras à requalifier après correction.
+  [Pilote corrigé](../receipts/audit_reponses_20261008/t2d_b_admission_reprise/README.md) : mur G/device conformes, veto A/A et
+  positions rééquilibrées ; quatre incohérences FULL informatives encore admises.
 - **C** : [suivi local](../receipts/audit_reponses_20261008/t2d_c_suivi/README.md), 705 portes + une sautée, modules CUDA u21/u24
   56/56 sans GPU, neuf paires FUL1 CPU. Huit gardes ajoutées ; refus/cohorte encore permissifs.
   Libération avant croissance : capacités après refus modifiées ; reprise sur le même contexte GPU à qualifier.
 - **Lecteurs FULL/MES-C** : [lecteur commun a2](../receipts/audit_reponses_20261008/lecteur_full_commun/README.md), types/mémoire/raisons
   encore permissifs ; [MES-C livré](../receipts/audit_reponses_20261008/mes_c_livraison/README.md), cohorte incomplète tenue,
-  patch avec porte adaptée proposé. Session MES-C en cours de suivi, aucun résultat admis ici.
+  patch avec porte adaptée proposé. [C1/C2 et chaud](../receipts/audit_reponses_20261008/mes_c_statistique/README.md) :
+  coefficients descriptifs, tournée de 147 nuages ; comparaison v11 non appariée. Aucun résultat MES-C admis ici.
 - **R** : [raccourci classe unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md) proposé,
   différé après A ; comparer aussi les CSR absents de FUL1.
 

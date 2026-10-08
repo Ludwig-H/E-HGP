@@ -1,0 +1,62 @@
+{
+  "capture_utc": "2026-10-08T06:21:55.835705+00:00",
+  "scope": "lecture_statistique_avant_lecture_de_resultats_MES_C",
+  "sources": {
+    "morsehgp3D_v12/microbancs/mes_c_petits/pilote_c.py": {
+      "git": "83ed7620d",
+      "sha256": "6309ac7ee8344f966e82bd05af1966e5c23b92515b289a653574af2f0f988899"
+    },
+    "morsehgp3D_v12/microbancs/mes_c_petits/README.md": {
+      "git": "83ed7620d",
+      "sha256": "e01369b9c7cacde99c6ef655dac6cbc7eb8aa095bb21427221c21f27c1dd682c"
+    },
+    "morsehgp3D_v12/bench/full_probe.cpp": {
+      "git": "83ed7620d",
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "morsehgp3D_v12/docs/MESURE.md": {
+      "git": "83ed7620d",
+      "sha256": "c0a8966ced7d00db60f8ba1b95b50ed5a4c23a2e8afa89be1e38ca1527f204c6"
+    },
+    "morsehgp3D_v12/microbancs/mes_p_petits/pilote_p.py": {
+      "git": "83ed7620d",
+      "sha256": "a5ca62fcdb3babd944f9ec0b60a526a9f73f7fd3e2b24d0657acfd8de3a4de0b"
+    },
+    "morsehgp3D_v12/microbancs/mes_p_petits/analyse_p.py": {
+      "git": "83ed7620d",
+      "sha256": "7514ace73635342e6dda58d389097c35c9d44716c301143c5b309e8f329c1584"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261007/session_h_mes_p/README.md": {
+      "git": "83ed7620d",
+      "sha256": "b05860024d2e17e8c8e18431cc45a7d69c359ff0f1aa0eeffcac06be5baa74f2"
+    },
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/session_k_full/mesures.json": {
+      "git": "83ed7620d",
+      "sha256": "08740ad02066f9376ce0e438f968eaaf6f1d7be80276f025e62e1389e325cd77"
+    },
+    "morsehgp3D_v12/receipts/g4_t0g_20261007/resultats/cmd/001_mes_p/files/mes_p/mes_p.json": {
+      "git": "83ed7620d",
+      "sha256": "c9132bbcc78915d1f6d74383430a7af228caa7383db191b5cb6ba63746ee5dcb"
+    },
+    "morsehgp3D_v12/receipts/g4_t2h_20261007/resultats/cmd/013_mes_p_fils_1_4/files/mes_p/mes_p.json": {
+      "git": "83ed7620d",
+      "sha256": "1a12a57e9c0239faeec0d28c35af45d267d337402774b580cb943cc5fc716f86"
+    },
+    "morsehgp3D_v11/bench/full_probe.cpp": {
+      "git": "ac081a06f",
+      "sha256": "9d70956efddcef97be0a9153da5feb2417702402b46394ac778c6d78e2c49c2c"
+    }
+  },
+  "manifest_sha256": "bed8fa902fc720cbfa1bedf454c0f99b920795289384cad5278fe9b09a651953",
+  "mes_p": {
+    "G": "morsehgp3D_v12/receipts/g4_t0g_20261007/resultats/cmd/001_mes_p/files/mes_p/mes_p.json",
+    "H": "morsehgp3D_v12/receipts/g4_t2h_20261007/resultats/cmd/013_mes_p_fils_1_4/files/mes_p/mes_p.json"
+  },
+  "native_execution": false,
+  "new_adoption_rule": false,
+  "replay_normal_optimized_equal": true,
+  "replay_codes": [
+    0,
+    0
+  ]
+}

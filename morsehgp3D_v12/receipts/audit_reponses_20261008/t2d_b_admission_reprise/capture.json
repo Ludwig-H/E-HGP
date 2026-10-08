@@ -1,0 +1,37 @@
+{
+  "scope": "prototype non publie, copie stable; base produit902041f66",
+  "captured_utc": "2026-10-08T06:22:52.049540+00:00",
+  "source": {
+    "pilote_t2d_b.py": {
+      "bytes": 56914,
+      "sha256": "183c18856dbe6b10e5ec07139e3a7783c8c475de6aa1911e5f80e3324f8d2da2"
+    },
+    "bras_t2d_b.json": {
+      "bytes": 96815,
+      "sha256": "3999a137f3002ca6fcf2a477457dbd9d118023da31f8490d0656350ab826b025"
+    },
+    "RAPPORT.md": {
+      "bytes": 26192,
+      "sha256": "d2a5435c1fbdb669100ed0b2daab2e4c203cc34797f46cf7637abacf4b11b282"
+    }
+  },
+  "prior_harness": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/t2d_b_admission/check.py",
+    "bytes": 7763,
+    "sha256": "e9b115d96f9eae0e8729da2abfebd691ab1d7b8374bc615edd48eb96b8e25d61"
+  },
+  "fixture": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261007/t2c_pilote_proposition/after.jsonl",
+    "bytes": 4280,
+    "sha256": "82dd7a2922c630c1a800ea25020d6404ed422c59be12ed0e0da9b5337679b8fb"
+  },
+  "latest_static_delta": {
+    "sha256": "6310c1e05d0d9cfeca11748bf17d7a20b346d5133ca65b97955c2cb87c8e1fc6",
+    "bytes": 57221,
+    "changed_function_only": [
+      "etape_informations"
+    ],
+    "change": "three lines reducing informational plans when args.essai; admission and campaign unchanged",
+    "runtime_replay_scope": "183c188 only; tested function bodies byte/AST equivalent in6310"
+  }
+}
