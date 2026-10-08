@@ -1,0 +1,26 @@
+{
+  "utc": "2026-10-08T05:20:14.653255+00:00",
+  "base": "902041f66",
+  "sources": [
+    {
+      "path": "src/tower/proposal.hpp",
+      "sha256": "9a2260a5f7e55273b67d8985ba6939b006da0ff717601a3b68d06c8af38ae494",
+      "bytes": 10947
+    },
+    {
+      "path": "src/tower/resolve.cpp",
+      "sha256": "58a78573b5ed04a2266bf004eae86c9ef5ae157ba28a95766ce0ff2dd768bb57",
+      "bytes": 15878
+    },
+    {
+      "path": "src/tower/supports.cpp",
+      "sha256": "04c91fc00bfe25373b3afed21900a3d866f333970bd1e2313e6e1e083159dd4d",
+      "bytes": 10526
+    },
+    {
+      "path": "tests/tower/proposal_unit.cpp",
+      "sha256": "665d23de94db467266bdc9ed83c25693a232aefd573f6b355e8d2430dc57de7b",
+      "bytes": 10180
+    }
+  ]
+}

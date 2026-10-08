@@ -1,0 +1,71 @@
+{
+  "captured_utc": "2026-10-08T05:12:03.324299+00:00",
+  "prototype": "T2d-C/repo902 ; base annoncee 902041f66",
+  "prototype_head": "37f43b1728e53b4387f8d265b3f6ff3fc852e253",
+  "scope": "octets du prototype observes, aucune attribution automatique des fichiers au commit HEAD",
+  "sources": {
+    "g4_catalogue_flux.py": {
+      "bytes": 24068,
+      "sha256": "88ca8e3ff529063b7b7450f0316a68babfda7ac300880520eb70cf2a629f772c"
+    },
+    "g4_catalogue_flux_judge.py": {
+      "bytes": 21285,
+      "sha256": "a00c2c0bdf1952a86a82dc41865c1b8e0807dc1e422eaae15c5af6a38571f01f"
+    },
+    "g4_catalogue_flux_lecteur.py": {
+      "bytes": 15549,
+      "sha256": "0b68756f0be74e11201737ff6aa4e6b6750454cca35dabb68b4f3f2a049e8cb1"
+    },
+    "g4_catalogue_flux_selftest.py": {
+      "bytes": 16233,
+      "sha256": "d2f830b9213580eec30c8627fca07cc702cd9d6ac01f7976c4d133a88f2efe27"
+    },
+    "g4_catalogue_flux_tables.py": {
+      "bytes": 6711,
+      "sha256": "b20c44de62f140dc0b49269ed6534cece9a3114e91edbf5269f749fb94e4b6e3"
+    },
+    "g4_catalogue_device.py": {
+      "bytes": 22097,
+      "sha256": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677"
+    },
+    "g4_catalogue_judge.py": {
+      "bytes": 23250,
+      "sha256": "62f8832ff9571219a2d8953a797ecfd68fddf02f192b74519c105bbbfbf07483"
+    },
+    "g4_catalogue_schema.py": {
+      "bytes": 11713,
+      "sha256": "20d0cc8b9f66e571b7ad9d06d092ac5bf5f9ff66af2632aebdfd4e8659feefad"
+    }
+  },
+  "producer": {
+    "bench/catalogue_probe.cpp": {
+      "bytes": 17368,
+      "sha256": "5d9b83bd235cd52594c4d52c5712d58f0dada13864b072c9c33553f89b07cc86"
+    },
+    "bench/full_probe.cpp": {
+      "bytes": 18119,
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    "src/core/reasons.def": {
+      "bytes": 5676,
+      "sha256": "6950b85dc15ed3ebfc51e4597ef06b4ed0b08c1833e83df09579dcb94e9e8cfd"
+    }
+  },
+  "fixture": {
+    "name": "cpu_synthetic_stdout.jsonl",
+    "bytes": 4010,
+    "sha256": "3b6c4261acd93fff79018706d9bd2c9b91e4a1d5fdc519dcf392b1982c9b365e"
+  },
+  "source_stable_after_first_replays": true,
+  "native_executed": false,
+  "cloud_used": false,
+  "verification": {
+    "python_normal": true,
+    "python_optimized": true,
+    "same_results": true,
+    "developer_cases": 39,
+    "independent_reports": 7,
+    "historical_fixture_refused": true,
+    "prototype_still_identical_utc": "2026-10-08T05:17:42.105477+00:00"
+  }
+}

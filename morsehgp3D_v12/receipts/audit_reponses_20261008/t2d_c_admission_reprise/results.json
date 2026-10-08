@@ -1,0 +1,223 @@
+{
+  "developer_cases": [
+    [
+      "conforme",
+      "adopte"
+    ],
+    [
+      "apres_plus_lent",
+      "rejete"
+    ],
+    [
+      "une_trame_plus_lente",
+      "rejete"
+    ],
+    [
+      "prise_manquante",
+      "refuse"
+    ],
+    [
+      "identite_rompue",
+      "rejete"
+    ],
+    [
+      "niveaux_differents",
+      "rejete"
+    ],
+    [
+      "binaire_change",
+      "refuse"
+    ],
+    [
+      "etapes_recouvertes",
+      "refuse"
+    ],
+    [
+      "mutant_survivant",
+      "rejete"
+    ],
+    [
+      "ful1_differente",
+      "rejete"
+    ],
+    [
+      "portes_en_echec",
+      "rejete"
+    ],
+    [
+      "gpu_non_isole",
+      "refuse"
+    ],
+    [
+      "bras_different",
+      "rejete"
+    ],
+    [
+      "contrat_de_mesure",
+      "refuse"
+    ],
+    [
+      "*passes_hors_commande",
+      "refuse"
+    ],
+    [
+      "*voie_cpu",
+      "refuse"
+    ],
+    [
+      "*profil_18",
+      "refuse"
+    ],
+    [
+      "*k10",
+      "refuse"
+    ],
+    [
+      "*un_fil",
+      "refuse"
+    ],
+    [
+      "*feuille_16",
+      "refuse"
+    ],
+    [
+      "*raison_sous_statut_ok",
+      "refuse"
+    ],
+    [
+      "*diagnostic_absent",
+      "refuse"
+    ],
+    [
+      "*indice_repete",
+      "refuse"
+    ],
+    [
+      "*sorties_absente",
+      "refuse"
+    ],
+    [
+      "*booleen_pour_entier",
+      "refuse"
+    ],
+    [
+      "*options_hors_commande",
+      "refuse"
+    ],
+    [
+      "*exit_absente",
+      "refuse"
+    ],
+    [
+      "*sequence_rompue",
+      "refuse"
+    ],
+    [
+      "*comptes_d_une_autre_entree",
+      "refuse"
+    ],
+    [
+      "*mutant_sans_comparaison",
+      "refuse"
+    ],
+    [
+      "*mutant_code3_cause_lue",
+      "adopte"
+    ],
+    [
+      "*mutant_code3_sans_cause",
+      "refuse"
+    ],
+    [
+      "*mutant_signal",
+      "adopte"
+    ],
+    [
+      "*mutant_refus_de_ressources",
+      "refuse"
+    ],
+    [
+      "*ful1_hors_commande",
+      "refuse"
+    ],
+    [
+      "*budget_appareil_non_joue",
+      "refuse"
+    ],
+    [
+      "*borne_haute_0_99996_non_arrondie",
+      "adopte"
+    ],
+    [
+      "*aa_hors_fenetre",
+      "refuse"
+    ],
+    [
+      "*aa_dans_la_fenetre",
+      "adopte"
+    ]
+  ],
+  "fixture_cpu_as_device": {
+    "sha256": "3b6c4261acd93fff79018706d9bd2c9b91e4a1d5fdc519dcf392b1982c9b365e",
+    "state": "illisible",
+    "why": "ligne open absente, hors schema ou en echec"
+  },
+  "independent": [
+    {
+      "case": "nominal",
+      "first": [],
+      "mutant": "tue (empreinte)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "mutant_unknown_reason",
+      "first": [],
+      "mutant": "tue (invariant_violated/not_a_reason)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "mutant_failed_metadata",
+      "first": [],
+      "mutant": "tue (invariant_violated/catalogue_invariant)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "mutant_status_reason_mismatch",
+      "first": [],
+      "mutant": "tue (invariant_violated/memory_budget)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "extra_campaign_arm",
+      "first": [],
+      "mutant": "tue (empreinte)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "ful1_bool_code",
+      "first": [],
+      "mutant": "tue (empreinte)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    },
+    {
+      "case": "ful1_bool_release",
+      "first": [],
+      "mutant": "tue (empreinte)",
+      "refused": 0,
+      "rejected": 0,
+      "verdict": "adopte"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "global_canonical_counterexample": {
+    "center": [
+      "1",
+      "1",
+      "0"
+    ],
+    "global_support": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ]
+    ],
+    "part": [
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ]
+    ],
+    "part_support": [
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ]
+    ],
+    "radius_squared": "2",
+    "whole": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        0
+      ]
+    ]
+  },
+  "integer_bounds": {
+    "21": {
+      "absolute_bound": 13194126950403,
+      "signed_bits": 64
+    },
+    "24": {
+      "absolute_bound": 844424829468675,
+      "signed_bits": 64
+    },
+    "30": {
+      "absolute_bound": 3458764507378089987,
+      "signed_bits": 64
+    },
+    "31": {
+      "absolute_bound": 13835058042397261827,
+      "signed_bits": 128
+    },
+    "32": {
+      "absolute_bound": 55340232195358851075,
+      "signed_bits": 128
+    }
+  },
+  "totals": {
+    "cases": 191,
+    "deferred": 27,
+    "pair": 151,
+    "triangle": 13
+  }
+}

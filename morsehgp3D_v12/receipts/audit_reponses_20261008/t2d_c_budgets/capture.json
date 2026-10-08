@@ -1,0 +1,297 @@
+{
+  "captured_utc_start": "2026-10-08T05:23:50.876787+00:00",
+  "captured_utc_end": "2026-10-08T05:23:50.930655+00:00",
+  "source_base": "902041f66",
+  "prototype_head": "96407fb5d8d141e5ce5268c8c3445fc5ea74f4f2",
+  "source_status": "prototype_not_delivered; current source pins, no prebuild hash certificate",
+  "scope": "metadata_read_only; no native execution, build or GPU by auditor",
+  "files": {
+    "RAPPORT.md": {
+      "bytes": 19762,
+      "sha256": "2844e5070f11c600849741c97024ede9fa156870037f83c04e9b5cec936b254e"
+    },
+    "essais/identite_902.sh": {
+      "bytes": 696,
+      "sha256": "00b4ddfa24a8952690ad9f6feb2f5a43e10241cec18eaa4b6fde5e8788a2ddda"
+    },
+    "essais/identite_902.log": {
+      "bytes": 25421,
+      "sha256": "e6a6d089c3bfd3d9809e737c3c45f1c1ef9426359dd94bcce508604683294f79"
+    },
+    "essais/identite_pics.cpp": {
+      "bytes": 8036,
+      "sha256": "8f57a20ca16be1a97f6897a7dbe7f8322264fd9517db5a668237be88b2aee69e"
+    },
+    "essais/identite_pics_avant": {
+      "bytes": 612696,
+      "sha256": "4897a4acf104093179c8688c542eca6afb93532a9e298eb5cbe74bcb0c72e9a5"
+    },
+    "essais/identite_pics_apres": {
+      "bytes": 684776,
+      "sha256": "56fad83af2b463c5931a74172b6e26aee6252382e832bdda0d1abe92595ec896"
+    },
+    "essais/build_902.sh": {
+      "bytes": 694,
+      "sha256": "189f2c87ab6b57708ea6563a1e8b52e5618dbcae56c705a01c5928802a793e8a"
+    },
+    "build_902.log": {
+      "bytes": 61,
+      "sha256": "e9e3572f38d39682bdd577e4cc82c53f363202efb8691f3b2d06c55e70198409"
+    },
+    "b902.build.log": {
+      "bytes": 15781,
+      "sha256": "89500d5fe5fb3179f6b41ba34a2ad1ab2f906927ada5bd625159bc0378a3ebd6"
+    },
+    "bbase902.build.log": {
+      "bytes": 15592,
+      "sha256": "518a7d2f6dfb1e62f319235e745e6dad3756b7f4901f6bbf82ba7438eb259008"
+    },
+    "b902/CMakeCache.txt": {
+      "bytes": 17359,
+      "sha256": "09058565ad41bf8df6c115d5f8ccdc33525030acaff928793bbdd81f8ac51671"
+    },
+    "bbase902/CMakeCache.txt": {
+      "bytes": 17375,
+      "sha256": "71875a57c69b0e665d6fd77b343ed198dbbebfd2d88e936105b639924af1ab5a"
+    },
+    "b902/mhgp12_catalogue_device_unit": {
+      "bytes": 1045488,
+      "sha256": "a93dbe385b10478dcdf101461fc998448a6bcaec3e9beaa2f2777dc0b2c9881c"
+    },
+    "b902/CMakeFiles/mhgp12_catalogue_device_unit.dir/flags.make": {
+      "bytes": 510,
+      "sha256": "60017dad1accdccc68d6a32381b494f783de95bf1c33e660e986799becf332c3"
+    },
+    "b902/CMakeFiles/mhgp12_catalogue_device_unit.dir/tests/catalogue/device_budget_test.cpp.o": {
+      "bytes": 423352,
+      "sha256": "212f4e2fd379a922a0233430799e35e356783554b3965d18fd896399619c1946"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/device_cuda.cu": {
+      "bytes": 14639,
+      "sha256": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/traversal.hpp": {
+      "bytes": 3615,
+      "sha256": "68cd6dba36f0d77df6e5064a09fd4d68d038e3e20b078ddaf4e3deb3be8627b7"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/exec_host.hpp": {
+      "bytes": 5138,
+      "sha256": "119ceb7c9cb5265323849f01248f876bd30b7284e79789e21fb8caaacc9b329f"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/transfer_meter.hpp": {
+      "bytes": 6542,
+      "sha256": "418350e795394c1c6f1c9107a31c47883d49bc951672702baff8e2e59a99b2c3"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/finish_outputs.hpp": {
+      "bytes": 7122,
+      "sha256": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee"
+    },
+    "repo902/morsehgp3D_v12/src/catalogue/device_pipeline.hpp": {
+      "bytes": 13704,
+      "sha256": "439c9397c3bb2da2328ddd5969cb130f21c48247fd9a864c09233822020802af"
+    },
+    "repo902/morsehgp3D_v12/tests/catalogue/device_budget_test.cpp": {
+      "bytes": 10079,
+      "sha256": "57904197161e12b8e93766eeff2b269857aa652dc1959d07568e03444c4898ed"
+    },
+    "repo902/morsehgp3D_v12/tests/catalogue/device_support.hpp": {
+      "bytes": 9984,
+      "sha256": "966c4e777843de20ac12bd6f560f91cd1a4e154a6b2172ac8e5de3a206653460"
+    },
+    "repo902/morsehgp3D_v12/tests/catalogue/device_finish_test.cpp": {
+      "bytes": 19003,
+      "sha256": "408a5be2dc05871e865d86bd5979e9d38589c49b584af40305209aa7ff0496fd"
+    },
+    "repo902/morsehgp3D_v12/tests/catalogue/device_unit.cpp": {
+      "bytes": 9753,
+      "sha256": "456a91dfe9c858d5d57928a4118997bba6151b2431ae81229b96481f6bbdf8a0"
+    },
+    "repo902/morsehgp3D_v12/tests/catalogue/tests.cmake": {
+      "bytes": 10183,
+      "sha256": "c0a99e651e88c6b176b70bd4f3286a22b858d739c0f47a95ca8693b2b9d981bc"
+    }
+  },
+  "result": {
+    "processes_closed_zero": 18,
+    "pairs": [
+      {
+        "name": "lidar_ng00",
+        "k": 5,
+        "balls": 1306696,
+        "levels": 1085776,
+        "rows_equal": 7,
+        "model_host_peak": [
+          255926268,
+          168469084
+        ],
+        "model_device_peak": [
+          730877796,
+          730877796
+        ],
+        "model_transit_bytes": [
+          52117200,
+          16777216
+        ]
+      },
+      {
+        "name": "lidar_ng01",
+        "k": 5,
+        "balls": 1095926,
+        "levels": 941217,
+        "rows_equal": 7,
+        "model_host_peak": [
+          219442524,
+          145863004
+        ],
+        "model_device_peak": [
+          610421952,
+          610421952
+        ],
+        "model_transit_bytes": [
+          45178368,
+          16777216
+        ]
+      },
+      {
+        "name": "lidar_ng02",
+        "k": 5,
+        "balls": 1407885,
+        "levels": 1099582,
+        "rows_equal": 7,
+        "model_host_peak": [
+          264305528,
+          175522968
+        ],
+        "model_device_peak": [
+          756861460,
+          756861460
+        ],
+        "model_transit_bytes": [
+          52779888,
+          16777216
+        ]
+      },
+      {
+        "name": "uniform_u18_n8000",
+        "k": 5,
+        "balls": 597998,
+        "levels": 597987,
+        "rows_equal": 7,
+        "model_host_peak": [
+          133634296,
+          93004856
+        ],
+        "model_device_peak": [
+          274052708,
+          274052708
+        ],
+        "model_transit_bytes": [
+          28703328,
+          16777216
+        ]
+      },
+      {
+        "name": "uniform_u18_n16000",
+        "k": 5,
+        "balls": 1233046,
+        "levels": 1232923,
+        "rows_equal": 7,
+        "model_host_peak": [
+          275566264,
+          173982968
+        ],
+        "model_device_peak": [
+          564614736,
+          564614736
+        ],
+        "model_transit_bytes": [
+          59180256,
+          16777216
+        ]
+      },
+      {
+        "name": "uniform_u18_n32000",
+        "k": 5,
+        "balls": 2536732,
+        "levels": 2535983,
+        "rows_equal": 7,
+        "model_host_peak": [
+          512276892,
+          340218108
+        ],
+        "model_device_peak": [
+          1166709624,
+          1166709624
+        ],
+        "model_transit_bytes": [
+          67108864,
+          16777216
+        ]
+      },
+      {
+        "name": "lidar_ng00",
+        "k": 10,
+        "balls": 5512670,
+        "levels": 5085986,
+        "rows_equal": 7,
+        "model_host_peak": [
+          1061149976,
+          766691048
+        ],
+        "model_device_peak": [
+          2838763812,
+          2838763812
+        ],
+        "model_transit_bytes": [
+          67108864,
+          16777216
+        ]
+      },
+      {
+        "name": "lidar_ng01",
+        "k": 10,
+        "balls": 4383302,
+        "levels": 4094746,
+        "rows_equal": 7,
+        "model_host_peak": [
+          861698052,
+          614818644
+        ],
+        "model_device_peak": [
+          2149393828,
+          2149393828
+        ],
+        "model_transit_bytes": [
+          67108864,
+          16777216
+        ]
+      },
+      {
+        "name": "lidar_ng02",
+        "k": 10,
+        "balls": 5483320,
+        "levels": 4908696,
+        "rows_equal": 7,
+        "model_host_peak": [
+          1036168876,
+          750219868
+        ],
+        "model_device_peak": [
+          2587974356,
+          2587974356
+        ],
+        "model_transit_bytes": [
+          67108864,
+          16777216
+        ]
+      }
+    ]
+  },
+  "unqualified": [
+    "actual CUDA capacities and peaks",
+    "same CUDA context reuse after resource refusal",
+    "reported budget repetitions without primary logs",
+    "compilation chain of local identity probes",
+    "future G4 latency adoption"
+  ]
+}

@@ -1,0 +1,12 @@
+--- a/morsehgp3D_v12/src/tower/proposal.hpp
++++ b/morsehgp3D_v12/src/tower/proposal.hpp
+@@ -12,7 +12,8 @@
+ // le test de la boule diametrale fermee, (x - a).(x - b) <= 0 pour chaque autre site x. Si tous y sont, la plus petite
+ // boule de la partie est cette boule (son rayon est au moins le demi-diametre), et (a, b) son support ; parmi des
+ // paires les plus eloignees ex aequo (toutes diametrales de la meme boule), la plus petite liste triee des positions,
+-// celle de S* (CST-0113). Sinon, pour trois sites, le triangle est aigu (l'angle oppose au plus grand cote est aigu) :
++// canonique parmi les sites de F (pas necessairement S* de la coquille globale ; CST-0113).
++// Sinon, pour trois sites, le triangle est aigu (l'angle oppose au plus grand cote est aigu) :
+ // le support est la partie entiere. Sinon (quatre sites ou plus) : la proposition flottante, amorcee sur la paire la
+ // plus eloignee exacte au lieu de la paire heuristique (barycentre, puis le plus loin). Cette voie ne decide rien non
+ // plus : son support est certifie comme l'autre (LEM-T1, certificat exact) ; elle evite le flottant pour 56 % des

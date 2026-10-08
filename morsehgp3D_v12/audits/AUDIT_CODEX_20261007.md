@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, 05:13 UTC, base publiée **`0347e3675`**.
+8 octobre 2026, 05:25 UTC, base publiée **`60ea4912b`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -24,7 +24,8 @@ Face aux mesures historiques v11 : GPU plus rapide, CPU plus lent ; comparaison 
 Catalogue CPU : 274–329 ms. Sur GPU, G : 44–57 ms ; T : 26–38 ms ; R : 12–15 ms.
 Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas à 100 ms.
 [L1](../receipts/audit_reponses_20261008/session_l1_diagnostic/README.md) : worker code 0, mais récupération
-refusée par la réserve disque locale ; arrêt TERMINATED certifié. Aucun brut disponible au relevé 05:10:53.
+refusée par la réserve disque ; arrêt certifié. Aucun brut au relevé 05:10:53 ;
+[contre-lecteur indépendant prêt](../receipts/audit_reponses_20261008/session_l_contrelecture/README.md).
 [Plans L1/L2](../receipts/audit_reponses_20261008/session_l_preparation/README.md) : K10 à froid, pas de FUL1 sur L2.
 
 **Contre-lectures courantes et aide au développeur.**
@@ -50,12 +51,14 @@ refusée par la réserve disque locale ; arrêt TERMINATED certifié. Aucun brut
 - **T2-d-B, census G** : [garde resserrée et preuve](../receipts/audit_reponses_20261008/garde_census/README.md),
   [témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
   gardent résultats/parcours ; supports certifiés transportés par valeur dans le prototype.
-  Proposition entière puis Welzl amorcé en préparation ; nouveau corps et gain G4 à qualifier.
-- **T2-d-C, catalogue GPU** : [copie fusionnée relue](../receipts/audit_reponses_20261008/t2d_c_reprise/README.md) :
-  staging adapté au plus grand segment, plancher forcé de 16 Mio corrigé ; ablation de l'anticipation complétée.
-  Budget de la sonde catalogue encore commun ; deux bras conservent une réparation différente de celle annoncée.
-  [Juge à renforcer](../receipts/audit_reponses_20261008/t2d_c_admission/README.md) : métadonnées incompatibles et
-  mutant sans empreinte toujours admis aux fonctions épinglées. Aucun nouveau CUDA ni gain acquis.
+  [Proposition entière vérifiée mathématiquement](../receipts/audit_reponses_20261008/t2d_b_proposition/README.md) :
+  oracle rationnel 191 parties, bornes B≤32 ; support canonique local distinct du global. Gain G4 à qualifier.
+- **T2-d-C, catalogue GPU** : [staging et anticipation repris](../receipts/audit_reponses_20261008/t2d_c_reprise/README.md).
+  [Admission réécrite contre-jugée](../receipts/audit_reponses_20261008/t2d_c_admission_reprise/README.md) :
+  39 cas passent, métadonnées/empreintes/A-A/arrondi corrigés, bras renommés. Reste le mutant code3 :
+  cause inconnue ou configuration incompatible peuvent encore permettre l'adoption.
+  [Budgets/identité locale](../receipts/audit_reponses_20261008/t2d_c_budgets/README.md) : neuf paires concordent ;
+  pics du modèle ≠ allocations CUDA, reprise GPU après refus à couvrir. Aucun nouveau CUDA ni gain.
 - **R** : [raccourci des classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md)
   fourni, non compilé, sans gain acquis ; comparer aussi les lignes/CSR, absentes de FUL1.
   Le développeur le garde pour après T2-d-A dans sa [réponse publiée](../receipts/developpement_20261008/reponse_audit_k_mes_b.md).
