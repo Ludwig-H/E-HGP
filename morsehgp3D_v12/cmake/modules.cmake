@@ -13,7 +13,7 @@ set(MHGP12_DEPS_cloud core)
 set(MHGP12_DEPS_io core cloud)
 set(MHGP12_DEPS_index num cloud)
 set(MHGP12_DEPS_catalogue num sched cloud io)
-set(MHGP12_DEPS_tower core num sched cloud index catalogue)
+set(MHGP12_DEPS_tower core num sched cloud io index catalogue)
 
 # mhgp12_module_closure(<sortie> <module>...) : les modules donnes et toutes leurs dependances, directes ou non, dans
 # l'ordre de la table. Un nom hors table est une erreur de configuration.

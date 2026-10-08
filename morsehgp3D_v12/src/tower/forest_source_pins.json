@@ -1,0 +1,74 @@
+{
+  "note": "Ports explicites des etages T, M, V, R et de l'export FUL1 du module tower (tranche T2-b), empreintes SHA-256 des sources lues au HEAD b62196d74 (microbancs de la v12, recus de conception de la v11) et au moteur gele ac081a06f de la v11 ; a fusionner avec source_pins.json de l'etage G. Chaque port est requalifie par les portes de tests/tower (unitaires, oracle borne, MES-M0 a l'octet sur les graines de la v11, mutants) ; aucune qualification n'est heritee.",
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/mes_m4/mes_m4.cpp",
+      "commit": "320db4a12",
+      "sha256": "ac059b5ebbf5530c49cedc30bde2471cb6ade82fb8d3c5a106e3edca8958a9ea",
+      "port": [
+        "src/tower/forest_kernel.cpp",
+        "src/tower/forest_contract.cpp",
+        "src/tower/forest_births.cpp",
+        "src/tower/vertical_images.cpp",
+        "tests/tower/forest_support.hpp",
+        "tests/tower/forest_unit.cpp"
+      ],
+      "changes": "noyau : pre-passe parallele des feuilles (cibles 4 octets de G, cibles << cellule >> lues comme l'element de la cellule relu a sa racine courante, date de LEM-T3 controlee), cellule de chaque evenement, tableaux en Buffer du budget, refus en Outcome ; contraction : quatre phases par tranche sur le Pool (sommes prefixes par le pilote), classes cles par (rang de la racine, plus petite naissance), enfant = operande hors de la classe ; numerotation : centres recalcules depuis S* et compares par num::compare_centers ; LEM-T6 : jointure en flux par boule au lieu d'un tableau par BallIdx ; porte : Kruskal par lots et temoins portes, cibles << cellule >> ajoutees"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/conception_v11_20261002/conception/preuves_tour/foret_check.py",
+      "commit": "33c2ae3c8",
+      "sha256": "3f6c6681c93e744bfa46bb86e97c2733c5574e899eab6cf02583966b7842d995",
+      "port": [
+        "src/tower/vertical_images.cpp",
+        "src/tower/forest_kernel.cpp"
+      ],
+      "changes": "component_at (LEM-T5) avec l'hypothese rang(l) <= r et le refus tower_query_domain (CST-0105) ; listes d'evenements par survivant en CSR ; profondeur d'attache calculee en remontant les evenements"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "commit": "ac081a06f",
+      "sha256": "9d70956efddcef97be0a9153da5feb2417702402b46394ac778c6d78e2c49c2c",
+      "port": [
+        "src/tower/export_full.cpp"
+      ],
+      "changes": "serialize et birth_sphere reecrits sur le registre de la v12 (memes mots, memes largeurs d'entiers au profil 21) ; niveaux lus dans la table du catalogue recu, centres depuis S* ; deux puits (fichier du dossier transactionnel, SHA-256 seul) ; signature ecrite caractere par caractere (regle [mhgp11])"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/whole_input.hpp",
+      "commit": "ac081a06f",
+      "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2",
+      "port": [
+        "src/tower/export_full.cpp"
+      ],
+      "changes": "word et integer (signe, nombre de mots, mots petit-boutistes) dans un flot par blocs de 64 Kio"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_semantic.py",
+      "commit": "ac081a06f",
+      "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25",
+      "port": [
+        "tests/tower/full_reader.py"
+      ],
+      "changes": "profils admis 21, 24 et 32 ; need et natural copies de catalogue_semantic.py ; point d'entree en ligne de commande ; empreinte semantique inchangee (recoupee par le lecteur de la v11 sur le vidage u8000 K5)"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "commit": "ac081a06f",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+      "port": [
+        "tests/tower/full_reader.py"
+      ],
+      "changes": "need et natural seulement"
+    },
+    {
+      "path": "morsehgp3D_v12/microbancs/mes_m3_m4_tour/tests/carre.py",
+      "commit": "320db4a12",
+      "sha256": "e42ea91b9790fadbbab260f95c8a9efa1c4394cf20cd96cfdfc06634eac2ff52",
+      "port": [
+        "tests/tower/forest_unit.cpp"
+      ],
+      "changes": "carre K1..4 de l'auditeur (CST-0214) en entrees synthetiques ; le cercle est une cellule inerte a l'ordre 1 (un representant)"
+    }
+  ]
+}

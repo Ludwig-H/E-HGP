@@ -43,7 +43,7 @@ struct Row {
   std::string_view name;
   Status status;
 };
-constexpr std::array<Row, 31> kTable = {{
+constexpr std::array<Row, 32> kTable = {{
     {"none", Status::ok},
     {"empty_input", Status::invalid_input},
     {"size_mismatch", Status::invalid_input},
@@ -75,6 +75,7 @@ constexpr std::array<Row, 31> kTable = {{
     {"cell_capacity", Status::unsupported_degeneracy},
     {"device_unavailable", Status::resource_exhausted},
     {"device_fault", Status::invariant_violated},
+    {"tower_query_domain", Status::invariant_violated},
 }};
 
 // Echantillon d'issues : un succes, des refus a plusieurs ordres et de plusieurs raisons, valeurs toutes distinctes.
@@ -123,16 +124,16 @@ MHGP12_TEST(types, 11) {
   CHECK_EQ(idx(NodeIdx{}), 0u);
 }
 
-MHGP12_TEST(reasons, 104) {
+MHGP12_TEST(reasons, 107) {
   REQUIRE(kReasonCount == kTable.size());  // 1
-  for (u16 i = 0; i < kReasonCount; ++i) {  // 31 x 3 = 93
+  for (u16 i = 0; i < kReasonCount; ++i) {  // 32 x 3 = 96
     const Reason r = static_cast<Reason>(i);
     CHECK_EQ(reason_name(r), kTable[i].name);
     CHECK_EQ(status_of(r), kTable[i].status);
     CHECK_EQ(status_of(r) == Status::ok, r == Reason::none);  // seule none est un succes
   }
   CHECK_EQ(static_cast<u16>(Reason::none), 0);
-  CHECK_EQ(static_cast<u16>(Reason::device_fault), kReasonCount - 1);
+  CHECK_EQ(static_cast<u16>(Reason::tower_query_domain), kReasonCount - 1);
   // hors table : jamais un succes
   CHECK_EQ(status_of(static_cast<Reason>(kReasonCount)), Status::invariant_violated);
   CHECK_EQ(reason_name(static_cast<Reason>(kReasonCount)), "unknown");

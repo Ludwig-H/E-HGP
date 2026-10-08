@@ -200,3 +200,9 @@ class Resolution {
                                                ResolutionDiagnostics* diagnostics = nullptr) noexcept;
 
 }  // namespace mhgp12
+
+// Etages T, M, V, R et export FUL1 (forest.hpp, export_full.hpp ; CONTRAT_TOUR.md, paragraphes 1, 5 et 9) : noyau
+// union-find par taille sans lots, contraction des plateaux et numerotation canonique, verticales par LEM-T6 et LEM-T5,
+// registre, export ; entree : chaque ResolvedOrder ci-dessus, par l'adaptateur sans copie tower::forest_input.
+#include "tower/export_full.hpp"
+#include "tower/forest.hpp"

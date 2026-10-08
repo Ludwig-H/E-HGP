@@ -126,8 +126,12 @@ publié.
 [interface](../receipts/developpement_20261007/tour_G_INTERFACE.md)) : oracle borné (21 225 cibles égales à
 `resolve_v12` sur 342 nuages), différentiel de la v11 sur ng00–02 à K5 (graine identique pour 100 % des
 représentants), déterminisme 1 contre 8 fils aux trois tailles d'intérêt et aux profils 21, 24 et 32, 7 mutants tués.
-Étages T, M, V, R et export `MHGP11FUL1` en cours (second agent ; chaîne complète déjà conforme à `MES-M0` sémantique
-sur les neuf cas en local). Suites déclarées (T2-c) : classification des cellules et table de populations
+**Étages T, M, V, R et export `MHGP11FUL1` livrés le 8 octobre** ([rapport](../receipts/developpement_20261007/tour_TMVR_RAPPORT.md),
+[interface](../receipts/developpement_20261007/tour_TMVR_INTERFACE.md)) : noyau union-find par taille sans lots après une
+pré-passe parallèle des cibles, contraction `LEM-T4`, verticales `LEM-T5`/`LEM-T6`, registre avec les branches ouvertes
+des hyperarêtes ; `MES-M0` à l'octet sur les neuf cas avec les graines de la v11 et **sémantique sur la chaîne complète
+du produit** (catalogue de T1 → G → T, M, V, R → export), 1 contre 8 fils identiques, 27 mutants de la tour tués : critère
+de sortie de T2 tenu localement. Temps locaux à un fil sur ng00 K5 : T 100, M 50, V 67, R 167 ms, à mesurer sur G4. Suites déclarées (T2-c) : classification des cellules et table de populations
 reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
 de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
 leviers `G-L4` à `G-L7` non implantés. **Premiers temps G4** ([session H](../receipts/g4_t2h_20261007/README.md), 48 fils) : étage G 80 / 63 / 76 ms à K5 sur ng00–02 (tables 15 à 19 ms, à peine parallèles ; résolution 37 à 49 ms, ×30 de 1 à 48 fils), 450 à 634 ms à K10 : 2,5 à 3 fois le budget à K5 ; chantier T2-c en cours (tables, `G-L5`, recherche des supports). **T2-c adopté sur G4 le 8 octobre** ([session J](../receipts/g4_t2cj_20261008/README.md)) : index des naissances parallèle et file de sondes `G-L7`, étage G **53,1 / 42,1 / 48,2 ms à K5** (rapport 0,63 à 0,67, IC 95 % serré, A/A ≈ 1), 443 ms à K10 sur ng00 ; `G-L5` rejeté. Reste 1,6 à 1,8 fois le budget : census gardé, puis `LEM-T1` et proposition.

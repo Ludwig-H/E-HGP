@@ -91,3 +91,54 @@ if(MHGP12_V11_TOWER_DIR AND EXISTS "${MHGP12_V11_TOWER_DIR}/ng00_k5/foret_5.bin"
 else()
   message(STATUS "mhgp12 : portes diff_v11 de la tour absentes (MHGP12_V11_TOWER_DIR='${MHGP12_V11_TOWER_DIR}')")
 endif()
+
+# ---- Etages T, M, V, R et export FUL1 (docs/CONTRAT_TOUR.md, paragraphe 9) ----
+mhgp12_add_unit(mhgp12_tower_forest SOURCES forest_unit.cpp
+                GROUPS admission attache branches catalogue determinisme domaine hypergraphes refus requetes temoins
+                       verticales
+                LABELS fast)
+# Adaptateur de test des vidages MHGP12DP de la v11 (MES-M0, determinisme, JUG-EMST) : outil joue par la porte
+# MES-M0 ci-dessous et par le pilote du developpeur. Il lit les vidages par le lecteur strict du format, source unique
+# des microbancs (microbancs/mes_m3_m4_tour/common/format.hpp) : construit seulement si ce dossier est present (les
+# copies des campagnes de mutants ne le contiennent pas).
+set(tower_dump_format ${PROJECT_SOURCE_DIR}/microbancs/mes_m3_m4_tour/common/format.hpp)
+if(EXISTS ${tower_dump_format})
+  add_executable(mhgp12_tower_dumps ${CMAKE_CURRENT_LIST_DIR}/tower_dumps.cpp)
+  target_link_libraries(mhgp12_tower_dumps PRIVATE mhgp12)
+endif()
+# Oracle borne (contrat, paragraphe 9.2) : suite rapide de reference/ sans doublon et temoins (WIT-TRI-EQ, WIT-SIX,
+# carre K1..4), trois politiques de saut ; registre, coupes et vidage FUL1 relu par le lecteur strict.
+add_executable(mhgp12_tower_forest_oracle ${CMAKE_CURRENT_LIST_DIR}/tower_oracle.cpp)
+target_link_libraries(mhgp12_tower_forest_oracle PRIVATE mhgp12)
+mhgp12_python_gate(mhgp12_tower_forest_oracle_gate 0 oracle_tour.py $<TARGET_FILE:mhgp12_tower_forest_oracle>
+                   ${MHGP12_COORD_BITS}
+                   LABELS oracle fast TIMEOUT 600)
+# Temoin WIT-FORME-NIVEAU par l'export reel (contrat, paragraphe 1 ; fixture reference/test_witness_forme.py) : meme
+# registre, table des niveaux dans l'ordre de Morton (v11) puis des positions (T1) : octets differents, empreinte
+# semantique identique.
+mhgp12_python_gate(mhgp12_tower_forme_niveau 0 forme_niveau.py $<TARGET_FILE:mhgp12_tower_forest_oracle>
+                   ${MHGP12_COORD_BITS}
+                   LABELS oracle fast TIMEOUT 120)
+# MES-M0 sur les graines de la v11 (contrat, paragraphe 9.1 ; mes_m0.py) : octets egaux aux empreintes de MESURE.md
+# au profil 21, empreinte semantique aux profils 24 et 32, 1 fil contre 8 fils, et JUG-EMST sur l'ordre un si son
+# binaire est donne. Enregistree seulement si les vidages MHGP12DP de la v11 sont donnes a la configuration
+# (-DMHGP12_TOWER_DUMPS=<dossier>, un sous-dossier par cas, outil mhgp12_vidage des microbancs) ; les trames viennent
+# de MHGP12_DATA_DIR (porte lidar, sautee sans elles).
+set(MHGP12_TOWER_DUMPS "" CACHE PATH "vidages MHGP12DP de la v11 pour MES-M0 (vide : porte non enregistree)")
+set(MHGP12_JUG_EMST "" CACHE FILEPATH "binaire mhgp12_jug_emst (juges/emst), joue sur l'ordre un des vidages")
+if(MHGP12_TOWER_DUMPS AND TARGET mhgp12_tower_dumps)
+  set(tower_mes_m0_judge)
+  if(MHGP12_JUG_EMST)
+    set(tower_mes_m0_judge --juge-emst ${MHGP12_JUG_EMST})
+  endif()
+  mhgp12_python_gate(mhgp12_tower_mes_m0 0 mes_m0.py $<TARGET_FILE:mhgp12_tower_dumps> ${MHGP12_COORD_BITS} -
+                     ${MHGP12_TOWER_DUMPS} ${tower_mes_m0_judge} LABELS lidar long TIMEOUT 7200)
+endif()
+# Chaine G -> T (mhgp12_tower_chain : index, catalogue de T1, resolve_tower, T, M, V, R, export) : porte MES-M0
+# SEMANTIQUE avec le catalogue de T1 dans la chaine (contrat, paragraphe 9.1, sortie de T2) : ng00-02 a K5 et K10 et
+# uniformes a K5, empreinte semantique egale a celle des vidages de la v11, 1 fil contre 8 fils ; trames dans
+# MHGP12_DATA_DIR (porte lidar), sans vidage de la v11.
+add_executable(mhgp12_tower_chain ${CMAKE_CURRENT_LIST_DIR}/tower_chain.cpp)
+target_link_libraries(mhgp12_tower_chain PRIVATE mhgp12)
+mhgp12_python_gate(mhgp12_tower_chain_m0 0 mes_m0.py --chaine $<TARGET_FILE:mhgp12_tower_chain> ${MHGP12_COORD_BITS}
+                   - LABELS lidar long TIMEOUT 7200)

@@ -209,13 +209,12 @@ les deux. Une tranche qui livre un module ajoute sa ligne ici et dans `cmake/mod
 | `io` | lecture `u32le`, SHA-256, écrivains, dossier transactionnel ; port v11 | `core`, `cloud` |
 | `index` | arbre radix de Morton, bornes et census exacts sur sites ; port v11 | `num`, `cloud` |
 | `catalogue` | parcours des boîtes en largeur (source de `MES-M5`), feuille J3 en source unique (source de `MES-M2`) jouée en flux sur le warp simulé, repli exact plus large, fin d'étage partagée (tri par base, sommes préfixes), table $S^{*}$ → boule, export `MHGP12DP` ; réécrit (§ 4.1) ; voie CPU de référence et voie appareil (T1-b, même code, exécuteurs Pool et CUDA) | `num`, `sched`, `cloud`, `io` |
-| `tower` | étage G (résolution) : cellules de fenêtre (naissance, jonction, inerte) et leurs traces strictes, table de populations (`LEM-POP`), résolution des représentants (`LEM-T1`, certificat exact, census gardé, arrêt `LEM-T3`), cibles de 4 octets ; réécrit (§ 4.2), voie CPU de référence | `core`, `num`, `sched`, `cloud`, `index`, `catalogue` |
+| `tower` | étage G (résolution) : cellules de fenêtre (naissance, jonction, inerte) et leurs traces strictes, table de populations (`LEM-POP`), résolution des représentants (`LEM-T1`, certificat exact, census gardé, arrêt `LEM-T3`), cibles de 4 octets ; étages T (noyau union-find par taille sans lots), M (contraction des plateaux, numérotation canonique), V (verticales par `LEM-T6` et `LEM-T5`), R (registre) et export FUL1 de la v11 ; réécrit (§ 4.2, § 4.3), voie CPU de référence | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue` |
 
 Modules prévus, ajoutés à la table ci-dessus par leur tranche :
 
 | Module prévu | Rôle | Origine |
 | --- | --- | --- |
-| `tower` (suite) | noyau, contraction, verticales (étages T, M, V) | réécrit (§ 4.3) |
 | `registry` | registre d'événements | nouveau |
 | `views` | `full`, squelette, `points`, `condense`, `plat`, exports | port des règles v11, nouvelle structure |
 | `api`, `cli` | `Session`, un exécutable à sortie obligatoire | port v11 |

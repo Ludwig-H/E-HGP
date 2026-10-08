@@ -69,3 +69,6 @@ MHGP12_REASON(cell_capacity, unsupported_degeneracy, tower)
 // erreur du pilote CUDA pendant le calcul (lancement, acces, synchronisation)
 MHGP12_REASON(device_unavailable, resource_exhausted, catalogue)
 MHGP12_REASON(device_fault, invariant_violated, catalogue)
+// tour, etage V (CONTRAT_TOUR.md, paragraphe 5) : requete d'ancetre de LEM-T5 hors de son domaine, rang de la naissance
+// au-dela du rang demande (CST-0105)
+MHGP12_REASON(tower_query_domain, invariant_violated, tower)
