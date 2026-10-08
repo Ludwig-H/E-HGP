@@ -1,0 +1,182 @@
+{
+  "delivered_commit": "7398aed7d8dd5595c880aa8a8677ecf05a8f2a32",
+  "prototype_base": "a5e0dbc776f2817f4e7e3a23fc791f1035948b47",
+  "prototype_patch_sha256": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab",
+  "copied": [
+    "CMakeLists.txt",
+    "cmake",
+    "src",
+    "cli",
+    "bench",
+    "tests",
+    "tools",
+    "reference",
+    "docs"
+  ],
+  "prototype_tree": [
+    "1b5d1fb38c2c2cbcbfaac86525eeaaeeab0f044afb1a4aa490a6f249d5b73279",
+    382
+  ],
+  "differences": [
+    {
+      "path": "docs/PLAN.md",
+      "prototype_sha256": "604002e4bc4d016bb194651d2addde2fa21443532bc519b37863b6204a458998",
+      "delivered_sha256": "f84949f7d61a9ac196f435f4dde965c1beea5e43d1076423541ffde3c5d1ee61"
+    }
+  ],
+  "source_result": {
+    "prototype_tree": [
+      "1b5d1fb38c2c2cbcbfaac86525eeaaeeab0f044afb1a4aa490a6f249d5b73279",
+      382
+    ],
+    "delivered_tree": [
+      "8177a5b225a49d9df20130c3ec94f2f3681eafd1e335ff713acc15da7ba1b9a1",
+      382
+    ],
+    "identical_files": 381,
+    "differences": [
+      {
+        "path": "docs/PLAN.md",
+        "prototype_sha256": "604002e4bc4d016bb194651d2addde2fa21443532bc519b37863b6204a458998",
+        "delivered_sha256": "f84949f7d61a9ac196f435f4dde965c1beea5e43d1076423541ffde3c5d1ee61"
+      }
+    ],
+    "groups": {
+      "CMakeLists.txt": {
+        "files": 1,
+        "equal": 1
+      },
+      "cmake": {
+        "files": 4,
+        "equal": 4
+      },
+      "src": {
+        "files": 128,
+        "equal": 128
+      },
+      "cli": {
+        "files": 0,
+        "equal": 0
+      },
+      "bench": {
+        "files": 40,
+        "equal": 40
+      },
+      "tests": {
+        "files": 167,
+        "equal": 167
+      },
+      "tools": {
+        "files": 3,
+        "equal": 3
+      },
+      "reference": {
+        "files": 26,
+        "equal": 26
+      },
+      "docs": {
+        "files": 13,
+        "equal": 12
+      }
+    },
+    "commit_changed_paths": 34,
+    "changed_code_config_test_paths_equal": 30,
+    "prototype_stable": true,
+    "native_executed": false
+  },
+  "scope_exclusions": [
+    "builds",
+    "receipts",
+    "microbancs",
+    "external_dependencies"
+  ],
+  "integration": {
+    "files_sha256": {
+      "build_v12_u21.build_tmv.log": "9961b9fff0f32c07f7d3487034d966e8dd70d4a35f91255ef57834100c55b1f9",
+      "build_v12_u21.conf_tmv.log": "2fb16cee3aa4b0d932312da0c47d08d8e9b8af710d20f67abd6375a660ad42a5",
+      "build_v12_u21.ctest_tmv.log": "ac8a61fa9d6bd07dbe5c6ef989f051293f5c6380c8c8752e514b5c92ca521bb2",
+      "v12_tour_TMV/final6/ctest21.log": "e3dabb61f78102bff630461f9ff4cebcd0fb21659462521a899e5cffa73073fc"
+    },
+    "observations_non_rejouees": {
+      "LastTest_end": "2026-10-08 02:18 UTC",
+      "LastTest_sha256_at_first_read": "29d65e047a682bbd410462d493defc9f88178b4765d8499acaf0a51890e083b0",
+      "LastTest_start": "2026-10-08 02:13 UTC",
+      "LastTestsFailed_stale_date": "2026-10-07 22:00:20 UTC",
+      "all_modules": true,
+      "build_artifacts_reused_for_full_probe_after_run": true,
+      "build_type": "Release",
+      "cache_sha256_at_first_read": "01e0413211bcdaa52f0ad825c81e21841fcc95f74b482d4efc35b0183a51a16c",
+      "cache_source": "main/morsehgp3D_v12",
+      "coord_bits": 21,
+      "cuda_enabled": false,
+      "emst_judge_configured": false,
+      "tower_dumps_configured": false
+    },
+    "result": {
+      "added_vs_repo6": [
+        "mhgp12_reference_diff_v10",
+        "mhgp12_reference_diff_v10_large",
+        "mhgp12_reference_diff_v10_large_opt",
+        "mhgp12_reference_diff_v10_mutant_admission_single",
+        "mhgp12_reference_diff_v10_mutant_admission_single_opt",
+        "mhgp12_reference_diff_v10_mutant_cover_last_ball",
+        "mhgp12_reference_diff_v10_mutant_cover_last_ball_opt",
+        "mhgp12_reference_diff_v10_mutant_lexicographic_sites",
+        "mhgp12_reference_diff_v10_mutant_lexicographic_sites_opt",
+        "mhgp12_reference_diff_v10_mutant_merge_numbering",
+        "mhgp12_reference_diff_v10_mutant_merge_numbering_opt",
+        "mhgp12_reference_diff_v10_mutant_q3_form_from_support",
+        "mhgp12_reference_diff_v10_mutant_q3_form_from_support_opt",
+        "mhgp12_reference_diff_v10_mutant_rank_by_double",
+        "mhgp12_reference_diff_v10_mutant_rank_by_double_opt",
+        "mhgp12_reference_diff_v10_mutant_rank_last_ball",
+        "mhgp12_reference_diff_v10_mutant_rank_last_ball_opt",
+        "mhgp12_reference_diff_v10_mutant_reduced_levels",
+        "mhgp12_reference_diff_v10_mutant_reduced_levels_opt",
+        "mhgp12_reference_diff_v10_mutant_support_last",
+        "mhgp12_reference_diff_v10_mutant_support_last_opt",
+        "mhgp12_reference_diff_v10_mutant_weighted_flag_lost",
+        "mhgp12_reference_diff_v10_mutant_weighted_flag_lost_opt",
+        "mhgp12_reference_diff_v10_opt",
+        "mhgp12_reference_diff_v10_refusal",
+        "mhgp12_reference_diff_v10_refusal_opt"
+      ],
+      "failed": 0,
+      "full_lidar_chain_replayed_here": false,
+      "gpu_qualified": false,
+      "native_replayed": false,
+      "outer_ctest_command_captured": false,
+      "passed": 716,
+      "process_exit_code_captured": false,
+      "registered_at_configuration": 748,
+      "removed_vs_repo6": [],
+      "selected": 717,
+      "skipped": [
+        "mhgp12_support_lidar_sentinel"
+      ]
+    }
+  },
+  "targeted_gates": [
+    "mhgp12_tower_forest_admission",
+    "mhgp12_tower_forest_attache",
+    "mhgp12_tower_forest_branches",
+    "mhgp12_tower_forest_catalogue",
+    "mhgp12_tower_forest_determinisme",
+    "mhgp12_tower_forest_domaine",
+    "mhgp12_tower_forest_hypergraphes",
+    "mhgp12_tower_forest_refus",
+    "mhgp12_tower_forest_requetes",
+    "mhgp12_tower_forest_temoins",
+    "mhgp12_tower_forest_verticales",
+    "mhgp12_tower_forest_inventaire",
+    "mhgp12_tower_forest_oracle_gate",
+    "mhgp12_tower_forest_oracle_gate_opt",
+    "mhgp12_tower_forme_niveau",
+    "mhgp12_tower_forme_niveau_opt"
+  ],
+  "reader_replay": {
+    "normal_optimized_identical": true,
+    "stdout_sha256": "54d0ab39c214db9234337233c6264004309908f7cab125781b71bee2bbd9ddce",
+    "targeted_gates_passed": 16
+  }
+}

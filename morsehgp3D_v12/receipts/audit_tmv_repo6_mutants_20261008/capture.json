@@ -1,0 +1,63 @@
+{
+  "files_sha256": {
+    "final6/build24.log": "64f60e263413fa032ae6026966ebd5777a5e4ba1e72c9aacd0f22bc83c91d409",
+    "final6/cfg24.log": "009790cd0376abf6ff32684c15895255b061c332d84b928d87b14e3453e69b6d",
+    "final6/mutants.log": "8412974d079bb2a49db6545afdfc76c7baca9663f169c7460f3559015be4d153",
+    "final6/mutants_tower.json": "d93153c7a3aa7b7d9a74d90e11db5b53f143414f53883f16a0ec226b52901643",
+    "outils/etape_final6.sh": "ae02e54ef0a2f316de9b71506bdc0cde31ca77d9783e572b5f0069d25ffd20e3",
+    "repo6/morsehgp3D_v12/tests/mutants/run_mutants.py": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec",
+    "repo6/morsehgp3D_v12/tests/mutants/tower.json": "75fa8a676129710045b79e1a0d5543fcb2e76b39548cc61075fe475724127f9b"
+  },
+  "patch_at_source_capture_sha256": "b3c78ae365a99568457bc6cd5d894a1b73d02b7b19ae3d774f9fdfa094a58bab",
+  "prior_reader_sha256": "b1424b987d0c19b2f4eb966fd852e4e1284ebdc491f312dc0943d81694bd86b5",
+  "public_status": "not_claimed",
+  "result": {
+    "code": 0,
+    "final6_status": "interrompu_pendant_construction_24",
+    "gcp_used": false,
+    "gpu_qualified": false,
+    "killed_by_code": [
+      "admission_r_sans_decalages",
+      "arret_sous_la_fenetre",
+      "branches_coupe_fermee",
+      "census_sans_seuil",
+      "cible_cellule_prise_pour_naissance",
+      "cible_de_meme_rang",
+      "controle_croise_decale",
+      "decroissance_apres_le_saut",
+      "element_sans_racine",
+      "empreinte_de_file_sans_interieur",
+      "empreinte_de_trace_sans_interieur",
+      "etoile_entiere",
+      "file_decalee",
+      "naissances_par_cle",
+      "plateau_non_atomique",
+      "population_repetee_admise",
+      "recherche_premiere_place_du_seau",
+      "recherche_sans_egalite_des_sites",
+      "repertoire_decale",
+      "seau_non_trie",
+      "t1_sans_s_dans_f",
+      "t6_sans_remontee",
+      "table_s_etoile_muette",
+      "table_s_etoile_queue_partielle",
+      "tri_instable",
+      "union_par_indice",
+      "verification_sans_collisions"
+    ],
+    "mutant_count": 27,
+    "native_replayed": false,
+    "source_failure_demonstrated": false,
+    "stop_declared_utc": "02:10:44",
+    "utc": "02:10:22",
+    "wide_profiles_qualified": false,
+    "witness": "vert"
+  },
+  "source_base": "a5e0dbc776f2817f4e7e3a23fc791f1035948b47",
+  "source_tree": [
+    "1b5d1fb38c2c2cbcbfaac86525eeaaeeab0f044afb1a4aa490a6f249d5b73279",
+    382
+  ],
+  "status": "repo6_27_mutants_clos_par_code",
+  "stop_report_excerpt": "Batterie arr\u00eat\u00e9e \u00e0 02:10:44 au d\u00e9but du profil 24"
+}
