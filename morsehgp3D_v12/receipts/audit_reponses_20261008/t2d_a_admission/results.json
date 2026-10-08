@@ -1,0 +1,23 @@
+{
+  "cpu_absent": "admis",
+  "fils_bool": "admis",
+  "identite_tronquee": {
+    "identite_ok": true,
+    "refus": [],
+    "verdict": "adopte"
+  },
+  "liberation_bool": "admis",
+  "mur_impossible": {
+    "P_plus_C_plus_G_plus_TMVR_ns": 55000,
+    "identite_ok": true,
+    "refus": [],
+    "verdict": "adopte",
+    "wall_ns": 1
+  },
+  "nominal": {
+    "identite_ok": true,
+    "refus": [],
+    "verdict": "adopte"
+  },
+  "queue_fausse": "admis"
+}

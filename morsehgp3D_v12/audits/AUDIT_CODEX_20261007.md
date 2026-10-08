@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, reprise après coupure, base publiée **`9feadf927`**.
+8 octobre 2026, 05:09 UTC, base publiée **`7bcf9665e`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -29,20 +29,25 @@ Retirer R par passe laisse 116–148 ms médians : ce seul poste ne suffit pas �
 
 **Contre-lectures courantes et aide au développeur.**
 
-- **CPU, catalogue** : finition déjà parallèle depuis `8ba7d7287` ; feuilles = 45–48 % de C.
-  [Patch popcount explicite depuis v11](../receipts/audit_reponses_20261008/cpu_popcount/README.md),
-  puis [assembleur vérifié](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md) : cinq appels logiciels
-  deviennent zéro dans les deux wrappers génériques ; avec `-mpopcnt`, assembleurs identiques.
-  Aucun gain temps ni objet produit corrigé qualifié. Cette piste concerne le catalogue, pas l'étage G.
-- **MES-B `8da450ab7`** : [livraison contre-jugée](../receipts/audit_reponses_20261008/mes_b_livraison/README.md).
-  Étiquettes, refus K10 et JSON corrigés ; tests Python normal/−O et 20 mutants passent.
-  Résidu mur nul→`log(0)` corrigé en `9feadf927` ; nouveau schéma mémoire par étage et tests en contre-lecture.
-  B1 tolère explicitement les refus K5 ≥10 M sites : « tenu » ne signifie pas achèvement de toutes ces scènes.
-  CPU/RSS et budgets séparés ajoutés ; aucune mesure massive nouvelle contre-certifiée.
-- **T2-d-A, recouvrement G/TMVR** : [conditions de concurrence](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md),
-  [copie reprise sur 8da](../receipts/audit_reponses_20261008/t2d_a_reprise/README.md) : `noexcept` retiré et fin G
-  mesurée avant les feuilles. Test mémoire récupéré : le digest pollue son compteur ; patch ciblé fourni.
-  Nouvelle qualification native attendue. T/M/V/R recouverts sont des sommes de fenêtres, pas du temps CPU.
+- **CPU, catalogue** : finition déjà parallèle ; feuilles = 45–48 % de C.
+  [Popcount, assembleur vérifié](../receipts/audit_reponses_20261008/cpu_popcount_asm/README.md) : cinq appels
+  logiciels deviennent zéro ; avec `-mpopcnt`, assembleurs identiques. Deux nouveaux
+  [patches séparés](../receipts/audit_reponses_20261008/cpu_live/README.md) : calcul symétrique des masques
+  (2E→E unions/popcounts), retrait du garde Q2 déjà garanti par le générateur. Modèle : 17 628 cas,
+  dix mutants, aucun tableau ajouté. Corps warp produit conservé ; qualification native et chronos attendus.
+- **Mémoire du catalogue** : [réemploi du tri des positions pour S*](../receipts/audit_reponses_20261008/catalogue_radix_reuse/README.md)
+  proposé après analyse des durées de vie : demande supprimée de 40n+1056t+1056 octets, t=max(1,ceil(n/1024)).
+  Modèle : 227 appels et 92 interruptions ; ni allocation physique, ni pic, ni temps économisé qualifiés.
+- **MES-B `9feadf927`** : [contre-lecture achevée](../receipts/audit_reponses_20261008/mes_b_memoire/README.md).
+  Mur/sites nuls refusés, portes Python normal/−O et 24 mutants passent. Trois incohérences mémoire restent
+  admises (capacité>pic, épinglé>pic hôte, pic suivant<usage précédent) ; témoins et patch fournis.
+  B1 tolère explicitement les refus K5 ≥10 M sites. Les nouveaux champs mémoire ne figurent pas dans L1.
+- **T2-d-A, recouvrement G/TMVR** : [concurrence](../receipts/audit_reponses_20261008/prelecture_t2d_t/README.md),
+  [reprise](../receipts/audit_reponses_20261008/t2d_a_reprise/README.md) : `noexcept` et fin G corrigés ;
+  pollution du compteur d'allocations par le digest signalée, test ensuite réécrit dans le prototype.
+  [Pilote épinglé avant refonte](../receipts/audit_reponses_20261008/t2d_a_admission/README.md) : mur impossible
+  ou cohorte d'identité tronquée permettent encore « adopte ». Corriger avant campagne ; T/M/V/R recouverts
+  sont des fenêtres de tâches, pas une partition du mur. Schéma suivant à contre-lire explicitement.
 - **T2-d-B, census G** : [garde resserrée et preuve](../receipts/audit_reponses_20261008/garde_census/README.md),
   [témoins de frontière](../receipts/audit_reponses_20261008/census_temoins/README.md) : 1 288 requêtes du modèle
   gardent résultats/parcours ; supports certifiés transportés par valeur dans le prototype.

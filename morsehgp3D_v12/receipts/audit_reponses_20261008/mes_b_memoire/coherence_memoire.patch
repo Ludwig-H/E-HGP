@@ -1,0 +1,15 @@
+--- a/morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py
++++ b/morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py
+@@ -249,6 +249,12 @@
+             any(type(mem[k]) is not list or len(mem[k]) != 2 or not all(is_int(v) for v in mem[k]) or
+                 mem[k][0] > mem[k][1] for k in MEM_STAGES) or max(mem[k][1] for k in MEM_STAGES) != row['pic_octets']:
+         return 'memoire par etage mal formee ou incoherente avec pic_octets (passe %d)' % i
++    # MES-B n'admet l'appareil qu'avec une ouverture a budget separe (parse_output).
++    if row['epinglee_octets'] > row['pic_octets'] or (case['voie'] == 'appareil' and
++            row['appareil_octets'] > row['pic_appareil_octets']):
++        return 'capacite residente superieure au pic du budget (passe %d)' % i
++    if any(mem[b][1] < mem[a][0] for a, b in zip(MEM_STAGES, MEM_STAGES[1:])):
++        return 'pic d\'etage inferieur a son usage initial (passe %d)' % i
+     st, g = row['etapes_ns'], row['g_ns']
+     if sum(st[k] for k in ('P', 'C', 'G', 'raccord', 'TMVR')) > row['wall_ns'] or \
+             sum(st[k] for k in ('T', 'M', 'V', 'R')) > st['TMVR'] or g['tables'] + g['resolution'] > st['G']:

@@ -1,0 +1,33 @@
+--- a/morsehgp3D_v12/src/catalogue/leaf_common.hpp
++++ b/morsehgp3D_v12/src/catalogue/leaf_common.hpp
+@@ -212,6 +212,7 @@
+   simt::sync();
+   pair_rows<N, A>(X, m);
+   simt::sync();
++#if MHGP12_SIMT_WARP
+   MHGP12_LANES(N, x) {
+     auto l0 = W::empty(), l1 = W::empty(), l2 = W::empty();
+     if (x < m) {
+@@ -227,6 +228,22 @@
+     L.live[1][x] = l1;
+     L.live[2][x] = l2;
+   }
++#else
++  // Hote : une union de dominances par arete non orientee, sans table auxiliaire.
++  for (u32 x = 0; x < N; ++x) L.live[0][x] = L.live[1][x] = L.live[2][x] = W::empty();
++  for (u32 x = 0; x < m; ++x) {
++    for (auto rest = L.nbr[x] & W::above(x); simt::any(rest); rest = simt::clear_lowest(rest)) {
++      const u32 y = simt::ctz(rest);
++      const int w = static_cast<int>(simt::popc(L.dom[x] | L.dom[y]));
++      for (int t = 0; t < 3; ++t) {
++        if (w <= K - 1 - t) {
++          L.live[t][x] = L.live[t][x] | W::bit(y);
++          L.live[t][y] = L.live[t][y] | W::bit(x);
++        }
++      }
++    }
++  }
++#endif
+   simt::sync();
+ }
+ 

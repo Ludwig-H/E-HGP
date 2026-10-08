@@ -1,0 +1,12 @@
+--- a/morsehgp3D_v12/src/catalogue/leaf_j3.hpp
++++ b/morsehgp3D_v12/src/catalogue/leaf_j3.hpp
+@@ -120,7 +120,9 @@
+   const u32 i = unpack<N>(item, 0), j = unpack<N>(item, 1), k = unpack<N>(item, 2), q = unpack<N>(item, 3);
+   // Visite deja comptee dans les enfants du parent (prefixes = m + somme des enfants des prefixes developpes).
+   if constexpr (Q == 2) {
++#if MHGP12_SIMT_WARP
+     if (static_cast<int>(simt::popc(S.dom[i] | S.dom[j])) > K - 1) return kNo;  // G3 (toujours vrai : live[0])
++#endif
+     if (K >= 2) {
+       const MaskOf<N> prefix[4] = {S.nbr[i], S.nbr[i] & S.nbr[j], W::empty(), W::empty()};
+       children<N>(acc, l, X.m, j, 2, prefix);

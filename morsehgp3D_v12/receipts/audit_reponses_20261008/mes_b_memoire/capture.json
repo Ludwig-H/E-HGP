@@ -1,0 +1,299 @@
+{
+  "format": "mhgp12_audit_mes_b_memoire_v1",
+  "pin": "9feadf92725190e14bf2a56fe98c761ba5afda1a",
+  "parent_memory_commit": "902041f6675a079deb4a642068b036635171db1f",
+  "previous_audit_pin": "8da450ab751017a77928cb5c33e284b0fd0371e8",
+  "capture_utc": "2026-10-08T04:56:08.043047+00:00",
+  "sources_sha256": {
+    "morsehgp3D_v12/microbancs/mes_b_scenes/pilote_b.py": "457d0e6ff6f27daca0eb22f5852fe6b1e53fce1611c330fd3931a5b071c8c49d",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/test_pilote_b.py": "bcc716f55584c5c3a18aae99dd325db2695eae7b924fc76e2c1685dd74917013",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/mutants_pilote_b.py": "ed7d9ff66b8fbba74aa9ea01dcf5640ecfa78deb9f30eb05f204134ea14261d7",
+    "morsehgp3D_v12/microbancs/mes_b_scenes/README.md": "b06842477bac7592ffadcce802537290002059347ab5835db33d4f883cb4e9f7",
+    "morsehgp3D_v12/bench/full_probe.cpp": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61",
+    "morsehgp3D_v12/tests/tower/full_probe_check.py": "e2da9b9f8bb4c6414beb32fd113c72bbca78185c4852c4f58a1eeecc7460c47e",
+    "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "morsehgp3D_v12/src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a"
+  },
+  "candidate_pilot_sha256": "d9a37a9865bf34145de2bd10b440b0cc51308c1c725aed7de17e069d7acbcd98",
+  "gate_capture_utc_start": "2026-10-08T04:53:42.601852+00:00",
+  "gate_capture_utc_end": "2026-10-08T04:53:51.999303+00:00",
+  "gate_results": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "microbancs/mes_b_scenes/test_pilote_b.py"
+      ],
+      "code": 0,
+      "stdout": "test_pilote_b_ok lecture=28 issues=7 verdicts=9 empreintes=3 etiquettes=12 pilote=2\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "microbancs/mes_b_scenes/test_pilote_b.py"
+      ],
+      "code": 0,
+      "stdout": "test_pilote_b_ok lecture=28 issues=7 verdicts=9 empreintes=3 etiquettes=12 pilote=2\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "microbancs/mes_b_scenes/mutants_pilote_b.py"
+      ],
+      "mode": "main() officielle avec interception des journaux enfants seulement",
+      "code": 0,
+      "stdout": "mutants_pilote_b_ok tues=24\n",
+      "stderr": ""
+    }
+  ],
+  "mutants": {
+    "count": 24,
+    "codes": [
+      [
+        "sans_cles_exactes",
+        1
+      ],
+      [
+        "booleen_admis",
+        1
+      ],
+      [
+        "sans_inclusion_mur",
+        1
+      ],
+      [
+        "refus_tout_statut",
+        1
+      ],
+      [
+        "b1_seuil",
+        1
+      ],
+      [
+        "b2_tous",
+        1
+      ],
+      [
+        "b3_seuil",
+        1
+      ],
+      [
+        "empreinte_voies",
+        1
+      ],
+      [
+        "empreinte_passes",
+        1
+      ],
+      [
+        "etiquette_tronquee",
+        1
+      ],
+      [
+        "delai_ignore",
+        1
+      ],
+      [
+        "cpu_appareil",
+        1
+      ],
+      [
+        "open_partage",
+        1
+      ],
+      [
+        "cles_repetees",
+        1
+      ],
+      [
+        "entier_non_borne",
+        1
+      ],
+      [
+        "liberation_rang",
+        1
+      ],
+      [
+        "ouverture_raison",
+        1
+      ],
+      [
+        "b1_sans_echec",
+        1
+      ],
+      [
+        "b1_refus_partout",
+        1
+      ],
+      [
+        "b4_sans_refus",
+        1
+      ],
+      [
+        "memoire_sans_coherence",
+        1
+      ],
+      [
+        "memoire_usage_libre",
+        1
+      ],
+      [
+        "mur_nul_admis",
+        1
+      ],
+      [
+        "pente_sans_garde",
+        1
+      ]
+    ],
+    "logical_failures": 23,
+    "deliberate_domain_error": "pente_sans_garde",
+    "syntax_or_import_failures": 0,
+    "new_mutant_diagnostics": {
+      "memoire_sans_coherence": "lecture : mutation memoire_pic_incoherent rendue ok",
+      "memoire_usage_libre": "lecture : mutation memoire_usage_sup_pic rendue ok",
+      "mur_nul_admis": "lecture : mutation mur_nul rendue ok",
+      "pente_sans_garde": "ValueError: math domain error"
+    }
+  },
+  "scope": {
+    "synthetic_json_only": true,
+    "native_engine_run": false,
+    "gcp_used": false,
+    "full_probe_gate_executed": false,
+    "l1_source_pin": "403736300900a709b82316721eeb589fbc4a5350",
+    "l1_schema_not_transferred": true
+  },
+  "result": {
+    "original": {
+      "nominal": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "mur_nul": {
+        "etat": "illisible",
+        "raison": "mur ou nombre de sites nul (passe 1)"
+      },
+      "etage_absent": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "pic_global_incoherent": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "usage_superieur_pic": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "memoire_booleenne": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "usage_diminue_pic_conserve": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "gpu_capacite_superieure_pic": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "epinglee_superieure_pic_hote": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "pic_suivant_inferieur_usage": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "sites_nuls": {
+        "etat": "illisible",
+        "raison": "mur ou nombre de sites nul (passe 0)"
+      },
+      "ouverture_partagee": {
+        "etat": "illisible",
+        "raison": "ligne open hors schema"
+      },
+      "cpu_sans_memoire_gpu": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "pentes_non_positives": [
+        null,
+        null
+      ]
+    },
+    "proposed": {
+      "nominal": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "mur_nul": {
+        "etat": "illisible",
+        "raison": "mur ou nombre de sites nul (passe 1)"
+      },
+      "etage_absent": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "pic_global_incoherent": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "usage_superieur_pic": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "memoire_booleenne": {
+        "etat": "illisible",
+        "raison": "memoire par etage mal formee ou incoherente avec pic_octets (passe 1)"
+      },
+      "usage_diminue_pic_conserve": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "gpu_capacite_superieure_pic": {
+        "etat": "illisible",
+        "raison": "capacite residente superieure au pic du budget (passe 1)"
+      },
+      "epinglee_superieure_pic_hote": {
+        "etat": "illisible",
+        "raison": "capacite residente superieure au pic du budget (passe 1)"
+      },
+      "pic_suivant_inferieur_usage": {
+        "etat": "illisible",
+        "raison": "pic d'etage inferieur a son usage initial (passe 1)"
+      },
+      "sites_nuls": {
+        "etat": "illisible",
+        "raison": "mur ou nombre de sites nul (passe 0)"
+      },
+      "ouverture_partagee": {
+        "etat": "illisible",
+        "raison": "ligne open hors schema"
+      },
+      "cpu_sans_memoire_gpu": {
+        "etat": "ok",
+        "raison": ""
+      },
+      "pentes_non_positives": [
+        null,
+        null
+      ]
+    },
+    "sources": 9,
+    "native_executed": false
+  },
+  "replay": {
+    "normal_code": 0,
+    "optimized_code": 0,
+    "stdout_equal": true,
+    "stdout_sha256": "a99e4e3849f82b69c288e836099b68428d7a20a84b9e03ce9c08dbb6d32727e5"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "utc": "2026-10-08T04:58:58.949873+00:00",
+  "base_commit": "9feadf92725190e14bf2a56fe98c761ba5afda1a",
+  "patch": {
+    "path": "morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+    "before_sha256": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+    "after_sha256": "82f44e99434f0f89b30f5d92bdfaa6659f62598c7fb019e84d229544524920b4"
+  },
+  "sources": [
+    {
+      "path": "morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+      "bytes": 14331,
+      "sha256": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/finish_sort.hpp",
+      "bytes": 11625,
+      "sha256": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/finish_kernels.hpp",
+      "bytes": 10794,
+      "sha256": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/exec_host.hpp",
+      "bytes": 5044,
+      "sha256": "93985cfe09c271d8e709b019ca9e2c8c1a3208c35961a78f26718cb9c2e6d1c4"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "bytes": 12127,
+      "sha256": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a"
+    },
+    {
+      "path": "morsehgp3D_v12/src/catalogue/device_driver.hpp",
+      "bytes": 6905,
+      "sha256": "e87f947fd85d9e76447254faf67548a5861502d47b892e79c74749f15c83199d"
+    }
+  ],
+  "port_review_only": [
+    {
+      "label": "C/repo902",
+      "path": "morsehgp3D_v12/src/catalogue/finish_driver.hpp",
+      "bytes": 12802,
+      "sha256": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed"
+    },
+    {
+      "label": "C/repo902",
+      "path": "morsehgp3D_v12/src/catalogue/exec_host.hpp",
+      "bytes": 5138,
+      "sha256": "119ceb7c9cb5265323849f01248f876bd30b7284e79789e21fb8caaacc9b329f"
+    },
+    {
+      "label": "C/repo902",
+      "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu",
+      "bytes": 14639,
+      "sha256": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86"
+    },
+    {
+      "label": "C/repo902",
+      "path": "morsehgp3D_v12/src/catalogue/transfer_meter.hpp",
+      "bytes": 6542,
+      "sha256": "418350e795394c1c6f1c9107a31c47883d49bc951672702baff8e2e59a99b2c3"
+    }
+  ],
+  "native": false,
+  "product_modified": false,
+  "checks": {
+    "normal_and_optimized_identical": true,
+    "results_sha256": "173754ad506d07bf27e45a2eef4398a69d4d5d60dbaebc099240c58166811762",
+    "scope": "git apply in temporary copy and independent Python model only"
+  }
+}

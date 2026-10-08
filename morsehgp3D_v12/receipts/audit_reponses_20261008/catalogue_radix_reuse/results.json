@@ -1,0 +1,47 @@
+{
+  "completed_calls": 227,
+  "cp_ct": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      1
+    ]
+  ],
+  "ct1_witness": {
+    "canonical": [
+      0,
+      1
+    ],
+    "cp": 1,
+    "ct": 1,
+    "passes_positions": 1,
+    "passes_table": 1,
+    "table": [
+      1,
+      0
+    ]
+  },
+  "interrupted_between_phases": 92,
+  "logical_requested_bytes": {
+    "0": 2112,
+    "1": 2152,
+    "1000000": 41032768,
+    "1024": 43072,
+    "1025": 44168
+  },
+  "native_execution": false,
+  "patch_apply_check": true,
+  "patch_reverse_check": true,
+  "patched_sha256": "82f44e99434f0f89b30f5d92bdfaa6659f62598c7fb019e84d229544524920b4"
+}
