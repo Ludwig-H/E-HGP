@@ -1,0 +1,11 @@
+--- a/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
++++ b/morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py
+@@ -9,7 +9,7 @@
+                           [--essai --sonde BINAIRE]
+         pilote_apparie.py auto-test
+ OPTIONS : options de la sonde separees par des espaces, dans une liste fermee : --cache=OCTETS, --sequentiel,
+---recouvert ; vide : la voie par defaut (Session recouverte, sans cache). NOM : [a-z][a-z0-9_]* (au plus 24).
++--recouvert ; vide : la voie par defaut (Session recouverte, cache de blocs 8 Gio). NOM : [a-z][a-z0-9_]* (au plus 24).
+ --donnees contient lidar_<trame>.u32le et lidar_<trame>.ids.u32le. --essai : sonde existante, voie CPU, minima
+ relaches, verdict « essai » (le jugement calcule reste publie, jamais comme mesure).
+ 

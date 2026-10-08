@@ -1,0 +1,61 @@
+{
+  "cpu_jsonl_sha256": {
+    "cpu_ng00_r0.jsonl": "253790a3fe48a4fa0755617cbac03c081954f9ac4f344bb7a4e0abe38ac34e96",
+    "cpu_ng00_r1.jsonl": "bf35ff0c55be2bb8739a876b4c286d7a2adb63d554e8d39e1b8e36b046891227",
+    "cpu_ng00_r2.jsonl": "8da10017b337dcc2a0ad05317c52cddc82c67a42501e690515058f1389f259e3",
+    "cpu_ng01_r0.jsonl": "36d3dc166b6990bcf6d85ae5be7b675f2e53a4146e12c372d1f127a3b2b536d2",
+    "cpu_ng01_r1.jsonl": "011cb86edc01895293c01042521ad02a81fd224181a9e40b06592cab9e551933",
+    "cpu_ng01_r2.jsonl": "b90583be42ddbce2258537e589b3ed2c3374a7ca0f154efb768a9062097e70ee",
+    "cpu_ng02_r0.jsonl": "e5c7db759fab8d93551a3072ec021714ba98e7a949264c1d39c4b61984c83e10",
+    "cpu_ng02_r1.jsonl": "c04ad045e230f1fc13ad95aef19fccc8030b16194d575952576b21576f005caf",
+    "cpu_ng02_r2.jsonl": "a18c2002d478a9bc3ed4eca1d9a72c1901848d859942d64b0a94a6d26c57b714"
+  },
+  "history": {
+    "docs/MESURE.md": "c0a8966ced7d00db60f8ba1b95b50ed5a4c23a2e8afa89be1e38ca1527f204c6",
+    "receipts/audit_reponses_20261008/session_i_catalogue/mesures.json": "d7697e7966b5c1f5774dc5204f1e4b44f226554f0407492598542dec82e939ec"
+  },
+  "m_results_sha256": "97bcf56d11438f311fbf30a522a44ad050d8ed8b9f6c316d37478fc2213c1e3c",
+  "reference_commit": "72f622a556130e25afdadbef84984619417286e2",
+  "same_i_m": [
+    "src/catalogue/leaves.cpp",
+    "src/catalogue/leaf_common.hpp",
+    "src/catalogue/leaf_census.hpp",
+    "src/catalogue/leaf_j3.hpp",
+    "src/catalogue/simt.hpp",
+    "src/catalogue/finish_sort.hpp"
+  ],
+  "same_m_reference": [
+    "bench/catalogue_probe.cpp",
+    "src/catalogue/catalogue.cpp",
+    "src/catalogue/leaves.cpp",
+    "src/catalogue/assemble.cpp",
+    "src/catalogue/exec_host.hpp",
+    "src/catalogue/finish_driver.hpp",
+    "src/catalogue/finish_sort.hpp",
+    "src/catalogue/simt.hpp",
+    "src/catalogue/leaf_common.hpp",
+    "src/catalogue/leaf_census.hpp",
+    "src/catalogue/leaf_j3.hpp"
+  ],
+  "source_i": "d2f39fe8293d31508697b6db113a7954a7fd0d9e",
+  "source_m": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+  "source_pins": {
+    "bench/catalogue_probe.cpp": "5d9b83bd235cd52594c4d52c5712d58f0dada13864b072c9c33553f89b07cc86",
+    "bench/full_probe.cpp": "00668cb9da02effaaea07eee3e7609e0a02221f4bff6773d9024c330bf656b42",
+    "src/catalogue/assemble.cpp": "5efddae8de847fb213e874fce108ba63ec693beb7d4a3cab0c29e55314b3439c",
+    "src/catalogue/catalogue.cpp": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49",
+    "src/catalogue/exec_host.hpp": "119ceb7c9cb5265323849f01248f876bd30b7284e79789e21fb8caaacc9b329f",
+    "src/catalogue/finish_driver.hpp": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed",
+    "src/catalogue/finish_sort.hpp": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce",
+    "src/catalogue/leaf_census.hpp": "829ba84ab6522a364d4985b5fb6d6571c14f8c72fd8e44bb45c97900b2125b6b",
+    "src/catalogue/leaf_common.hpp": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+    "src/catalogue/leaf_j3.hpp": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922",
+    "src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "src/catalogue/simt.hpp": "acda01afa5e114234be2e22b17815d5b7fe32c5fe5a0ae184675ea6ef5f57122"
+  },
+  "v11": {
+    "bench/full_probe.cpp": "9d70956efddcef97be0a9153da5feb2417702402b46394ac778c6d78e2c49c2c",
+    "commit": "ac081a06fd684fdcd3b11c2b1faa4679f2ad287c",
+    "src/catalogue/leaf.cpp": "1cb484cb2768b5e9ce4a73198ca18c042811a9adf324712a654a723f5ca5f897"
+  }
+}

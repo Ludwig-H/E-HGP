@@ -1,0 +1,26 @@
+{
+  "counterexamples": {
+    "cpu_device_fingerprint": "digest mismatch k5",
+    "extra_process": "missing/extra process",
+    "input_peak_floor": "peak below resident input bytes",
+    "missing_process": "missing/extra process",
+    "not_known_idle": "GPU not known idle apres",
+    "pooled_median_forged": "report mismatch statistiques",
+    "reported_refusal": "pilot refused/incomplete",
+    "sequence_foreign_label": "legacy admission: passe 0 hors contrat (passe, statut, trame, voie, K, fils, profil ou sites)",
+    "shared_capacity_exceeds_peak": "shared budget capacity/peak",
+    "shared_device_peak": "shared budget capacity/peak"
+  },
+  "four_statistics": {
+    "max_process_median_ns": 2000000,
+    "max_raw_ns": 101000000,
+    "median_process_medians_ns": 1000000,
+    "pooled_median_ns": 2000000
+  },
+  "nominal": {
+    "passes": 610,
+    "processes": 38,
+    "verdict": "tenu",
+    "warm_passes": 392
+  }
+}

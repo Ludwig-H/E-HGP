@@ -1,0 +1,50 @@
+{
+  "combos": [
+    [
+      21,
+      1
+    ],
+    [
+      21,
+      8
+    ],
+    [
+      24,
+      1
+    ],
+    [
+      24,
+      8
+    ],
+    [
+      32,
+      1
+    ],
+    [
+      32,
+      8
+    ],
+    [
+      32,
+      2048
+    ]
+  ],
+  "files": {
+    "morsehgp3D_v12/bench/catalogue_probe.cpp": "5d9b83bd235cd52594c4d52c5712d58f0dada13864b072c9c33553f89b07cc86",
+    "morsehgp3D_v12/bench/tower_probe.cpp": "5c68d7225ac22d06dbb5a40bb45357c045ab0e7e48f530cfb4dbb87e425b3241",
+    "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f"
+  },
+  "journal_inventory_sha256": "7323ab977f1982ed939de9daa8b3d57a15ffafd09712883b7a37a66f6fdf219b",
+  "kmax": 5,
+  "passes": 5,
+  "report_sha256": "ae8cb173c08d5803a4c126e78af56f6873fd61cb0ee6c550c857b8c24728e8c6",
+  "result_archive_sha256": "2aa478be748e41854767a5e65dfbfc77430a0a261c22b328c58b583b0e24524f",
+  "sites": {
+    "ng00": 39885,
+    "ng01": 35551,
+    "ng02": 45845
+  },
+  "source_commit": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+  "threads": 48,
+  "tours": 3
+}

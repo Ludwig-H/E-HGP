@@ -1,0 +1,29 @@
+{
+  "external_provenance_receipt": "../session_m_provenance/README.md",
+  "journal_inventory_sha256": "6d3ac484117ea7cb6a05502ffb54b9d2bc61f4d1995de7fffc61b425fbba243f",
+  "metadata_sha256": "c75ec292bc744a9f3042623b3bda66451cd413bfb8832b00b5df3b1e1cfbb7be",
+  "original": {
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f"
+  },
+  "patched": {
+    "morsehgp3D_v12/microbancs/mes_apparie/pilote_apparie.py": "a0f59585fbeea2cbb6de1a2abbdc4ae6b422dcb514f081ac7fb369de3d6d3dc8",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+  },
+  "patches": {
+    "apparie_livraison/composition.patch": "3119d4cea05b4b14f7fbcdda0bdebd25ec6fe3da0c270d50e8af7821064bbaa8",
+    "lf_recouvert_gardes/proposition.patch": "0a64e44b77169b4e747599f1117290d92255bdea24a1c9c0024b5dc8674d61b0"
+  },
+  "plan_sha256": "15a3787556a3216b9036e694ee3962fdf262745b4a83207d3e7f6417a570e04e",
+  "report_sha256": "d03978e57957463fecf9139ba3974d0fbd7b17661b81179445c6e5b5dcbcf579",
+  "result_archive_bytes": 942840,
+  "result_archive_sha256": "2aa478be748e41854767a5e65dfbfc77430a0a261c22b328c58b583b0e24524f",
+  "result_modes_equal": [
+    "normal",
+    "-O"
+  ],
+  "scope": "offline admission of returned FULL M paired JSON journals and report; no engine or campaign run; final ELF closure deliberately not invented",
+  "source_pin": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d"
+}

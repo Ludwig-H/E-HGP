@@ -1,0 +1,98 @@
+{
+  "I_cpu_catalogue_one_process_nine_hot_per_cell": {
+    "ng00": {
+      "C16_ns": 330735966,
+      "C24_ns": 327789536,
+      "difference_of_stage_medians_16_minus24_ns": {
+        "emission": -11384221,
+        "feuilles": -27619049,
+        "fin": 1197040,
+        "parcours": 41551200,
+        "publication": 0,
+        "transferts": 0
+      },
+      "ratio16_over24": 1.0089887860239688
+    },
+    "ng01": {
+      "C16_ns": 289395697,
+      "C24_ns": 280875566,
+      "difference_of_stage_medians_16_minus24_ns": {
+        "emission": -9991940,
+        "feuilles": -23216241,
+        "fin": 6488351,
+        "parcours": 34646672,
+        "publication": 0,
+        "transferts": 0
+      },
+      "ratio16_over24": 1.030334183643443
+    },
+    "ng02": {
+      "C16_ns": 333756478,
+      "C24_ns": 331990190,
+      "difference_of_stage_medians_16_minus24_ns": {
+        "emission": -13389168,
+        "feuilles": -27559966,
+        "fin": 3608303,
+        "parcours": 39100400,
+        "publication": 0,
+        "transferts": 0
+      },
+      "ratio16_over24": 1.0053203017836159
+    }
+  },
+  "M_cpu_full_three_processes_four_hot_each": {
+    "ng00": {
+      "C_if_finish_free_conditional_median_ns": 258324174.5,
+      "C_median_ns": 318766578.0,
+      "c_stage_medians_ns": {
+        "emission": 24294115.0,
+        "feuilles": 156298303.5,
+        "fin_etage": 60718108.5,
+        "parcours": 68984372.5,
+        "publication": 0.0,
+        "transferts": 0.0
+      },
+      "median_C_over_wall": 0.8355442931696906,
+      "wall_if_C_finish_free_conditional_median_ns": 321280208.5,
+      "wall_median_ns": 382078092.5,
+      "warm_passes": 12
+    },
+    "ng01": {
+      "C_if_finish_free_conditional_median_ns": 217450566.0,
+      "C_median_ns": 272697915.0,
+      "c_stage_medians_ns": {
+        "emission": 24063624.5,
+        "feuilles": 126534992.5,
+        "fin_etage": 55855939.0,
+        "parcours": 59447739.0,
+        "publication": 0.0,
+        "transferts": 0.0
+      },
+      "median_C_over_wall": 0.8426837665119067,
+      "wall_if_C_finish_free_conditional_median_ns": 268143715.0,
+      "wall_median_ns": 323883224.0,
+      "warm_passes": 12
+    },
+    "ng02": {
+      "C_if_finish_free_conditional_median_ns": 255561950.0,
+      "C_median_ns": 320924354.0,
+      "c_stage_medians_ns": {
+        "emission": 28235274.5,
+        "feuilles": 148243466.5,
+        "fin_etage": 65235828.5,
+        "parcours": 70984569.5,
+        "publication": 0.0,
+        "transferts": 0.0
+      },
+      "median_C_over_wall": 0.8341918038093503,
+      "wall_if_C_finish_free_conditional_median_ns": 320037423.5,
+      "wall_median_ns": 386392492.5,
+      "warm_passes": 12
+    }
+  },
+  "new_native_runs": 0,
+  "potential_q2_q3_q4_supports_per_full_leaf": {
+    "16": 2500,
+    "24": 12926
+  }
+}

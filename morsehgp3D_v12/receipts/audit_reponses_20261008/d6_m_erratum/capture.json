@@ -1,0 +1,18 @@
+{
+  "after_sha256": "c4d12264b76feef805c4e0b4e847907feab4bd77847d16b3f09d7273971e3aeb",
+  "before_sha256": "ccfd39e4ffa5e42f99a587399dffdbe3b62dc8cea3bc1f39b7af8d414549efb4",
+  "d6_peer_output_sha256": "7e611e18192831d29ec573e0c1802344284772da5e7592e25d75aaef344b98c3",
+  "d6_peer_script_sha256": "5d6bc3117c461a4a8eaee5e237accdc6324a785477f3b5cd36f677def4bcbc30",
+  "documentation_path": "morsehgp3D_v12/receipts/g4_fullm_20261008/README.md",
+  "documentation_pin": "72f622a556130e25afdadbef84984619417286e2",
+  "domain_bound": {
+    "max_original": 262143,
+    "max_scaled_2048": 536868864,
+    "strict_upper_scaled": 536870912
+  },
+  "executed_source": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+  "native_executed": false,
+  "patch_sha256": "da56371f9ec7946365ebd83531af891ed28cbc06f622252f61b4ad479abc6ea9",
+  "pilot_path": "morsehgp3D_v12/microbancs/mes_d6_profils/pilote_d6.py",
+  "pilot_sha256": "bb1de862175814467664ae83b377238771511c264eca4150905fbec5ffe5db4f"
+}

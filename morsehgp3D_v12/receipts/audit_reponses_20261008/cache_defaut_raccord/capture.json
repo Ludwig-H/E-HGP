@@ -1,0 +1,107 @@
+{
+  "pins": {
+    "measured": "957e9784fb19ccd2d6348e779ed8b7affadc1f3d",
+    "delivered": "72f622a556130e25afdadbef84984619417286e2"
+  },
+  "files": {
+    "bench/full_probe.cpp": {
+      "measured": {
+        "sha256": "00668cb9da02effaaea07eee3e7609e0a02221f4bff6773d9024c330bf656b42",
+        "bytes": 27501
+      },
+      "delivered": {
+        "sha256": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b",
+        "bytes": 27989
+      }
+    },
+    "src/core/buffer.hpp": {
+      "measured": {
+        "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+        "bytes": 14629
+      },
+      "delivered": {
+        "sha256": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+        "bytes": 14629
+      }
+    },
+    "src/core/buffer.cpp": {
+      "measured": {
+        "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+        "bytes": 12383
+      },
+      "delivered": {
+        "sha256": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+        "bytes": 12383
+      }
+    },
+    "src/tower/pipeline_run.cpp": {
+      "measured": {
+        "sha256": "f3d260ae51159c5c039082f8b1442434123bdb59114d4364c4d0a4e7ef8f09a6",
+        "bytes": 19556
+      },
+      "delivered": {
+        "sha256": "f7e077d847d060c0830591496cf8ded03b8e534f0533420e42fb21d1862377bc",
+        "bytes": 19649
+      }
+    },
+    "tests/tower/full_probe_check.py": {
+      "measured": {
+        "sha256": "a0e41fd17f206cfa3bab309b27e28b9c5693fc200b90e83ba0893a1704b784a8",
+        "bytes": 10152
+      },
+      "delivered": {
+        "sha256": "a0e41fd17f206cfa3bab309b27e28b9c5693fc200b90e83ba0893a1704b784a8",
+        "bytes": 10152
+      }
+    },
+    "tests/tower/tests.cmake": {
+      "measured": {
+        "sha256": "9279ea8ee3fc6557f2ae4f9ce5ffe4aad5d22956685068ad1446af81cb319492",
+        "bytes": 15125
+      },
+      "delivered": {
+        "sha256": "810bb4674fcbaeff87df46e52ca7e9b6245df9a7e7c55410bae398d493dfdcbb",
+        "bytes": 15726
+      }
+    },
+    "microbancs/mes_full/pilote_full.py": {
+      "measured": {
+        "sha256": "407e412bf4f91f4a81d25c27c1a4cd4f34cf83fcd2934890d5bce8aba5eb4432",
+        "bytes": 20084
+      },
+      "delivered": {
+        "sha256": "407e412bf4f91f4a81d25c27c1a4cd4f34cf83fcd2934890d5bce8aba5eb4432",
+        "bytes": 20084
+      }
+    },
+    "microbancs/mes_apparie/pilote_apparie.py": {
+      "measured": {
+        "sha256": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+        "bytes": 28664
+      },
+      "delivered": {
+        "sha256": "fe22a6813ebb4f801de011fb06dc7cc6af754494c9c4e2b1148aa87dfb4925d1",
+        "bytes": 28664
+      }
+    },
+    "microbancs/outils/lecteur_full.py": {
+      "measured": {
+        "sha256": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f",
+        "bytes": 12821
+      },
+      "delivered": {
+        "sha256": "c3e9e0f4adbbfda60203c70c902dcd4cc0a04336d5679bce372f157988805e8f",
+        "bytes": 12821
+      }
+    }
+  },
+  "numeric_policy_example": {
+    "used": 0,
+    "limit": 1000000,
+    "admitted_bytes": 900000,
+    "without_cache": true,
+    "with_cache": false,
+    "cache_capacity": 8589934592,
+    "allocation_executed": false
+  }
+}

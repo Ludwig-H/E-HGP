@@ -1,0 +1,23 @@
+--- a/morsehgp3D_v12/receipts/g4_fullm_20261008/README.md
++++ b/morsehgp3D_v12/receipts/g4_fullm_20261008/README.md
+@@ -80,7 +80,7 @@
+ 
+ ## 3. `MES-D6` : coût des profils 21, 24 et 32 (voie CPU, catalogue et G)
+ 
+-Rapport au couple (profil 21, ×1) de la même trame et du même tour, K5, 48 fils, 3 tours (IC dans
++Rapport au couple (profil 21, ×1) de la même trame et du même tour, K5, 48 fils, 3 tours (étendues min/max des trois rapports par tour dans
+ [`mes_d6.md`](resultats/cmd/004_mes_d6_profils/files/d6/mes_d6.md)) :
+ 
+ | Trame | 24 ×1 catalogue / G | 32 ×1 catalogue / G | 32 ×8 catalogue / G | 32 ×2048 catalogue / G |
+@@ -90,8 +90,9 @@
+ | ng02 | 1,021 / 1,108 | 1,025 / 1,136 | 1,040 / 1,054 | **2,966** / 1,093 |
+ 
+ Les lignes de G sont admises cette fois : la session K les avait toutes refusées. Sur les mêmes coordonnées, élargir le
+-profil coûte 1 à 2,5 % au catalogue et 0,5 à 14 % à G. Une grille 8 fois plus fine coûte 3 à 7 % au catalogue. Des
+-coordonnées qui remplissent 32 bits (grille de 1/2048 mm) triplent le catalogue CPU et ajoutent 9 à 13 % à G. Les
++profil coûte 1 à 2,5 % au catalogue et 0,5 à 14 % à G. La dilatation ×8 des entiers coûte 3 à 7 % au catalogue.
++À ×2048, le catalogue CPU est triplé et G augmente de 9 à 13 %. L’admission de ×8 en u21 impose au maximum initial
++$m \leq 2^{18}-1$ ; ×2048 reste donc sous $2^{29}$, sans remplir 32 bits ni créer de précision physique. Les
+ écarts de G à ng02 (1,108 dès le profil 24) restent à confirmer sur plus de tours. La voie appareil aux profils 24 et 32
+ n'est pas mesurée.
+ 

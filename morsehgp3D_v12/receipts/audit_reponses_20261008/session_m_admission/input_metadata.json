@@ -1,0 +1,172 @@
+{
+  "archive_announced_sha256": "0f94df1969ebacbaa863367bff4b686487006c98a755cbfb3263d4968f369255",
+  "archive_bytes": 36116480,
+  "bundle_manifest_sha256": "a1323fa263b735e72e12959453353443fd3e3ac222f80e8def5148943e5daecf",
+  "ng": [
+    {
+      "name": "ng00",
+      "sites": 39885
+    },
+    {
+      "name": "ng01",
+      "sites": 35551
+    },
+    {
+      "name": "ng02",
+      "sites": 45845
+    }
+  ],
+  "session37": [
+    {
+      "name": "kitti_ng_00_000648",
+      "sites": 77965
+    },
+    {
+      "name": "kitti_ng_00_000660",
+      "sites": 71483
+    },
+    {
+      "name": "kitti_ng_00_001464",
+      "sites": 74736
+    },
+    {
+      "name": "kitti_ng_00_001502",
+      "sites": 64995
+    },
+    {
+      "name": "kitti_ng_00_001880",
+      "sites": 80607
+    },
+    {
+      "name": "kitti_ng_00_001896",
+      "sites": 95586
+    },
+    {
+      "name": "kitti_ng_00_003612",
+      "sites": 70537
+    },
+    {
+      "name": "kitti_ng_00_003624",
+      "sites": 72836
+    },
+    {
+      "name": "kitti_ng_02_000620",
+      "sites": 52403
+    },
+    {
+      "name": "kitti_ng_02_001600",
+      "sites": 67585
+    },
+    {
+      "name": "kitti_ng_02_001604",
+      "sites": 67805
+    },
+    {
+      "name": "kitti_ng_02_001606",
+      "sites": 64740
+    },
+    {
+      "name": "kitti_ng_02_001610",
+      "sites": 67864
+    },
+    {
+      "name": "kitti_ng_05_002060",
+      "sites": 66456
+    },
+    {
+      "name": "kitti_ng_05_002064",
+      "sites": 62859
+    },
+    {
+      "name": "kitti_ng_05_002748",
+      "sites": 50136
+    },
+    {
+      "name": "kitti_ng_06_000770",
+      "sites": 46561
+    },
+    {
+      "name": "kitti_ng_06_000772",
+      "sites": 49668
+    },
+    {
+      "name": "kitti_ng_06_000774",
+      "sites": 53754
+    },
+    {
+      "name": "kitti_ng_06_000780",
+      "sites": 49628
+    },
+    {
+      "name": "kitti_ng_06_000798",
+      "sites": 37543
+    },
+    {
+      "name": "kitti_ng_06_000800",
+      "sites": 38341
+    },
+    {
+      "name": "kitti_ng_06_000804",
+      "sites": 47658
+    },
+    {
+      "name": "kitti_ng_06_000806",
+      "sites": 50884
+    },
+    {
+      "name": "kitti_ng_08_000000",
+      "sites": 39885
+    },
+    {
+      "name": "kitti_ng_08_000100",
+      "sites": 35551
+    },
+    {
+      "name": "kitti_ng_08_000200",
+      "sites": 45845
+    },
+    {
+      "name": "kitti_ng_08_000246",
+      "sites": 41691
+    },
+    {
+      "name": "kitti_ng_08_000691",
+      "sites": 61198
+    },
+    {
+      "name": "kitti_ng_08_001176",
+      "sites": 67114
+    },
+    {
+      "name": "kitti_ng_08_001193",
+      "sites": 80433
+    },
+    {
+      "name": "kitti_ng_08_001302",
+      "sites": 48925
+    },
+    {
+      "name": "kitti_ng_08_001847",
+      "sites": 33179
+    },
+    {
+      "name": "kitti_ng_08_002119",
+      "sites": 99099
+    },
+    {
+      "name": "kitti_ng_08_002554",
+      "sites": 72426
+    },
+    {
+      "name": "kitti_ng_10_000424",
+      "sites": 69106
+    },
+    {
+      "name": "kitti_ng_10_000430",
+      "sites": 73576
+    }
+  ],
+  "scene_payload_read": false,
+  "archive_rehashed": false,
+  "method": "JSON manifest and tar member headers/stat only; no coordinates or ids read"
+}
