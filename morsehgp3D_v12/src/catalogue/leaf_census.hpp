@@ -4,7 +4,8 @@
 // Census (lemme R puis vote) : chaque voie s < m classe son site (generateur : contact certifie par la fabrique ;
 // dominateur d'un generateur : interieur ; domine : exterieur ; sinon cote exact). Premier evenement de l'ordre
 // sequentiel (contrat Q1 de l'auditeur v11) : rejet au (theta+1)-ieme interieur, theta = K+1-q ; census_tests compte
-// jusqu'au site d'arret inclus, ou m. Un site a la fois dominateur et domine des generateurs contredirait la propriete
+// jusqu'au site d'arret inclus, ou m. Sur l'hote, les voies sont jouees dans l'ordre et s'arretent effectivement a ce
+// site (CST-0234, preuve de l'auditeur : les sites suivants ne changent ni le rejet ni aucune emission). Un site a la fois dominateur et domine des generateurs contredirait la propriete
 // du centre : invariant (catalogue_invariant de leaf.cpp).
 //
 // Support canonique de la v12 (CONTRAT_NUMERIQUE.md, paragraphe 4 ; CST-0113) : support de cardinal minimal, puis plus
@@ -131,9 +132,11 @@ MHGP12_HD void census(LeafCtx<N, A>& X, Sink& sink, u32 q, const LocalRank (&gen
     return;
   }
   simt::Lanes<bool, N> is_in, is_on, fault;
+  const u32 theta = static_cast<u32>(X.K + 1) - q;
+  u32 inside_seen = 0;  // hote : arret effectif au (theta+1)-ieme interieur (CST-0234) ; appareil : toutes les voies
   MHGP12_LANES(N, s) {
     is_in[s] = is_on[s] = fault[s] = false;
-    if (s < m) {
+    if (s < m && !simt::serial_stop(inside_seen, theta)) {
       if (simt::test(gm, s)) {
         is_on[s] = true;  // contact certifie par la fabrique
       } else if (simt::test(inside, s)) {
@@ -147,6 +150,7 @@ MHGP12_HD void census(LeafCtx<N, A>& X, Sink& sink, u32 q, const LocalRank (&gen
         else if (r < 0) is_in[s] = true;
         else if (r == 0) is_on[s] = true;
       }
+      inside_seen += is_in[s] ? 1u : 0u;
     }
   }
   const auto I = simt::ballot<N>(is_in), C = simt::ballot<N>(is_on);
@@ -154,7 +158,6 @@ MHGP12_HD void census(LeafCtx<N, A>& X, Sink& sink, u32 q, const LocalRank (&gen
     X.status = kLeafInvariant;
     return;
   }
-  const u32 theta = static_cast<u32>(X.K + 1) - q;
   const u32 t = simt::popc(I) > theta ? simt::select_nth<N>(I, theta + 1) : m;
   if (t < m) {
     X.census_tests += t + 1;

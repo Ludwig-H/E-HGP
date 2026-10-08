@@ -194,6 +194,18 @@ MHGP12_HD u32 select_nth(M mask, u32 n) {
   return any(mask) ? ctz(mask) : N;
 }
 
+// Arret anticipe d'une boucle de voies : sur l'hote (voies jouees en serie, dans l'ordre), vrai des que count depasse
+// limit ; sur l'appareil (voies paralleles), jamais : toutes les voies travaillent et le vote decide ensuite.
+MHGP12_HD bool serial_stop(u32 count, u32 limit) {
+#if MHGP12_SIMT_WARP
+  (void)count;
+  (void)limit;
+  return false;
+#else
+  return count > limit;
+#endif
+}
+
 // ------------------------------------------------------------------------------------------------- collectives
 // Vrai pour la voie 0 en code uniforme (ecritures partagees uniques) ; toujours vrai sur l'hote.
 MHGP12_HD bool leader() {

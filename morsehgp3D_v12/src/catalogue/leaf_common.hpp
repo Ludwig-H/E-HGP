@@ -127,12 +127,76 @@ struct LeafCtx {
   u64 judged, census_tests, emitted, incidences, q4_levels;
 };
 
-// Chargement en repere local, dominances, graphe de paires et lignes vivantes. Une ligne par voie : chaque couple est
-// evalue par ses deux voies, toujours dans l'orientation canonique (i < j) de la v11, donc avec la meme decision.
+// Relation d'un couple (i < j) dans l'orientation canonique de la v11 : 1 si j domine i, 2 si i domine j, 0 si voisins.
 // Dominance |p_j|^2 - |p_i|^2 - 2 c.(p_j - p_i) aux coins : < 9 M^2 en coordonnees locales (Small).
+template <class A>
+MHGP12_HD int pair_relation(const u32* pi, const u32* pj, const i64* lo, const i64* hi) {
+  using S = typename A::Small;
+  S base = 0, cmin = 0, cmax = 0;
+  for (int a = 0; a < 3; ++a) {
+    const S u = S(pi[a]), v = S(pj[a]);
+    const S delta = v - u;
+    base += v * v - u * u;
+    cmin += S(delta > 0 ? lo[a] : hi[a]) * delta;
+    cmax += S(delta > 0 ? hi[a] : lo[a]) * delta;
+  }
+  if (base - 2 * cmin < 0) return 1;
+  if (base - 2 * cmax > 0) return 2;
+  return 0;
+}
+
+// Dominances et graphe de paires. Sur l'appareil, une ligne par voie : chaque couple est evalue par ses deux voies,
+// dans l'orientation canonique (i < j), donc avec la meme decision. Sur l'hote (voies jouees en serie), chaque couple
+// une seule fois et ses deux lignes ecrites (CST-0234) : memes masques, moitie des evaluations.
+template <u32 N, class A>
+MHGP12_HD void pair_rows(LeafCtx<N, A>& X, u32 m) {
+  using W = simt::Width<N>;
+  LeafShared<N>& L = X.S;
+#if MHGP12_SIMT_WARP
+  MHGP12_LANES(N, x) {
+    auto dom = W::empty(), domby = W::empty(), nbr = W::empty();
+    if (x < m) {
+      for (u32 y = 0; y < m; ++y) {
+        if (y == x) continue;
+        const u32 i = x < y ? x : y, j = x < y ? y : x;
+        const int relation = pair_relation<A>(L.P[i], L.P[j], X.lo, X.hi);
+        if (relation == 1) {  // j domine i
+          if (x == i) dom = dom | W::bit(j);
+          else domby = domby | W::bit(i);
+        } else if (relation == 2) {  // i domine j
+          if (x == j) dom = dom | W::bit(i);
+          else domby = domby | W::bit(j);
+        } else {
+          nbr = nbr | W::bit(y);
+        }
+      }
+    }
+    L.dom[x] = dom;
+    L.domby[x] = domby;
+    L.nbr[x] = nbr;
+  }
+#else
+  for (u32 x = 0; x < N; ++x) L.dom[x] = L.domby[x] = L.nbr[x] = W::empty();
+  for (u32 i = 0; i < m; ++i)
+    for (u32 j = i + 1; j < m; ++j) {
+      const int relation = pair_relation<A>(L.P[i], L.P[j], X.lo, X.hi);
+      if (relation == 1) {  // j domine i
+        L.dom[i] = L.dom[i] | W::bit(j);
+        L.domby[j] = L.domby[j] | W::bit(i);
+      } else if (relation == 2) {  // i domine j
+        L.dom[j] = L.dom[j] | W::bit(i);
+        L.domby[i] = L.domby[i] | W::bit(j);
+      } else {
+        L.nbr[i] = L.nbr[i] | W::bit(j);
+        L.nbr[j] = L.nbr[j] | W::bit(i);
+      }
+    }
+#endif
+}
+
+// Chargement en repere local, dominances, graphe de paires et lignes vivantes.
 template <u32 N, class A>
 MHGP12_HD void prepare(const LeafInput& in, LeafCtx<N, A>& X) {
-  using S = typename A::Small;
   using W = simt::Width<N>;
   LeafShared<N>& L = X.S;
   const u32 m = in.m;
@@ -146,35 +210,7 @@ MHGP12_HD void prepare(const LeafInput& in, LeafCtx<N, A>& X) {
     }
   }
   simt::sync();
-  MHGP12_LANES(N, x) {
-    auto dom = W::empty(), domby = W::empty(), nbr = W::empty();
-    if (x < m) {
-      for (u32 y = 0; y < m; ++y) {
-        if (y == x) continue;
-        const u32 i = x < y ? x : y, j = x < y ? y : x;
-        S base = 0, cmin = 0, cmax = 0;
-        for (int a = 0; a < 3; ++a) {
-          const S pi = S(L.P[i][a]), pj = S(L.P[j][a]);
-          const S delta = pj - pi;
-          base += pj * pj - pi * pi;
-          cmin += S(delta > 0 ? X.lo[a] : X.hi[a]) * delta;
-          cmax += S(delta > 0 ? X.hi[a] : X.lo[a]) * delta;
-        }
-        if (base - 2 * cmin < 0) {  // j domine i
-          if (x == i) dom = dom | W::bit(j);
-          else domby = domby | W::bit(i);
-        } else if (base - 2 * cmax > 0) {  // i domine j
-          if (x == j) dom = dom | W::bit(i);
-          else domby = domby | W::bit(j);
-        } else {
-          nbr = nbr | W::bit(y);
-        }
-      }
-    }
-    L.dom[x] = dom;
-    L.domby[x] = domby;
-    L.nbr[x] = nbr;
-  }
+  pair_rows<N, A>(X, m);
   simt::sync();
   MHGP12_LANES(N, x) {
     auto l0 = W::empty(), l1 = W::empty(), l2 = W::empty();

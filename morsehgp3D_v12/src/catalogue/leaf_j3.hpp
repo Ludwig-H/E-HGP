@@ -241,7 +241,12 @@ MHGP12_HD u32 run_leaf(const LeafInput& in, LeafShared<N>& S, LeafCounts& out, S
   MHGP12_LANES(N, i) {
     acc.prefixes[i] = acc.pair_tests[i] = acc.pair_rejects[i] = 0;
     acc.line_tests3[i] = acc.line_tests4[i] = acc.line_rejects[i] = acc.q4_candidates[i] = 0;
+#if MHGP12_SIMT_WARP
     for (u32 w = i; w < kPairRows<N>; w += N) S.H[w] = simt::Width<N>::empty();
+#else
+    // hote : seules les lignes (i, j), i < j < m, sont lues (CST-0234)
+    for (u32 j = i + 1; j < in.m; ++j) S.H[hrow<N>(i, j)] = simt::Width<N>::empty();
+#endif
     next1[i] = simt::Width<N>::empty();
     if (i < in.m) {
       const int c1 = static_cast<int>(simt::popc(S.dom[i]));
