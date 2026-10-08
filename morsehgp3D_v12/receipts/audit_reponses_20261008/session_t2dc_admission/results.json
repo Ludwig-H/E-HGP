@@ -1,0 +1,662 @@
+{
+  "C5_stages_medians_ns": {
+    "ng00": {
+      "apres": {
+        "emission": 2129179.5,
+        "feuilles": 10990312.0,
+        "fin_etage": 2042845.0,
+        "parcours": 4109510.0,
+        "publication": 1662081.0,
+        "sorties": 2602015.0,
+        "transferts": 3264205.5
+      },
+      "avant": {
+        "emission": 3385025.5,
+        "feuilles": 11040375.0,
+        "fin_etage": 2457510.0,
+        "parcours": 4185525.0,
+        "publication": 4035865.0,
+        "sorties": null,
+        "transferts": 9059090.0
+      }
+    },
+    "ng01": {
+      "apres": {
+        "emission": 2533320.0,
+        "feuilles": 8899585.0,
+        "fin_etage": 1959200.0,
+        "parcours": 3734410.0,
+        "publication": 1371624.5,
+        "sorties": 2223060.5,
+        "transferts": 2942215.0
+      },
+      "avant": {
+        "emission": 3654515.0,
+        "feuilles": 8932845.0,
+        "fin_etage": 2303770.0,
+        "parcours": 3804315.0,
+        "publication": 3193905.0,
+        "sorties": null,
+        "transferts": 7897116.5
+      }
+    },
+    "ng02": {
+      "apres": {
+        "emission": 2364115.0,
+        "feuilles": 10197422.0,
+        "fin_etage": 2197055.0,
+        "parcours": 4182919.5,
+        "publication": 1629560.0,
+        "sorties": 2709715.0,
+        "transferts": 3472185.5
+      },
+      "avant": {
+        "emission": 3692705.0,
+        "feuilles": 10235270.0,
+        "fin_etage": 3992590.0,
+        "parcours": 4259600.0,
+        "publication": 3986126.0,
+        "sorties": null,
+        "transferts": 10291319.5
+      }
+    }
+  },
+  "C5_v12set": {
+    "apres": {
+      "frames": 37,
+      "max_frame_median_ns": 71739289,
+      "median_frame_median_ns": 40749878
+    },
+    "avant": {
+      "frames": 37,
+      "max_frame_median_ns": 89993998,
+      "median_frame_median_ns": 51483129
+    }
+  },
+  "campaign_processes": 210,
+  "campaign_warm_passes": 1890,
+  "full_identity_cases": 9,
+  "gate_logs": {
+    "device_open": [
+      "device_open : voie appareil jouee sur 9 temoins",
+      "test device_open controles=217 echecs=0 plancher=1",
+      "mhgp12_test_ok tests=1 controles=217"
+    ],
+    "device_open_budget": [
+      "device_open_budget : refus sous budget serre joues sur l'appareil (14 appels)",
+      "test device_open_budget controles=15 echecs=0 plancher=1",
+      "mhgp12_test_ok tests=1 controles=15"
+    ]
+  },
+  "independent_ratio_statistics": {
+    "A/A": {
+      "ng00": {
+        "gm": 0.992248807944459,
+        "high": 0.9976554139531794,
+        "low": 0.9871012041762155
+      },
+      "ng01": {
+        "gm": 1.0037044134527946,
+        "high": 1.0089729011617212,
+        "low": 0.9990451112070959
+      },
+      "ng02": {
+        "gm": 1.0029392790149636,
+        "high": 1.0045898728148734,
+        "low": 1.0013379773639857
+      }
+    },
+    "double_tampon": {
+      "ng00": {
+        "gm": 0.946200462550279,
+        "high": 0.9500533986345054,
+        "low": 0.9422910218260542
+      },
+      "ng01": {
+        "gm": 0.9432238233520597,
+        "high": 0.9460893624637714,
+        "low": 0.9400660754777737
+      },
+      "ng02": {
+        "gm": 0.9387352166116163,
+        "high": 0.9418443815890132,
+        "low": 0.9358462745668026
+      }
+    },
+    "fenetres_du_repli": {
+      "ng00": {
+        "gm": 1.0010291938700542,
+        "high": 1.0051777014483885,
+        "low": 0.9970325368274563
+      },
+      "ng01": {
+        "gm": 0.9962175050257682,
+        "high": 0.9990684936453166,
+        "low": 0.9930901697874878
+      },
+      "ng02": {
+        "gm": 0.9786557261214656,
+        "high": 0.9813148051366601,
+        "low": 0.9761020670817298
+      }
+    },
+    "flux": {
+      "ng00": {
+        "gm": 0.8525194315084663,
+        "high": 0.8569603409888934,
+        "low": 0.8480237646166169
+      },
+      "ng01": {
+        "gm": 0.8641643021717665,
+        "high": 0.8690766961994368,
+        "low": 0.8588797853688137
+      },
+      "ng02": {
+        "gm": 0.8209805121632067,
+        "high": 0.8242541257969834,
+        "low": 0.8175340729667393
+      }
+    },
+    "lot": {
+      "ng00": {
+        "gm": 0.7858325378226532,
+        "high": 0.7907861201223548,
+        "low": 0.7811302882826275
+      },
+      "ng01": {
+        "gm": 0.797562999506542,
+        "high": 0.8017838574094289,
+        "low": 0.7932789908782713
+      },
+      "ng02": {
+        "gm": 0.7368838902120396,
+        "high": 0.739806161014468,
+        "low": 0.7343766273460307
+      }
+    },
+    "sorties_anticipees": {
+      "ng00": {
+        "gm": 0.9915563895448616,
+        "high": 0.9955658384361343,
+        "low": 0.987417254445003
+      },
+      "ng01": {
+        "gm": 0.9871582132924378,
+        "high": 0.9904391860451608,
+        "low": 0.9834891356515717
+      },
+      "ng02": {
+        "gm": 0.9822983433047635,
+        "high": 0.9856835114799661,
+        "low": 0.9792104529209702
+      }
+    }
+  },
+  "logs_linked": 393,
+  "logs_tree_sha256": "22fbba80fe56cf43faf40a9514bdfab41528c957252609e2498667380ce62443",
+  "passes": {
+    "catalogue": 2888,
+    "full": 216
+  },
+  "return_codes_scope": "entiers archivés dans report.json par Session.run ; pas de codes externes par sonde",
+  "small_numeric_differences": [
+    {
+      "absolute_delta": 1.1102230246251565e-16,
+      "field": "low",
+      "frame": "ng00",
+      "lever": "lot"
+    },
+    {
+      "absolute_delta": 1.1102230246251565e-16,
+      "field": "high",
+      "frame": "ng00",
+      "lever": "lot"
+    }
+  ],
+  "tables": {
+    "C10": {
+      "ng00": {
+        "apres": {
+          "max_process_median_ns": 103185308.5,
+          "median_ns": 102739743.5,
+          "processes": 3,
+          "warm_passes": 12
+        },
+        "avant": {
+          "max_process_median_ns": 136208833.0,
+          "median_ns": 135866716.5,
+          "processes": 3,
+          "warm_passes": 12
+        }
+      },
+      "ng01": {
+        "apres": {
+          "max_process_median_ns": 84271860.5,
+          "median_ns": 84036455.0,
+          "processes": 3,
+          "warm_passes": 12
+        },
+        "avant": {
+          "max_process_median_ns": 112597798.5,
+          "median_ns": 111983793.0,
+          "processes": 3,
+          "warm_passes": 12
+        }
+      },
+      "ng02": {
+        "apres": {
+          "max_process_median_ns": 98441009.0,
+          "median_ns": 98206678.5,
+          "processes": 3,
+          "warm_passes": 12
+        },
+        "avant": {
+          "max_process_median_ns": 148011313.0,
+          "median_ns": 145315883.0,
+          "processes": 3,
+          "warm_passes": 12
+        }
+      }
+    },
+    "C5": {
+      "ng00": {
+        "apres": {
+          "max_process_median_ns": 27652231,
+          "median_ns": 26896090.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant": {
+          "max_process_median_ns": 35326219,
+          "median_ns": 34292198.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant_bis": {
+          "max_process_median_ns": 35122069,
+          "median_ns": 33988736.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "flux_et_repli_selectif": {
+          "max_process_median_ns": 30021919,
+          "median_ns": 29182095.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "repli_cles_entieres": {
+          "max_process_median_ns": 27708859,
+          "median_ns": 26850400.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_anticipation": {
+          "max_process_median_ns": 28027849,
+          "median_ns": 27059125.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_double_tampon": {
+          "max_process_median_ns": 29374168,
+          "median_ns": 28418634.5,
+          "processes": 10,
+          "warm_passes": 90
+        }
+      },
+      "ng01": {
+        "apres": {
+          "max_process_median_ns": 24476720,
+          "median_ns": 23762734.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant": {
+          "max_process_median_ns": 30605028,
+          "median_ns": 29863015.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant_bis": {
+          "max_process_median_ns": 30797910,
+          "median_ns": 29962359.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "flux_et_repli_selectif": {
+          "max_process_median_ns": 26573930,
+          "median_ns": 25777494.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "repli_cles_entieres": {
+          "max_process_median_ns": 24481520,
+          "median_ns": 23855324.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_anticipation": {
+          "max_process_median_ns": 24696639,
+          "median_ns": 24091919.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_double_tampon": {
+          "max_process_median_ns": 25959809,
+          "median_ns": 25214105.0,
+          "processes": 10,
+          "warm_passes": 90
+        }
+      },
+      "ng02": {
+        "apres": {
+          "max_process_median_ns": 27601360,
+          "median_ns": 26847635.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant": {
+          "max_process_median_ns": 37478720,
+          "median_ns": 36520835.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "avant_bis": {
+          "max_process_median_ns": 37403280,
+          "median_ns": 36655065.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "flux_et_repli_selectif": {
+          "max_process_median_ns": 30722149,
+          "median_ns": 29977470.5,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "repli_cles_entieres": {
+          "max_process_median_ns": 28249529,
+          "median_ns": 27438730.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_anticipation": {
+          "max_process_median_ns": 28142920,
+          "median_ns": 27454470.0,
+          "processes": 10,
+          "warm_passes": 90
+        },
+        "sans_double_tampon": {
+          "max_process_median_ns": 29483590,
+          "median_ns": 28641520.5,
+          "processes": 10,
+          "warm_passes": 90
+        }
+      }
+    },
+    "FULL5": {
+      "ng00": {
+        "apres": {
+          "max_process_median_ns": 154287469,
+          "median_ns": 153860912,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "avant": {
+          "max_process_median_ns": 160452591,
+          "median_ns": 160161600,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      },
+      "ng01": {
+        "apres": {
+          "max_process_median_ns": 122693205,
+          "median_ns": 122663536,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "avant": {
+          "max_process_median_ns": 128473567,
+          "median_ns": 128005870,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      },
+      "ng02": {
+        "apres": {
+          "max_process_median_ns": 157477276,
+          "median_ns": 155638090,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "avant": {
+          "max_process_median_ns": 165959549,
+          "median_ns": 164871597,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      }
+    },
+    "cache": {
+      "ng00": {
+        "apres": {
+          "max_process_median_ns": 26674907,
+          "median_ns": 26561557,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "apres_cache": {
+          "max_process_median_ns": 25853197,
+          "median_ns": 25636217,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      },
+      "ng01": {
+        "apres": {
+          "max_process_median_ns": 23927247,
+          "median_ns": 23804788,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "apres_cache": {
+          "max_process_median_ns": 22935717,
+          "median_ns": 22875357,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      },
+      "ng02": {
+        "apres": {
+          "max_process_median_ns": 26856107,
+          "median_ns": 26703847,
+          "processes": 3,
+          "warm_passes": 27
+        },
+        "apres_cache": {
+          "max_process_median_ns": 25724857,
+          "median_ns": 25705457,
+          "processes": 3,
+          "warm_passes": 27
+        }
+      }
+    }
+  },
+  "verdict": {
+    "refused": [],
+    "rejected": [],
+    "stats": {
+      "levers": {
+        "A/A": {
+          "frames": {
+            "ng00": {
+              "affiche": "0.9922 (0.9871-0.9977)",
+              "decisive": true,
+              "gm": 0.992248807944459,
+              "high": 0.9976554139531794,
+              "low": 0.9871012041762155
+            },
+            "ng01": {
+              "affiche": "1.0037 (0.9990-1.0090)",
+              "decisive": true,
+              "gm": 1.0037044134527946,
+              "high": 1.0089729011617212,
+              "low": 0.9990451112070959
+            },
+            "ng02": {
+              "affiche": "1.0029 (1.0013-1.0046)",
+              "decisive": true,
+              "gm": 1.0029392790149638,
+              "high": 1.0045898728148734,
+              "low": 1.0013379773639857
+            }
+          },
+          "from": "avant",
+          "to": "avant_bis",
+          "verdict": "valide"
+        },
+        "double_tampon": {
+          "frames": {
+            "ng00": {
+              "affiche": "0.9462 (0.9423-0.9501)",
+              "decisive": true,
+              "gm": 0.946200462550279,
+              "high": 0.9500533986345054,
+              "low": 0.9422910218260542
+            },
+            "ng01": {
+              "affiche": "0.9432 (0.9401-0.9461)",
+              "decisive": true,
+              "gm": 0.9432238233520597,
+              "high": 0.9460893624637714,
+              "low": 0.9400660754777737
+            },
+            "ng02": {
+              "affiche": "0.9387 (0.9358-0.9418)",
+              "decisive": true,
+              "gm": 0.9387352166116163,
+              "high": 0.9418443815890132,
+              "low": 0.9358462745668026
+            }
+          },
+          "from": "sans_double_tampon",
+          "to": "apres",
+          "verdict": "adopte"
+        },
+        "fenetres_du_repli": {
+          "frames": {
+            "ng00": {
+              "affiche": "1.0010 (0.9970-1.0052)",
+              "decisive": false,
+              "gm": 1.0010291938700542,
+              "high": 1.0051777014483885,
+              "low": 0.9970325368274563
+            },
+            "ng01": {
+              "affiche": "0.9962 (0.9931-0.9991)",
+              "decisive": false,
+              "gm": 0.9962175050257682,
+              "high": 0.9990684936453166,
+              "low": 0.9930901697874878
+            },
+            "ng02": {
+              "affiche": "0.9787 (0.9761-0.9813)",
+              "decisive": true,
+              "gm": 0.9786557261214656,
+              "high": 0.98131480513666,
+              "low": 0.9761020670817298
+            }
+          },
+          "from": "repli_cles_entieres",
+          "to": "apres",
+          "verdict": "adopte"
+        },
+        "flux": {
+          "frames": {
+            "ng00": {
+              "affiche": "0.8525 (0.8480-0.8570)",
+              "decisive": true,
+              "gm": 0.8525194315084663,
+              "high": 0.8569603409888934,
+              "low": 0.8480237646166169
+            },
+            "ng01": {
+              "affiche": "0.8642 (0.8589-0.8691)",
+              "decisive": true,
+              "gm": 0.8641643021717665,
+              "high": 0.8690766961994368,
+              "low": 0.8588797853688137
+            },
+            "ng02": {
+              "affiche": "0.8210 (0.8175-0.8243)",
+              "decisive": false,
+              "gm": 0.8209805121632067,
+              "high": 0.8242541257969834,
+              "low": 0.8175340729667393
+            }
+          },
+          "from": "avant",
+          "to": "flux_et_repli_selectif",
+          "verdict": "adopte"
+        },
+        "lot": {
+          "frames": {
+            "ng00": {
+              "affiche": "0.7858 (0.7811-0.7908)",
+              "decisive": true,
+              "gm": 0.7858325378226532,
+              "high": 0.7907861201223548,
+              "low": 0.7811302882826275
+            },
+            "ng01": {
+              "affiche": "0.7976 (0.7933-0.8018)",
+              "decisive": true,
+              "gm": 0.797562999506542,
+              "high": 0.8017838574094288,
+              "low": 0.7932789908782713
+            },
+            "ng02": {
+              "affiche": "0.7369 (0.7344-0.7398)",
+              "decisive": true,
+              "gm": 0.7368838902120396,
+              "high": 0.739806161014468,
+              "low": 0.7343766273460307
+            }
+          },
+          "from": "avant",
+          "to": "apres",
+          "verdict": "adopte"
+        },
+        "sorties_anticipees": {
+          "frames": {
+            "ng00": {
+              "affiche": "0.9916 (0.9874-0.9956)",
+              "decisive": true,
+              "gm": 0.9915563895448616,
+              "high": 0.9955658384361343,
+              "low": 0.987417254445003
+            },
+            "ng01": {
+              "affiche": "0.9872 (0.9835-0.9904)",
+              "decisive": true,
+              "gm": 0.9871582132924378,
+              "high": 0.9904391860451608,
+              "low": 0.9834891356515717
+            },
+            "ng02": {
+              "affiche": "0.9823 (0.9792-0.9857)",
+              "decisive": true,
+              "gm": 0.9822983433047635,
+              "high": 0.9856835114799662,
+              "low": 0.9792104529209702
+            }
+          },
+          "from": "sans_anticipation",
+          "to": "apres",
+          "verdict": "adopte"
+        }
+      },
+      "mutant": "tue (empreinte)"
+    },
+    "verdict": "adopte"
+  }
+}

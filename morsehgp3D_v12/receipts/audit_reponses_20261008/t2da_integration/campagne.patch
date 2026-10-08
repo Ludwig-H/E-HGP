@@ -1,0 +1,45 @@
+--- a/morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py
++++ b/morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py
+@@ -478,6 +478,34 @@
+     return identique, resultats
+ 
+ 
++def verifier_campagne(rapport):
++    """Admission de la campagne decisive depuis sa position, avant de relire les resumes declares."""
++    env = rapport.get("environnement", {})
++    for moment in ("avant", "apres"):
++        observation = env.get(moment, {})
++        exiger(type(observation.get("gpu")) is str and observation["gpu"].strip() and
++               type(observation.get("gpu_apps")) is str and observation["gpu_apps"] == "",
++               "observation GPU absente, inconnue ou occupee")
++    camp = rapport.get("campagne_k5", {})
++    fils = naturel(camp.get("fils"), minimum=1)
++    passes = naturel(camp.get("passes"), minimum=REGLE_T2D_A["passes_min"])
++    tours = naturel(camp.get("tours_demandes"), minimum=REGLE_T2D_A["processus_min"])
++    trames = camp.get("trames")
++    exiger(type(trames) is dict and set(trames) == set(TRAMES), "cohorte de campagne differente")
++    for trame in TRAMES:
++        exiger(type(trames[trame]) is list and len(trames[trame]) == tours, "nombre de tours different")
++        for tour in trames[trame]:
++            exiger(type(tour) is dict and set(tour) == set(BRAS), "bras de campagne differents")
++            for bras in BRAS:
++                take = tour[bras]
++                attendu = {"k": 5, "fils": fils, "passes": passes, "bras": bras, "empreinte": False,
++                           "trames": [trame] * passes, "appareil": True,
++                           "schema": "recouvert" if bras == "apres" else "sequentiel"}
++                exiger(type(take) is dict and take.get("bras") == bras and
++                       json.dumps(take.get("attendu"), sort_keys=True) == json.dumps(attendu, sort_keys=True),
++                       "commande attendue incompatible avec sa place dans la campagne")
++
++
+ def _juger(rapport, sortie, verifier):
+     refus, cas, verdict = [], {}, None
+     construction = rapport.get("construction", {}).get("binaires", {})
+@@ -496,6 +524,7 @@
+         refus.append("GPU non isole avant ou apres")
+     if verifier:
+         try:
++            verifier_campagne(rapport)
+             reverifier(rapport, sortie)
+         except (ValueError, TypeError, KeyError, OSError, UnicodeError) as error:
+             refus.append("admission des journaux : " + str(error))

@@ -1,0 +1,24 @@
+{
+  "candidate257_support": [
+    253,
+    256
+  ],
+  "catalogues_compared": 315,
+  "certified_list_cases": 105,
+  "contacts_before_first_inside": 69,
+  "gpu_execution": false,
+  "model_mutants": [
+    "blocs_geometriques",
+    "frontiere_fermee",
+    "coquille65_immediate",
+    "indice_u8"
+  ],
+  "native_execution": false,
+  "shell65_then_five_interiors": "rejet",
+  "shell84_no_interior": "shell_capacity",
+  "small_fixtures": 7,
+  "sphere_contacts": 84,
+  "strict_list_reductions": 6,
+  "support_bound257": 180385216,
+  "support_tuples_compared": 840
+}

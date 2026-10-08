@@ -1,0 +1,26 @@
+{
+  "pin": "dd39e486a74e06d7a351e57fc914b5d2ba6c05be",
+  "capture_utc": "2026-10-08T07:12:40.534390+00:00",
+  "sources": {
+    "morsehgp3D_v12/src/catalogue/leaf_common.hpp": "a52cca4a03d663e452422e82fcf6395e4733857877e0818921256b7bf7dfe860",
+    "morsehgp3D_v12/src/catalogue/leaf_census.hpp": "829ba84ab6522a364d4985b5fb6d6571c14f8c72fd8e44bb45c97900b2125b6b",
+    "morsehgp3D_v12/src/catalogue/leaf_j3.hpp": "8329fc3fb251ad739ddfacd0174711a64dd22b6a9adf2d9798020f939fe54922",
+    "morsehgp3D_v12/src/catalogue/leaf_predicates.hpp": "03498f29bb135cfb1c969d952d93e43c784aae54f6aef53f5e5b0d40c57bfd9e",
+    "morsehgp3D_v12/src/catalogue/leaf_arith.hpp": "47abe759d9d253e1f0c9e1911d587766a0c2869c5e571365e2a7cfe3e33b40a6",
+    "morsehgp3D_v12/src/catalogue/leaves.cpp": "2172f739d7f3a5a49bfe748f4f8c3a38b4d6a4e6b393bbf22bf1b6396367fff8",
+    "morsehgp3D_v12/src/catalogue/internal.hpp": "d44c6946741117cdeccd00872c28a15f7ad1a00d1788040a6ba91dec930ee320",
+    "morsehgp3D_v12/src/catalogue/catalogue.cpp": "799abaf8ee815df58c40a44c74d1ba9b9dfc40fdd05488d1e214efe9b1009e49",
+    "morsehgp3D_v12/src/catalogue/catalogue.hpp": "5d7c4ddad4777b7996196a4315b17764492e96e25d0dfc8e362e34baa79d53e7",
+    "morsehgp3D_v12/src/catalogue/traversal.hpp": "68cd6dba36f0d77df6e5064a09fd4d68d038e3e20b078ddaf4e3deb3be8627b7",
+    "morsehgp3D_v12/src/catalogue/traversal_driver.hpp": "971c47dfe40394398d1dc42fb5c14b47031940b9db031be4dc500daa46f5eae9",
+    "morsehgp3D_v12/src/catalogue/traversal_records.hpp": "76e5c7712a4c6f172c3c23d8296b7f11145be5fc339a4b5b969e5d0f8c27aea6",
+    "morsehgp3D_v12/src/catalogue/device_driver.hpp": "e87f947fd85d9e76447254faf67548a5861502d47b892e79c74749f15c83199d",
+    "morsehgp3D_v12/src/tower/cells.cpp": "67720e8d3ac7eb71eabb7bb957f9c2256537d89fde27cbdc1e740fad6e6d24d2",
+    "morsehgp3D_v12/docs/CONTRAT_CATALOGUE.md": "4a2279a58648b01d1fefde29f424cccfaa86c8ff5c2bb4e81b9ca408697f07c3",
+    "morsehgp3D_v12/docs/PLAN.md": "3cc2cd97c2ddc69f34593a67a52a3967a24f6badb4ff19b642da904df3140c36",
+    "morsehgp3D_v12/receipts/audit_reponses_20261008/wide_leaf_semantique/README.md": "723773c81007d2d5f362e9a239d9665a7a029f097843b3b5397834589fe7c724",
+    "morsehgp3D_v12/src/cloud/morton.hpp": "03b6fd1b750ed24a64e481a63bdf2b122a40e6d104a04ce31c7769cd04bd3eda",
+    "morsehgp3D_v12/src/cloud/cloud.cpp": "26c82a1bfc1411606fbe1189541925539cb3c48a4cd1c1c3fe3a5d6a43a5684b"
+  },
+  "scope": "proposition de stockage et itération ; modèle synthétique indépendant ; aucune implantation ni qualification native"
+}

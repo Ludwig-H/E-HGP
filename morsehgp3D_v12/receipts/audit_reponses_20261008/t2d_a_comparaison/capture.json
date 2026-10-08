@@ -1,0 +1,36 @@
+{
+  "pins": {
+    "livre": "bcd742c0517f38b33ef85e212c94414377998157",
+    "historique": "902041f6675a079deb4a642068b036635171db1f"
+  },
+  "sources": {
+    "livre": {
+      "morsehgp3D_v12/microbancs/mes_t2d_a/pilote_t2d_a.py": "ea9023cfbdd791b651e7b5f4299050bc0e6f9285c6901306b67b85805e335faa",
+      "morsehgp3D_v12/microbancs/mes_t2d_a/README.md": "0620d3d7e66686d4252fd4b9fe48cf15dc4fd1b7854ee494a772836207322c46",
+      "morsehgp3D_v12/bench/full_probe.cpp": "e3a54104a2e0db3e669751ed407e0935f601a721ac702413eb206d3f597c3143",
+      "morsehgp3D_v12/src/tower/pipeline.cpp": "44e83374113a860519744f4a34dab854e32e50d50febc0e0f905a8aa7f8e437b",
+      "morsehgp3D_v12/src/tower/pipeline_run.cpp": "08b385e624db1eda20cd214e378e1bd7cd50d2a77c9832c485a66ff564847d02",
+      "morsehgp3D_v12/src/tower/stage.cpp": "7ee10167640865594ecd02133b2e8f29f9c18ebdb850c83582cd875e8ca68b38",
+      "morsehgp3D_v12/src/tower/forest_build.cpp": "4180abf4d6afa09cf7abd6a3c242c481c5a4f301fd8a6fcc9fc44feb24a16805",
+      "morsehgp3D_v12/src/catalogue/device_cuda.cu": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86",
+      "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed",
+      "morsehgp3D_v12/src/sched/pool.cpp": "490963ac714271db06cd138aecca96a4620dfad1dd23b8ff5326c76919492580"
+    },
+    "historique": {
+      "morsehgp3D_v12/src/catalogue/device_cuda.cu": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a",
+      "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+      "morsehgp3D_v12/src/sched/pool.cpp": "eed86be4c20f4812032616b639a009b513c12e3106cc808c66f5ec38d4da176f"
+    }
+  },
+  "snapshot_utc": "2026-10-08T07:20:36.754714+00:00",
+  "snapshot_metadata_sha256": "a94756e302c470deaab97ebfd2740cac712e87f284a45db0a9d5520afbe6c829",
+  "snapshot_git_differences": {
+    "morsehgp3D_v12/src/sched/pool.cpp": {
+      "snapshot": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+      "git": "490963ac714271db06cd138aecca96a4620dfad1dd23b8ff5326c76919492580"
+    }
+  },
+  "stable_capture_before_after": true,
+  "initial_setup": "liaison stricte de toute la capture au Git refusée avant modèle : pool.cpp local différent ; les neuf autres fichiers sont égaux aux blobs livrés",
+  "scope": "proposition de comparaison avant mesure ; aucun temps ni brut admis"
+}

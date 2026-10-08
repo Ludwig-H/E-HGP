@@ -1,0 +1,98 @@
+{
+  "base": "02b735d6bc7d0eeb0053303e9d9711db96a985df",
+  "execution_native": false,
+  "lecteur_inchange": true,
+  "livraison": "5f5c0c83fcb7df842996f584e3870bfbf3017d89",
+  "nominal": "adopte",
+  "patch_sha256": "4380e99cdf3481f1e9ed02291585f07483ef24226c17391622aa31f137dd30d1",
+  "pool": {
+    "morsehgp3D_v12/src/sched/pool.cpp": {
+      "apres_sha256": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+      "avant_sha256": "490963ac714271db06cd138aecca96a4620dfad1dd23b8ff5326c76919492580",
+      "hors_lignes_commentaires_sha256": "3843befe8eb70428cc5869d6d3c6a1ba72e059f9812447d2e8fe810a0e9e0196"
+    },
+    "morsehgp3D_v12/src/sched/sched.hpp": {
+      "apres_sha256": "87f723febab0f12652ff01be6ed87128ceefb07cbe0d6e1cc0334d7666185cbf",
+      "avant_sha256": "87f723febab0f12652ff01be6ed87128ceefb07cbe0d6e1cc0334d7666185cbf",
+      "hors_lignes_commentaires_sha256": "0d8396f661b8f8b2ce473ce62b8a2ded7d757861ed40df285e3e825337622ecd"
+    }
+  },
+  "porte_normal_et_O": {
+    "code": 0,
+    "stdout": "juge_g4_t2dc_ok injections=39 admission=25 cohorte=8"
+  },
+  "postimages_exactes": [
+    "g4_catalogue_flux_judge.py",
+    "g4_catalogue_flux_tables.py"
+  ],
+  "sources": {
+    "morsehgp3D_v12/bench/g4_catalogue_device.py": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677",
+    "morsehgp3D_v12/bench/g4_catalogue_flux.py": "88ca8e3ff529063b7b7450f0316a68babfda7ac300880520eb70cf2a629f772c",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_judge.py": "805d8303dabc753e810b3e0c42e7df2b19e23eceb3b41a73c05a382fa44a93be",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_lecteur.py": "dae75c321217b7fac765150b88ab68560f802c9c9d6947ec57b88f7c0edeb261",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_selftest.py": "551179ceb8166122efd0cb70f91509049d84266997ade32dfc2cdca4d1ae4b48",
+    "morsehgp3D_v12/bench/g4_catalogue_flux_tables.py": "db54cf9e7e48e358e08e3c869786c35fce5caaa9249c2d8f92a573b5bbfde810",
+    "morsehgp3D_v12/bench/g4_catalogue_judge.py": "62f8832ff9571219a2d8953a797ecfd68fddf02f192b74519c105bbbfbf07483",
+    "morsehgp3D_v12/bench/g4_catalogue_schema.py": "20d0cc8b9f66e571b7ad9d06d092ac5bf5f9ff66af2632aebdfd4e8659feefad",
+    "morsehgp3D_v12/tests/catalogue/tests.cmake": "e496e89793644021cce33b26263ba56cb8ac82923085f652cb41b0b8f4534313",
+    "morsehgp3D_v12/tests/sched/README.md": "073734db8d046cba2420d10c00fa7699b67c0969d0221e85f96fc32e3f1e3980"
+  },
+  "temoins": {
+    "*cohorte_bras_etranger": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_doublon": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_manquante": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_tour_booleen": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_tour_etranger": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_tour_non_hashable": {
+      "avant": {
+        "agregation_ng00": true,
+        "exception": "TypeError"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_trame_etrangere": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    },
+    "*cohorte_vide": {
+      "avant": {
+        "agregation_ng00": true,
+        "verdict": "refuse"
+      },
+      "livre": "refuse ; aucune aggregation"
+    }
+  }
+}

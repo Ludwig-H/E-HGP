@@ -1,0 +1,31 @@
+{
+  "admission_de_bruts": false,
+  "cases": [
+    {
+      "rapport_historique": 0.77,
+      "rapport_route": 1.1,
+      "unites_arbitraires": {
+        "historique": 100,
+        "recouvert": 77,
+        "sequentiel_actuel": 70
+      },
+      "verdict_historique": "adopte",
+      "verdict_nouvelle_route": "rejete"
+    },
+    {
+      "rapport_historique": 1.08,
+      "rapport_route": 0.9,
+      "unites_arbitraires": {
+        "historique": 100,
+        "recouvert": 108,
+        "sequentiel_actuel": 120
+      },
+      "verdict_historique": "rejete",
+      "verdict_nouvelle_route": "adopte"
+    }
+  ],
+  "native_execution": false,
+  "regle_originale_inchangee": true,
+  "remote_execution": false,
+  "voie_du_juge": "synthetique verifier=False"
+}

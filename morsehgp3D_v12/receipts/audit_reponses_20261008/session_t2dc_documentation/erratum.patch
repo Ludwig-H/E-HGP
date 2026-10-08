@@ -1,0 +1,13 @@
+diff --git a/morsehgp3D_v12/receipts/g4_t2dc_20261008/ERRATUM_MEMOIRE_20261008.md b/morsehgp3D_v12/receipts/g4_t2dc_20261008/ERRATUM_MEMOIRE_20261008.md
+new file mode 100644
+--- /dev/null
++++ b/morsehgp3D_v12/receipts/g4_t2dc_20261008/ERRATUM_MEMOIRE_20261008.md
+@@ -0,0 +1,8 @@
++# Erratum mémoire de la session T2-d-C
++
++8 octobre 2026. Dans le tableau K5 du README, lire « pic du budget commun hôte + appareil » à la place de
++« pic de l’hôte ». La sonde appelle CatalogueDevice::open(budget) avec un budget partagé entre l’hôte et
++l’appareil. Les valeurs 994→907 / 828→754 / 1 011→922 Mo ne sont donc ni le pic hôte isolé ni le RSS.
++
++Les valeurs, temps, empreintes et verdicts restent inchangés. Voir la
++[contrelecture des sources](../audit_reponses_20261008/session_t2dc_documentation/README.md).

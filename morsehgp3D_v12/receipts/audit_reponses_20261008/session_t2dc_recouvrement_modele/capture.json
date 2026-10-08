@@ -1,0 +1,65 @@
+{
+  "admission": {
+    "files": {
+      "capture.json": "962bb42e05eb21bf090d577e72e6521701997b5307ec4d2f76cc2001ae76f4bf",
+      "check.py": "3387286662d087586da53d0a50c56ae27a9e76ae74782074fcdf3c639ce05d6a",
+      "results.json": "50cc3bfd38200a631c57d20ddbb518144fb6c88ef1140d1fc01a8e648d57e3f7"
+    },
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_t2dc_admission"
+  },
+  "formula_reader": {
+    "path": "morsehgp3D_v12/receipts/audit_reponses_20261008/session_k_recouvrement_modele/check.py",
+    "sha256": "16e1eb4d8218574af5e93c54485600d62d0b01ade07c42473b3d7c6168df166b"
+  },
+  "frames": {
+    "ng00": 39885,
+    "ng01": 35551,
+    "ng02": 45845
+  },
+  "logs_sha256": {
+    "logs/i_full_r0_ng00_apres.log": "de3fd9910053d2e6d87437d1951862821e40e0e26eb008a88acc8cb9b6fab7d7",
+    "logs/i_full_r0_ng00_avant.log": "3e91b71671ce9bbbfa0cca446ddd88876a7a0770b25593ef5e64979bb7442a03",
+    "logs/i_full_r0_ng01_apres.log": "947e5575a50916e489e9ed3f5fb516a0a4fd5114d9bf29d46b35a6e06e08b071",
+    "logs/i_full_r0_ng01_avant.log": "61316680acc2c33dc981116e973f3f41e7554750e892062fc96e68b71fba4da5",
+    "logs/i_full_r0_ng02_apres.log": "64009b041afa0b6471967aa63fb2eb50bb75bbf6037544e3c546b6d3d828273c",
+    "logs/i_full_r0_ng02_avant.log": "a44313756f2f4f193712d4f8a9eb45eb860b53d02c85bb2281ec1c4ae172cb51",
+    "logs/i_full_r1_ng00_apres.log": "f09e6f0174e9193c43a5e6aa0c7e26b802f07ebf5fd898e0a75163101a5279ec",
+    "logs/i_full_r1_ng00_avant.log": "0bf8f94552b2d7c804e71bcb5c1246f0ade8c369caa808b7be19a3d8261ff2b3",
+    "logs/i_full_r1_ng01_apres.log": "e0c034673b25cba1b2e13857155b48c8b0302c328f2bb8c576f78bf6b608f1ec",
+    "logs/i_full_r1_ng01_avant.log": "ad4018b1ccb848371dc7619492d3183ce7a048842f63e493f265a6302d5a7112",
+    "logs/i_full_r1_ng02_apres.log": "fdbcc3117998c0f48528ab32b4700b5244adca8240739dd48b224027f6ad8938",
+    "logs/i_full_r1_ng02_avant.log": "bb45ac828f27ff0a68ba6fe017eac4bc6237513e790b460a842ff7fcd5f7e1a2",
+    "logs/i_full_r2_ng00_apres.log": "147bf26762b705f318f094df9e3d22e1588c98f1e297ca65f31a3f2083e268fa",
+    "logs/i_full_r2_ng00_avant.log": "0ffb088b3a9f7f1b32115a44dc0796897640da373a97753614e9facefe885731",
+    "logs/i_full_r2_ng01_apres.log": "6d203d72a4d06c432a34b7de772e0a6d83a5ea688a69be5de719fbead2a86d71",
+    "logs/i_full_r2_ng01_avant.log": "6b8ae02fb811f5d4f69dd1a9cbbb960964b3edd5118cdf74740a07d8841c8b8d",
+    "logs/i_full_r2_ng02_apres.log": "ad878096799b515dcf82442cd66a1416bf287c6939f3809a96031870d95618ec",
+    "logs/i_full_r2_ng02_avant.log": "dd0243d1aa6265eb605be7db2aa0e4c8542462b04a4def97ddd9e9496cf27e63"
+  },
+  "report_sha256": "3e6e9aaae28b447fc8c1e69ea23cbac4c09fd8355185152156d495391c972e90",
+  "scope": "scenario comptable conditionnel, jamais chrono de A",
+  "sources": [
+    {
+      "commit": "902041f6675a079deb4a642068b036635171db1f",
+      "lines": [
+        192,
+        194,
+        242,
+        298
+      ],
+      "path": "morsehgp3D_v12/bench/full_probe.cpp",
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    },
+    {
+      "commit": "02b735d6bc7d0eeb0053303e9d9711db96a985df",
+      "lines": [
+        192,
+        194,
+        242,
+        298
+      ],
+      "path": "morsehgp3D_v12/bench/full_probe.cpp",
+      "sha256": "201119a78a52ccbe5c8e2ce128a165e9b3774800d55ed8a0935c91e587858d61"
+    }
+  ]
+}

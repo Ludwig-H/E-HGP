@@ -1,0 +1,10 @@
+{
+  "source_sha256": {
+    "27eca166b:morsehgp3D_v12/receipts/g4_t2dc_20261008/README.md": "105cd8f319307c456b8660074a536e55e90d27903de599d1caa95071e7667de6",
+    "02b735d6b:morsehgp3D_v12/bench/catalogue_probe.cpp": "5d9b83bd235cd52594c4d52c5712d58f0dada13864b072c9c33553f89b07cc86",
+    "02b735d6b:morsehgp3D_v12/src/catalogue/device_cuda.cu": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86",
+    "902041f66:morsehgp3D_v12/bench/catalogue_probe.cpp": "2db6c9ec12ea9b34cb9f697836e7a4cbb2e7338ebda9232f947d85bf4d3a2356"
+  },
+  "native_execution": false,
+  "primary_measurements_changed": false
+}

@@ -1,0 +1,44 @@
+{
+  "capture": {
+    "apres_sequentiel_sans_recouvrement": {
+      "refus": [],
+      "verdict": "adopte"
+    },
+    "gpu_apps_inconnu": {
+      "refus": [],
+      "verdict": "adopte"
+    },
+    "nominal": {
+      "refus": [],
+      "verdict": "adopte"
+    },
+    "trame_etrangere_complete": {
+      "refus": [],
+      "verdict": "adopte"
+    }
+  },
+  "proposition": {
+    "apres_sequentiel_sans_recouvrement": {
+      "refus": [
+        "admission des journaux : commande attendue incompatible avec sa place dans la campagne"
+      ],
+      "verdict": "refuse"
+    },
+    "gpu_apps_inconnu": {
+      "refus": [
+        "admission des journaux : observation GPU absente, inconnue ou occupee"
+      ],
+      "verdict": "refuse"
+    },
+    "nominal": {
+      "refus": [],
+      "verdict": "adopte"
+    },
+    "trame_etrangere_complete": {
+      "refus": [
+        "admission des journaux : cohorte de campagne differente"
+      ],
+      "verdict": "refuse"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "head": "bcd742c0517f38b33ef85e212c94414377998157",
+  "captured_utc": "2026-10-08T07:21:09.777342+00:00",
+  "files": {
+    "README.md": {
+      "sha256": "0620d3d7e66686d4252fd4b9fe48cf15dc4fd1b7854ee494a772836207322c46",
+      "size": 4677,
+      "stable": true
+    },
+    "pilote_t2d_a.py": {
+      "sha256": "ea9023cfbdd791b651e7b5f4299050bc0e6f9285c6901306b67b85805e335faa",
+      "size": 43214,
+      "stable": true
+    }
+  },
+  "fixture_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/t2d_a_schema902/check.py",
+  "fixture_sha256": "a6cc40a9cdfaae6768328b351f52ed9792c38344202d912bb1f171cd11ad067b",
+  "scope": "Capture non commise ; lecture et Python synthétique ; aucun moteur/GCP."
+}

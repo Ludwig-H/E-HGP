@@ -1,0 +1,19 @@
+{
+  "captured_utc": "2026-10-08T07:13:51.571603+00:00",
+  "commit": "02b735d6bc7d0eeb0053303e9d9711db96a985df",
+  "sources": {
+    "g4_catalogue_flux.py": "88ca8e3ff529063b7b7450f0316a68babfda7ac300880520eb70cf2a629f772c",
+    "g4_catalogue_flux_judge.py": "970482edf04d79039c63372a1306e34a31be1139e1dc5426d24e0ae4deccd782",
+    "g4_catalogue_flux_lecteur.py": "dae75c321217b7fac765150b88ab68560f802c9c9d6947ec57b88f7c0edeb261",
+    "g4_catalogue_flux_selftest.py": "a858041831dba64b64576f17bbd54f2877b5d40d3ab8bfe1e58386431864325c",
+    "g4_catalogue_flux_tables.py": "b20c44de62f140dc0b49269ed6534cece9a3114e91edbf5269f749fb94e4b6e3",
+    "g4_catalogue_device.py": "c477ffd80533a7e770ae382b9062ca1372699b6ea07a4db4178a4a934e7ae677"
+  },
+  "report_sha256": "3e6e9aaae28b447fc8c1e69ea23cbac4c09fd8355185152156d495391c972e90",
+  "returned_tree_sha256": "c02c62432c8ffbb7d9a06e81342d327cafd168fdc9a6d86d37bc20e457f142d0",
+  "returned_files": 415,
+  "cohort_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/mes_full_contrelecture/capture.json",
+  "provenance": "../session_t2dc_provenance/README.md",
+  "native_executed": false,
+  "cohort_capture_sha256": "295270d48d84efd9baa1ef6b2caf795a41c152ff7998e79c00c93fb93726c669"
+}
