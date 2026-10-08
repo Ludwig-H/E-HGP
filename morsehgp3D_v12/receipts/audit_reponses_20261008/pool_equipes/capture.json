@@ -1,0 +1,41 @@
+{
+  "observed_utc": "2026-10-08T06:59:42.934409+00:00",
+  "head_observed": "dd39e486a74e06d7a351e57fc914b5d2ba6c05be",
+  "attribution": "snapshot checked byte-for-byte against seven delivered Git objects",
+  "files": {
+    "src/sched/pool.cpp": {
+      "bytes": 4412,
+      "sha256": "490963ac714271db06cd138aecca96a4620dfad1dd23b8ff5326c76919492580"
+    },
+    "src/sched/sched.hpp": {
+      "bytes": 3649,
+      "sha256": "87f723febab0f12652ff01be6ed87128ceefb07cbe0d6e1cc0334d7666185cbf"
+    },
+    "src/sched/source_pins.json": {
+      "bytes": 2350,
+      "sha256": "5ce95e66231c7782a2e3c930aa53fad79a29516299e9db6b031ad535e6c01377"
+    },
+    "tests/sched/unit.cpp": {
+      "bytes": 11578,
+      "sha256": "ee630ffb074890d99fe62e1c672af14c646b757698412fb52bfe1f328f78d27c"
+    },
+    "tests/sched/tests.cmake": {
+      "bytes": 366,
+      "sha256": "66f4de9bad23c4d3d1a7cfb6481310e31f7bc30b1475c18863aec7709913ae0e"
+    },
+    "tests/sched/README.md": {
+      "bytes": 4517,
+      "sha256": "ea16e2200a80bf3c2c251e386e1a20a6c20cce648746387375e80657655bbf7a"
+    },
+    "tests/sched/fault.cpp": {
+      "bytes": 6861,
+      "sha256": "d7b993fff5de2ec6c3b20a8d09a826552b5c3a48258beac8d8e33b35e26bf9c8"
+    }
+  },
+  "native_execution": false,
+  "normal_exit_code": 0,
+  "optimized_exit_code": 0,
+  "native_tests_executed_by_audit": false,
+  "delivered_commit": "5b3362bbdba50a5910033808daf0011c22378069",
+  "git_objects_exact": 7
+}

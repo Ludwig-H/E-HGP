@@ -1,0 +1,187 @@
+{
+  "counter_json": {
+    "campagne_hors_cohorte_invalide": {
+      "mutant": "tue (empreinte)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "cohorte_juge_et_tableaux_divergente": {
+      "after": "| ng00 | apres | 0.001 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.0 | 0.0 |",
+      "before": "| ng00 | apres | 28.097 | 2.810 | 5.619 | 1.405 | 0.000 | 2.810 | 1.405 | 0.562 | 0.0 | 0.0 |",
+      "entire_judgment_unchanged": true,
+      "extra_processes": 11,
+      "verdict": "adopte"
+    },
+    "full_code_false": {
+      "mutant": "tue (empreinte)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "full_liberation_pass_false": {
+      "mutant": "tue (empreinte)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "mutant_cpu_pour_commande_device": {
+      "mutant": "tue (invariant_violated/catalogue_invariant)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "mutant_memory_budget_declare_invariant": {
+      "mutant": "tue (invariant_violated/memory_budget)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    },
+    "nominal_officiel": {
+      "mutant": "tue (empreinte)",
+      "refused": [],
+      "rejected": [],
+      "verdict": "adopte"
+    }
+  },
+  "official": {
+    "code": 0,
+    "stdout": "juge_g4_t2dc_ok injections=39 admission=25"
+  },
+  "proposed_closed_cohort": {
+    "negative": {
+      "bras_etranger": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "doublon": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "manquante": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "tour_booleen": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "tour_etranger": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "tour_non_hashable": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "trame_etrangere": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      },
+      "vide": {
+        "table_refuse": true,
+        "verdict": "refuse"
+      }
+    },
+    "nominal": "adopte"
+  },
+  "source_review": {
+    "after_files": 131,
+    "after_tree": "bdded2b17a85d0a5f6da568160d0b51e4ada390d8a84bec9f5927fde44498f47",
+    "base_files": 128,
+    "base_tree": "7a3d0d5fbc686aa8d96d1c4f92c0feecf8414d2c74c456e1f0d7475113028332",
+    "changed": [
+      {
+        "after": "5efddae8de847fb213e874fce108ba63ec693beb7d4a3cab0c29e55314b3439c",
+        "base": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd",
+        "path": "morsehgp3D_v12/src/catalogue/assemble.cpp"
+      },
+      {
+        "after": "5d7c4ddad4777b7996196a4315b17764492e96e25d0dfc8e362e34baa79d53e7",
+        "base": "9c8c5ccec389c50bd2858d67d7de29560dc2b9e7304017f70e6bc81cdf6cfc41",
+        "path": "morsehgp3D_v12/src/catalogue/catalogue.hpp"
+      },
+      {
+        "after": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86",
+        "base": "c80d349f29a645b842e5300c21f3c60aabd8dbcbceec19ac0beef21c6721c08a",
+        "path": "morsehgp3D_v12/src/catalogue/device_cuda.cu"
+      },
+      {
+        "after": "439c9397c3bb2da2328ddd5969cb130f21c48247fd9a864c09233822020802af",
+        "base": "4a752fb766263363b1e6dcd24eed85a797c96e561ee97e725066e73afa12622b",
+        "path": "morsehgp3D_v12/src/catalogue/device_pipeline.hpp"
+      },
+      {
+        "after": "119ceb7c9cb5265323849f01248f876bd30b7284e79789e21fb8caaacc9b329f",
+        "base": "93985cfe09c271d8e709b019ca9e2c8c1a3208c35961a78f26718cb9c2e6d1c4",
+        "path": "morsehgp3D_v12/src/catalogue/exec_host.hpp"
+      },
+      {
+        "after": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed",
+        "base": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+        "path": "morsehgp3D_v12/src/catalogue/finish_driver.hpp"
+      },
+      {
+        "after": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+        "base": null,
+        "path": "morsehgp3D_v12/src/catalogue/finish_outputs.hpp"
+      },
+      {
+        "after": "897c5d0f50cd8d9c94e71ecb886cd1354b5a33c7ff6d2b2278a8c0431e95fff9",
+        "base": null,
+        "path": "morsehgp3D_v12/src/catalogue/finish_repair.hpp"
+      },
+      {
+        "after": "d44c6946741117cdeccd00872c28a15f7ad1a00d1788040a6ba91dec930ee320",
+        "base": "d2bbad4c12a673f7c65f6a4fdc7769bfd9de49645319302c43fe3039f167a57e",
+        "path": "morsehgp3D_v12/src/catalogue/internal.hpp"
+      },
+      {
+        "after": "07a6b05db097db9ff28b3449024dbf36abb203ca94aaed85ebc2b92ee4ab1b2c",
+        "base": "9d1d41ffcc4eadd337e16f010580766965a26a9a7785644781d048ad5f54b34d",
+        "path": "morsehgp3D_v12/src/catalogue/module.cmake"
+      },
+      {
+        "after": "c71d506ecb9ebf95e58b0fcdc5241e11d5d914dc6bc2a37ed79549b984b0cc28",
+        "base": null,
+        "path": "morsehgp3D_v12/src/catalogue/outputs.cpp"
+      },
+      {
+        "after": "418350e795394c1c6f1c9107a31c47883d49bc951672702baff8e2e59a99b2c3",
+        "base": "cc63d7d9b89c6c81ec92394f93acfb9d9fdc17834a1ad0c47485b3ca4df13b3d",
+        "path": "morsehgp3D_v12/src/catalogue/transfer_meter.hpp"
+      },
+      {
+        "after": "452917c7aa7a54244502934bb6c06f6ae65064232714b99356748ddaabc5660f",
+        "base": "53c05dccf838583b7226af624d1d8df5e770cbc9b248ce67207fb3dc823901ce",
+        "path": "morsehgp3D_v12/src/io/io.hpp"
+      },
+      {
+        "after": "872eb3624fd933cd26ed7d7b82311a22021f216b35f7fcd1629c224b607c0f73",
+        "base": "a5693a67d55817c9361b33d97f2dc40da1d7d986b9454598511f5a5f2f72e382",
+        "path": "morsehgp3D_v12/src/io/sha256.cpp"
+      },
+      {
+        "after": "490963ac714271db06cd138aecca96a4620dfad1dd23b8ff5326c76919492580",
+        "base": "eed86be4c20f4812032616b639a009b513c12e3106cc808c66f5ec38d4da176f",
+        "path": "morsehgp3D_v12/src/sched/pool.cpp"
+      },
+      {
+        "after": "87f723febab0f12652ff01be6ed87128ceefb07cbe0d6e1cc0334d7666185cbf",
+        "base": "de9bbd3b67cc701c19ba46ee627c4212ca8e324fc52f35a9fce466bb923a80f1",
+        "path": "morsehgp3D_v12/src/sched/sched.hpp"
+      },
+      {
+        "after": "5ce95e66231c7782a2e3c930aa53fad79a29516299e9db6b031ad535e6c01377",
+        "base": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8",
+        "path": "morsehgp3D_v12/src/sched/source_pins.json"
+      }
+    ],
+    "delivered_02_tree": "fc43b634af957db00a344463b4ec146c416bde3c07eea32a40f0f5c8d322b3fe",
+    "inverse_application": "ok ; postimages parent exactes ; hors catalogue inchangé",
+    "inverse_files": 20,
+    "inverse_patch_sha256": "f884da1397a7d6c1d5b2dd65396fabbe49bd7b9e80cde14766bf423860d2837a",
+    "qualification_compilation": false,
+    "same_pin_before_C_tree": "fbfe6c9f85223a302e86b793b1adcd9a5b056d74578eff0b110e414f24c7e0b9"
+  }
+}

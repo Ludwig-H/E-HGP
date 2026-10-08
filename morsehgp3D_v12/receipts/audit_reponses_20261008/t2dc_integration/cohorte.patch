@@ -1,0 +1,57 @@
+--- a/morsehgp3D_v12/bench/g4_catalogue_flux_judge.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_flux_judge.py
+@@ -202,12 +202,32 @@
+                if not (name == 'sorties' and arm in HISTORICAL))
+ 
+ 
++def closed_campaign(steps, rounds):
++    """Cohorte exacte partagee par jugement et publication : aucune observation ignoree."""
++    entries = steps.get('campaign') if type(steps) is dict else None
++    if type(entries) is not list or not is_int(rounds):
++        return None
++    expected = {(r, f, a) for r in range(rounds) for f in FRAMES for a in ARMS}
++    found = {}
++    for entry in entries:
++        if type(entry) is not dict:
++            return None
++        r, frame, arm = (entry.get(k) for k in ('round', 'frame', 'arm'))
++        if not is_int(r) or type(frame) is not str or type(arm) is not str:
++            return None
++        key = (r, frame, arm)
++        if key not in expected or key in found:
++            return None
++        found[key] = entry
++    return found if len(found) == len(expected) else None
++
++
+ def campaign_table(steps, out, rounds, passes, threads, refs):
+     """Medianes chaudes par (tour, trame, bras) ; refus si une prise manque, sort de sa commande ou si des etapes
+     depassent le total d'une passe."""
+-    table, entries = {}, by_key(steps.get('campaign'), 'round', 'frame', 'arm')
++    table, entries = {}, closed_campaign(steps, rounds)
+     if entries is None:
+-        out['refused'].append('campagne illisible ou prise en double')
++        out['refused'].append('campagne illisible, incomplete, hors cohorte ou prise en double')
+         return table
+     for (r, frame, arm), e in entries.items():
+         if arm not in ARMS or frame not in FRAMES or not is_int(r) or r >= rounds:
+--- a/morsehgp3D_v12/bench/g4_catalogue_flux_tables.py
++++ b/morsehgp3D_v12/bench/g4_catalogue_flux_tables.py
+@@ -71,6 +71,8 @@
+ def campaign_lines(report):
+     steps, opts = report.get('steps') or {}, report.get('options') or {}
+     threads, passes = opts.get('threads'), opts.get('passes')
++    if J.closed_campaign(steps, opts.get('rounds')) is None:
++        return ['', 'Campagne refusee : cohorte absente, incomplete, etrangere ou repetee.']
+     lines = ['', '## Etage C a chaud, K5 (mediane des passes 2..P de tous les processus, ms ; transferts : partition '
+              'du mur, pas une mesure du DMA ; sorties : reservation et premier toucher)', '',
+              '| trame | bras | total | ' + ' | '.join(STAGE_NAMES) + ' | epinglee (Mo) | pic (Mo) |',
+@@ -122,4 +124,8 @@
+ 
+ 
+ def tables(report):
++    if J.closed_campaign(report.get('steps'), (report.get('options') or {}).get('rounds')) is None:
++        return ('# T2-d-C : transferts et publication du catalogue sur G4\n\n'
++                'Verdict de REGLE_T2D_C : **refuse**.\n\n'
++                'Cohorte absente, incomplete, etrangere ou repetee ; aucune agregation publiee.\n')
+     return '\n'.join(verdict_lines(report) + campaign_lines(report) + information_lines(report)) + '\n'

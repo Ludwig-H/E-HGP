@@ -1,0 +1,19 @@
+{
+  "canonical_payloads": 24,
+  "exhaustive_graph_windows": 9840,
+  "gpu_execution": false,
+  "halo_cases": 78,
+  "invalid_streams": 4,
+  "level_rows": 780,
+  "model_mutants": [
+    "cles_desolidarisees",
+    "fenetre_unique",
+    "mots_hauts_perdus",
+    "rang_zero_ecrase",
+    "reemploi_precoce",
+    "sans_attente",
+    "sans_dedup"
+  ],
+  "native_execution": false,
+  "streams": 60
+}

@@ -1,0 +1,182 @@
+{
+  "by_sequence": {
+    "000": {
+      "final_states": 1,
+      "states": 28,
+      "states_token_before_wait": 0,
+      "transitions": 27
+    },
+    "001": {
+      "final_states": 1,
+      "states": 86,
+      "states_token_before_wait": 0,
+      "transitions": 135
+    },
+    "002": {
+      "final_states": 1,
+      "states": 670,
+      "states_token_before_wait": 0,
+      "transitions": 1733
+    },
+    "010": {
+      "final_states": 1,
+      "states": 95,
+      "states_token_before_wait": 0,
+      "transitions": 153
+    },
+    "011": {
+      "final_states": 1,
+      "states": 154,
+      "states_token_before_wait": 9,
+      "transitions": 263
+    },
+    "012": {
+      "final_states": 1,
+      "states": 814,
+      "states_token_before_wait": 85,
+      "transitions": 2081
+    },
+    "020": {
+      "final_states": 1,
+      "states": 697,
+      "states_token_before_wait": 0,
+      "transitions": 1796
+    },
+    "021": {
+      "final_states": 1,
+      "states": 815,
+      "states_token_before_wait": 18,
+      "transitions": 2075
+    },
+    "022": {
+      "final_states": 1,
+      "states": 1508,
+      "states_token_before_wait": 181,
+      "transitions": 3991
+    },
+    "100": {
+      "final_states": 1,
+      "states": 104,
+      "states_token_before_wait": 0,
+      "transitions": 171
+    },
+    "101": {
+      "final_states": 1,
+      "states": 163,
+      "states_token_before_wait": 9,
+      "transitions": 281
+    },
+    "102": {
+      "final_states": 1,
+      "states": 823,
+      "states_token_before_wait": 85,
+      "transitions": 2099
+    },
+    "110": {
+      "final_states": 1,
+      "states": 163,
+      "states_token_before_wait": 9,
+      "transitions": 281
+    },
+    "111": {
+      "final_states": 1,
+      "states": 222,
+      "states_token_before_wait": 18,
+      "transitions": 391
+    },
+    "112": {
+      "final_states": 1,
+      "states": 882,
+      "states_token_before_wait": 94,
+      "transitions": 2209
+    },
+    "120": {
+      "final_states": 1,
+      "states": 841,
+      "states_token_before_wait": 85,
+      "transitions": 2144
+    },
+    "121": {
+      "final_states": 1,
+      "states": 959,
+      "states_token_before_wait": 103,
+      "transitions": 2423
+    },
+    "122": {
+      "final_states": 1,
+      "states": 1652,
+      "states_token_before_wait": 266,
+      "transitions": 4339
+    },
+    "200": {
+      "final_states": 1,
+      "states": 724,
+      "states_token_before_wait": 0,
+      "transitions": 1859
+    },
+    "201": {
+      "final_states": 1,
+      "states": 842,
+      "states_token_before_wait": 18,
+      "transitions": 2138
+    },
+    "202": {
+      "final_states": 1,
+      "states": 1535,
+      "states_token_before_wait": 181,
+      "transitions": 4054
+    },
+    "210": {
+      "final_states": 1,
+      "states": 842,
+      "states_token_before_wait": 18,
+      "transitions": 2138
+    },
+    "211": {
+      "final_states": 1,
+      "states": 960,
+      "states_token_before_wait": 36,
+      "transitions": 2417
+    },
+    "212": {
+      "final_states": 1,
+      "states": 1653,
+      "states_token_before_wait": 199,
+      "transitions": 4333
+    },
+    "220": {
+      "final_states": 1,
+      "states": 1535,
+      "states_token_before_wait": 181,
+      "transitions": 4054
+    },
+    "221": {
+      "final_states": 1,
+      "states": 1653,
+      "states_token_before_wait": 199,
+      "transitions": 4333
+    },
+    "222": {
+      "final_states": 1,
+      "states": 2346,
+      "states_token_before_wait": 362,
+      "transitions": 6249
+    }
+  },
+  "invocations": 3,
+  "memory_model": "abstract interleavings, C++ happens-before proved separately",
+  "mutants": {
+    "compteur_trop_court": "compteur sous zero",
+    "retour_sans_attendre": "retour avant toutes les issues"
+  },
+  "native_execution": false,
+  "pool_workers": 3,
+  "sequences": 27,
+  "teams": 3,
+  "totals": {
+    "final_states": 27,
+    "states": 22766,
+    "states_token_before_wait": 2156,
+    "transitions": 58167
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "pins": {
+    "livre": "02b735d6bc7d0eeb0053303e9d9711db96a985df",
+    "avant": "f0012bb7dea086e8efd20d4e280804d965b48bdd"
+  },
+  "sources": {
+    "livre": {
+      "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "3a46be936021a1dab50d5d13526571b84f2bebb29be511ee4e97cd10a645d2ed",
+      "morsehgp3D_v12/src/catalogue/finish_repair.hpp": "897c5d0f50cd8d9c94e71ecb886cd1354b5a33c7ff6d2b2278a8c0431e95fff9",
+      "morsehgp3D_v12/src/catalogue/finish_outputs.hpp": "0c4fd7551fe4198f81ba59b17b14a6c6fb5549de6913bd66dfe1dfa21df8e5ee",
+      "morsehgp3D_v12/src/catalogue/finish_kernels.hpp": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426",
+      "morsehgp3D_v12/src/catalogue/finish_level.hpp": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb",
+      "morsehgp3D_v12/src/catalogue/finish_sort.hpp": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce",
+      "morsehgp3D_v12/src/catalogue/transfer_meter.hpp": "418350e795394c1c6f1c9107a31c47883d49bc951672702baff8e2e59a99b2c3",
+      "morsehgp3D_v12/src/catalogue/device_cuda.cu": "4704ae7f3082c9efdbf50e524e5ba7e7a6079e3d003cd7c8fd3b8001bbc93c86",
+      "morsehgp3D_v12/src/catalogue/device_pipeline.hpp": "439c9397c3bb2da2328ddd5969cb130f21c48247fd9a864c09233822020802af",
+      "morsehgp3D_v12/src/catalogue/exec_host.hpp": "119ceb7c9cb5265323849f01248f876bd30b7284e79789e21fb8caaacc9b329f",
+      "morsehgp3D_v12/src/catalogue/assemble.cpp": "5efddae8de847fb213e874fce108ba63ec693beb7d4a3cab0c29e55314b3439c",
+      "morsehgp3D_v12/src/catalogue/outputs.cpp": "c71d506ecb9ebf95e58b0fcdc5241e11d5d914dc6bc2a37ed79549b984b0cc28",
+      "morsehgp3D_v12/src/num/level.hpp": "6e851904581ed3b0419e0363bbf538d2ac082877c2268fe4c53e8bfe0af330fd",
+      "morsehgp3D_v12/src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+      "morsehgp3D_v12/tests/catalogue/device_finish_test.cpp": "408a5be2dc05871e865d86bd5979e9d38589c49b584af40305209aa7ff0496fd",
+      "morsehgp3D_v12/tests/catalogue/device_pipeline_test.cpp": "25853982afc95fbcdec28914d5132d78ea715ceeeb1dec163d8d3f964e5426b0",
+      "morsehgp3D_v12/tests/catalogue/device_support.hpp": "966c4e777843de20ac12bd6f560f91cd1a4e154a6b2172ac8e5de3a206653460",
+      "morsehgp3D_v12/tests/catalogue/device_budget_test.cpp": "57904197161e12b8e93766eeff2b269857aa652dc1959d07568e03444c4898ed"
+    },
+    "avant": {
+      "morsehgp3D_v12/src/catalogue/finish_driver.hpp": "4d15554c30d8db4332fafc3d62c4a90996e421e579326960c681693db149e59f",
+      "morsehgp3D_v12/src/catalogue/assemble.cpp": "7c00cc574fc194cfa49dd23942cfa657b91e69163d71ff1a574ef350a7a3e4cd",
+      "morsehgp3D_v12/src/catalogue/finish_kernels.hpp": "96b1afe896fcbd65afce3cc119a3db4d9149c059e5e8251f53605c2f3f059426",
+      "morsehgp3D_v12/src/catalogue/finish_level.hpp": "d5dd177a787367330ef6a35e4e949a9e997681dcf2267b392e1bf19d44fa7ecb",
+      "morsehgp3D_v12/src/catalogue/finish_sort.hpp": "c7355b1e5b2b278dccb62a726bf20deb92b89ceed39cb9635db7a6763d47d5ce",
+      "morsehgp3D_v12/src/num/level.hpp": "6e851904581ed3b0419e0363bbf538d2ac082877c2268fe4c53e8bfe0af330fd"
+    }
+  },
+  "same_as_reprise": {
+    "src/catalogue/device_cuda.cu": true,
+    "src/catalogue/transfer_meter.hpp": true,
+    "src/catalogue/device_pipeline.hpp": true,
+    "src/catalogue/finish_outputs.hpp": false,
+    "src/catalogue/finish_driver.hpp": true,
+    "src/catalogue/finish_repair.hpp": false
+  },
+  "capture_utc": "2026-10-08T06:58:00.138127+00:00",
+  "scope": "source et modèles Python indépendants uniquement ; aucun moteur/GPU/GCP"
+}

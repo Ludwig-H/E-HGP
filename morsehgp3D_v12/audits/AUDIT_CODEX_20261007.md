@@ -62,9 +62,13 @@ CPU/C : [symétrie et garde redondante](../receipts/audit_reponses_20261008/cpu_
 [R classe unique](../receipts/audit_reponses_20261008/registre_classe_unique_patch/README.md) à qualifier.
 A : [fenêtre des feuilles](../receipts/audit_reponses_20261008/t2d_a_fenetre_patch/README.md) à corriger.
 B : [pilote corrigé](../receipts/audit_reponses_20261008/t2d_b_admission_reprise/README.md), quatre blocs FULL informatifs permissifs.
-C : intégration `02b735d6b` du transfert par morceaux et réparation compacte en cours d'audit ; aucune mesure G4 de cette livraison.
+C `02b735d6b` : [relecture mathématique favorable](../receipts/audit_reponses_20261008/t2d_c_integration_math/README.md),
+chaînes/niveaux/propriété conservés sur les chemins relus ; résultats G4 en cours d’admission.
+[Juge C](../receipts/audit_reponses_20261008/t2dc_integration/README.md) : prises étrangères ignorées au verdict mais incluses au tableau ;
+patch de cohorte commune proposé. Métadonnées de mutants en échec encore permissives.
 [Diagnostic MES-C](../receipts/audit_reponses_20261008/session_c_diagnostic/README.md) : C porte l’écart CPU/GPU ;
 41/41 réels de 100–300 sites ralentis à W48/W4 sur les deux voies, surtout G/TMVR quand C est sur GPU.
-Pool : équipe limitée aux tranches en développement, synchronisation à relire ; causalité et gains à mesurer.
+[Pool `5b3362bbd`](../receipts/audit_reponses_20261008/pool_equipes/README.md) : synchronisation favorable, modèle 22 766 états ;
+gain G4 à mesurer. Session C sur `02b` sans ce pool ; future comparaison : même pool dans les deux bras (recette proposée).
 [Grande feuille](../receipts/audit_reponses_20261008/wide_leaf_semantique/README.md) : liste candidate ≥257, pas une coquille ; repli global ouvert.
 Autres états, preuves et limites dans le registre. Audit : Python et sources ; aucun moteur, GCP ni donnée sous licence.
