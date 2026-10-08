@@ -1,0 +1,3 @@
+pilote_t2d_a_auto_test_ok cas=5 verdicts=adopte,rejete,refuse
+pilote_t2d_a_auto_test_ok cas=5 verdicts=adopte,rejete,refuse
+pilote_t2d_a_verdict adopte refus=0

@@ -1,0 +1,14 @@
+Test project $HOME/ehgp-v12/ehgp-v12.mB5E7nWmiD/build
+    Start  15: mhgp12_support_lidar_sentinel
+1/7 Test  #15: mhgp12_support_lidar_sentinel ............   Passed    0.01 sec
+    Start 363: mhgp12_catalogue_lidar_ng00_k5
+2/7 Test #363: mhgp12_catalogue_lidar_ng00_k5 ...........   Passed   10.55 sec
+    Start 364: mhgp12_catalogue_lidar_ng01_k5
+3/7 Test #364: mhgp12_catalogue_lidar_ng01_k5 ...........   Passed    8.64 sec
+    Start 365: mhgp12_catalogue_lidar_ng02_k5
+4/7 Test #365: mhgp12_catalogue_lidar_ng02_k5 ...........   Passed   10.46 sec
+    Start 366: mhgp12_catalogue_euler_lidar_ng00_k5
+5/7 Test #366: mhgp12_catalogue_euler_lidar_ng00_k5 .....   Passed    9.63 sec
+    Start 392: mhgp12_tower_determinism_lidar_ng00_k5
+6/7 Test #392: mhgp12_tower_determinism_lidar_ng00_k5 ...   Passed    9.95 sec
+    Start 436: mhgp12_tower_chain_m0

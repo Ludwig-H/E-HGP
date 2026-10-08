@@ -140,7 +140,10 @@ de transferts), G 79, T 63, M 16, R 23 ms. Suite : tranche T2-d (recouvrement et
 G ; transferts de C), budgets d'étage repris à la taille médiane réelle. **T2-d-C adopté sur G4 le 8 octobre**
 ([session T2-d-C](../receipts/g4_t2dc_20261008/README.md), `02b735d6b`) : sorties du catalogue en flux, double tampon,
 sorties anticipées, repli compact ; étage C **26,9 / 23,8 / 26,8 ms à K5** (rapport 0,74 à 0,80), 98 à 103 ms à K10 ;
-mur FULL 154 / 123 / 156 ms (−4 à −6 %), G et T, M, V, R restant en série. Suites déclarées (T2-c) : classification des cellules et table de populations
+mur FULL 154 / 123 / 156 ms (−4 à −6 %), G et T, M, V, R restant en série. **T2-d-A adopté sur G4 le 8 octobre**
+([session T2-d-A](../receipts/g4_t2da_20261008/README.md), bras avant = `27eca166b`) : Session recouverte, mur FULL K5
+**99,7 / 81,0 / 97,8 ms** sur ng00–02 (rapport 0,65 à 0,69) ; 37 trames `v12set` : médiane 160,6 ms, maximum 327,3 ms ;
+queue de 5 à 14 ms, G devient le chemin critique. Suites déclarées (T2-c) : classification des cellules et table de populations
 reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
 de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
 leviers `G-L4` à `G-L7` non implantés. **Premiers temps G4** ([session H](../receipts/g4_t2h_20261007/README.md), 48 fils) : étage G 80 / 63 / 76 ms à K5 sur ng00–02 (tables 15 à 19 ms, à peine parallèles ; résolution 37 à 49 ms, ×30 de 1 à 48 fils), 450 à 634 ms à K10 : 2,5 à 3 fois le budget à K5 ; chantier T2-c en cours (tables, `G-L5`, recherche des supports). **T2-c adopté sur G4 le 8 octobre** ([session J](../receipts/g4_t2cj_20261008/README.md)) : index des naissances parallèle et file de sondes `G-L7`, étage G **53,1 / 42,1 / 48,2 ms à K5** (rapport 0,63 à 0,67, IC 95 % serré, A/A ≈ 1), 443 ms à K10 sur ng00 ; `G-L5` rejeté. Reste 1,6 à 1,8 fois le budget : census gardé, puis `LEM-T1` et proposition.
