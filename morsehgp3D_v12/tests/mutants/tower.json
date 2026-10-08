@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 7,
+  "plancher": 18,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -64,6 +64,94 @@
       "remplace": "if (data.p + 1 != inner.size() || data.m != shell.size()",
       "porte": "mhgp12_tower_unit_witness_t1_square",
       "note": "controle croise du census complet et de la boule du catalogue de meme S* fausse d'un site : refus census_mismatch sur le cercle du carre (F = BD, ordre 2)"
+    },
+    {
+      "id": "recherche_sans_egalite_des_sites",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "if (pos < hi && compare_at(pos, key, f) == 0) return hit_at(pos);  // egalite exacte des SiteIdx",
+      "remplace": "if (pos < hi && key_at(pos) == key) return hit_at(pos);  // egalite exacte des SiteIdx",
+      "porte": "mhgp12_tower_index_index_reference",
+      "note": "LEM-POP decide sur l'empreinte seule (la recherche de l'index ne compare plus les SiteIdx) : sous collision d'empreintes (masque nul), une autre naissance du seau est rendue pour F ; la table ordonnee de reference la refuse"
+    },
+    {
+      "id": "verification_sans_collisions",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "const u64 pos = lower_bound(u64{candidate} + 1, hi, key, &f);",
+      "remplace": "const u64 pos = hi;",
+      "porte": "mhgp12_tower_index_index_reference",
+      "note": "jointure G-L5 qui perd un egal : le candidat (premiere place de meme empreinte) n'est pas la population de F et les autres places de meme empreinte ne sont pas cherchees ; sous masque nul, presque toutes les premieres sondes echouent a tort"
+    },
+    {
+      "id": "recherche_premiere_place_du_seau",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "const u64 pos = lower_bound(directory_[bucket], hi, key, &f);",
+      "remplace": "const u64 pos = directory_[bucket];",
+      "porte": "mhgp12_tower_index_weak_key_resolution",
+      "note": "recherche de la file G-L7 (voie produit) sans dichotomie : seule la premiere place du seau est comparee ; sous masque nul, les sondes echouent a tort et les compteurs de la resolution rejouee different de ceux de l'etage"
+    },
+    {
+      "id": "seau_non_trie",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "        if (hi - lo > 1)",
+      "remplace": "        if (false)",
+      "porte": "mhgp12_tower_index_index_reference",
+      "note": "index construit dans un ordre non canonique (seaux laisses dans l'ordre des naissances) : le controle de l'ordre strict (empreinte, population) refuse la construction (tower_invariant)"
+    },
+    {
+      "id": "population_repetee_admise",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "if (pos > 0 && !s.less(s.sorted[pos - 1], e)) return fail(Reason::tower_invariant, t.k_);  // ordre strict",
+      "remplace": "if (pos > 0 && s.less(e, s.sorted[pos - 1])) return fail(Reason::tower_invariant, t.k_);  // ordre strict",
+      "porte": "mhgp12_tower_index_duplicate_population",
+      "note": "deux naissances de meme population admises (proposition G-L5 de l'auditeur : refuser une cle de naissance repetee, meme de meme charge) : la liste qui repete une boule n'est plus refusee"
+    },
+    {
+      "id": "repertoire_decale",
+      "fichier": "src/tower/populations.cpp",
+      "cherche": "t.directory_[j] = static_cast<u32>(pos);",
+      "remplace": "t.directory_[j] = static_cast<u32>(pos + 1);",
+      "porte": "mhgp12_tower_index_index_reference",
+      "note": "repertoire des seaux decale d'une place : la premiere fiche de chaque seau devient introuvable"
+    },
+    {
+      "id": "tri_instable",
+      "fichier": "src/tower/radix.cpp",
+      "cherche": "      for (u64 i = lo; i < hi; ++i) s.out[place[s.digit(s.in[i])]++] = s.in[i];",
+      "remplace": "      for (u64 i = hi; i-- > lo;) s.out[place[s.digit(s.in[i])]++] = s.in[i];",
+      "porte": "mhgp12_tower_index_radix_stable",
+      "note": "dispersion d'un bloc a rebours : tri par base non stable (ordre non canonique a chiffres egaux), compare a std::stable_sort"
+    },
+    {
+      "id": "file_decalee",
+      "fichier": "src/tower/passes.cpp",
+      "cherche": "        if (in - out == kLag) MHGP12_TRY(lane.finish(file[out++ % kLag]));",
+      "remplace": "        if (in - out == kLag) MHGP12_TRY(lane.finish(file[(out++ + 1) % kLag]));",
+      "porte": "mhgp12_tower_index_weak_key_resolution",
+      "note": "file de sondes G-L7 qui resout la place suivante au lieu de la plus ancienne : des representants sont resolus deux fois, d'autres jamais ; les cibles de l'etage different de la resolution rejouee"
+    },
+    {
+      "id": "empreinte_de_trace_sans_interieur",
+      "fichier": "src/tower/first_probes.cpp",
+      "cherche": "      for (const SiteIdx site : inner) base += site_key(idx(site));",
+      "remplace": "      (void)inner;",
+      "porte": "mhgp12_tower_index_index_reference",
+      "note": "empreintes des traces de la jointure G-L5 sans les sites interieurs : les candidats different de ceux d'une sonde par representant"
+    },
+    {
+      "id": "table_s_etoile_queue_partielle",
+      "fichier": "src/catalogue/table.cpp",
+      "cherche": "if (found == end || balls_[idx(*found)].support != probe.support) return std::nullopt;",
+      "remplace": "if (found == end || balls_[idx(*found)].support[0] != probe.support[0]) return std::nullopt;",
+      "porte": "mhgp12_tower_index_support_table",
+      "note": "table S* -> boule du catalogue (fin d'etage partagee de T1-b) qui ne compare que le premier site de S* : un support voisin absent du catalogue rend la boule suivante de la ligne ; la table ordonnee de reference le refuse (LEM-T1 trouverait une fausse boule)"
+    },
+    {
+      "id": "empreinte_de_file_sans_interieur",
+      "fichier": "src/tower/passes.cpp",
+      "cherche": "        for (const SiteIdx site : inner) base += site_key(idx(site));",
+      "remplace": "        (void)inner;",
+      "porte": "mhgp12_tower_index_weak_key_resolution",
+      "note": "file G-L7 (voie produit) dont l'empreinte des traces oublie les sites interieurs : les premieres sondes manquent leur naissance ; les cibles restent celles de l'objet (resolution pas a pas), mais les compteurs du travail de l'etage different de la resolution rejouee : seul le travail le voit, hors empreinte"
     }
   ]
 }

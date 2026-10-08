@@ -1,12 +1,12 @@
-// Etage G de la tour (CONTRAT_TOUR.md, paragraphes 4, 7 et 8) : sequence compter, admettre, reserver, remplir,
-// resoudre, controler, publier. Toute la memoire de l'etage est admise dans le budget avant d'etre allouee ; un refus
-// ne publie rien. Resolution par tranches de cellules sur le Pool : chaque representant a sa case, ecrite par un seul
-// fil ; un espace de census et des compteurs par fil, fusionnes dans l'ordre des fils (sommes et maxima : independants
-// du decoupage). Controles globaux avant publication : un controle de decroissance par plus petite boule et par succes
-// de sonde (contrat du paragraphe 4.1 : avant toute sortie par saut), une longueur de chaine par representant.
+// Etage G de la tour (CONTRAT_TOUR.md, paragraphes 4, 7 et 8) : sequence preparer, compter, admettre, reserver,
+// remplir, resoudre, controler, publier. Toute la memoire de l'etage est admise dans le budget avant d'etre allouee ;
+// un refus ne publie rien. Les passes par ordre (index, premieres sondes, resolution, controles) sont dans passes.cpp ;
+// ici : controle du catalogue et points exacts (paralleles, T2-c : le controle sequentiel des incidences pesait sur le
+// reste du mur a 48 fils), plan des cellules, sorties, espaces des fils, chronos aux frontieres disjointes.
 #include <algorithm>
 #include <memory>
 
+#include "tower/profile.hpp"
 #include "tower/stage.hpp"
 
 namespace mhgp12 {
@@ -27,7 +27,7 @@ Outcome check_order_capacity(u64 births, u64 cells, u64 representatives) noexcep
 namespace tower_detail {
 namespace {
 
-constexpr u64 kCellGrain = 256;  // cellules par tranche de resolution
+constexpr u64 kPrepareGrain = 1 << 16;  // sites, incidences ou boules par tranche de preparation
 
 // Octets admis pour les sorties d'un ordre.
 u64 order_bytes(u64 births, u64 cells, u64 reps) noexcept {
@@ -47,141 +47,57 @@ Outcome allocate_order(ResolvedOrder& o, Order k, u64 births, u64 cells, u64 rep
   return StageAccess::targets(o).allocate(reps, budget);
 }
 
-// Ordre 1 : les naissances sont les sites, et la cible d'une trace (un site) est sa naissance.
-struct FirstOrder {
+// Points exacts des sites et coherence du catalogue avec l'index (tout SiteIdx des populations et de S* designe un
+// site du nuage), par tranches sur le Pool.
+struct Prepare {
+  const Cloud& cloud;
   const Catalogue& catalogue;
-  ResolvedOrder& order;
-  static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {
-    auto& self = *static_cast<FirstOrder*>(raw);
-    const auto balls = StageAccess::cell_balls(self.order).span();
-    const auto offsets = StageAccess::cell_offsets(self.order).span();
-    const auto masks = StageAccess::trace_masks(self.order).span();
-    auto targets = StageAccess::targets(self.order).span();
-    for (u64 c = begin; c < end; ++c) {
-      const auto shell = self.catalogue.shell(balls[c]);
-      for (u64 r = offsets[c]; r < offsets[c + 1]; ++r) {
-        if (masks[r] == 0 || (masks[r] & (masks[r] - 1)) != 0) return fail(Reason::tower_invariant, 1);
-        const u32 j = static_cast<u32>(__builtin_ctzll(masks[r]));
-        if (j >= shell.size()) return fail(Reason::tower_invariant, 1);
-        targets[r] = birth_target(idx(shell[j]));
-      }
+  std::span<num::Point> points;
+  static Outcome points_body(void* raw, u64 begin, u64 end, u32) noexcept {
+    auto& s = *static_cast<Prepare*>(raw);
+    const u64 hi = std::min<u64>(s.points.size(), end * kPrepareGrain);
+    for (u64 i = begin * kPrepareGrain; i < hi; ++i) {
+      auto p = num::Point::make(s.cloud.x()[i], s.cloud.y()[i], s.cloud.z()[i]);
+      if (!p.ok()) return p.outcome();
+      s.points[i] = p.value();
     }
+    return {};
+  }
+  static Outcome population_body(void* raw, u64 begin, u64 end, u32) noexcept {
+    auto& s = *static_cast<Prepare*>(raw);
+    const auto population = s.catalogue.population();
+    const u64 hi = std::min<u64>(population.size(), end * kPrepareGrain);
+    for (u64 i = begin * kPrepareGrain; i < hi; ++i)
+      if (idx(population[i]) >= s.cloud.sites()) return fail(Reason::tower_invariant);
+    return {};
+  }
+  static Outcome supports_body(void* raw, u64 begin, u64 end, u32) noexcept {
+    auto& s = *static_cast<Prepare*>(raw);
+    const auto balls = s.catalogue.balls_data();
+    const u64 hi = std::min<u64>(balls.size(), end * kPrepareGrain);
+    for (u64 b = begin * kPrepareGrain; b < hi; ++b)
+      for (u32 i = 0; i < balls[b].qmin && i < 4; ++i)
+        if (idx(balls[b].support[i]) >= s.cloud.sites()) return fail(Reason::tower_invariant);
     return {};
   }
 };
 
-struct Workers {
-  std::array<std::unique_ptr<CensusWorkspace>, sched::kMaxWorkers> census;
-  Buffer<OrderCounters> counters;
-};
+u64 slices(u64 n) noexcept { return (n + kPrepareGrain - 1) / kPrepareGrain; }
 
-struct OrderPass {
-  const ResolveContext& context;
-  ResolvedOrder& order;
-  Workers& workers;
-  static Outcome body(void* raw, u64 begin, u64 end, u32 worker) noexcept {
-    auto& self = *static_cast<OrderPass*>(raw);
-    const Catalogue& cat = self.context.domain.catalogue;
-    const auto balls = StageAccess::cell_balls(self.order).span();
-    const auto ranks = StageAccess::cell_ranks(self.order).span();
-    const auto offsets = StageAccess::cell_offsets(self.order).span();
-    const auto masks = StageAccess::trace_masks(self.order).span();
-    auto targets = StageAccess::targets(self.order).span();
-    OrderCounters& counters = self.workers.counters[worker];
-    CensusWorkspace& workspace = *self.workers.census[worker];
-    const Order k = self.context.order.k;
-    for (u64 c = begin; c < end; ++c) {
-      const auto inner = cat.interior(balls[c]), shell = cat.shell(balls[c]);
-      for (u64 r = offsets[c]; r < offsets[c + 1]; ++r) {
-        Part f;  // trace stricte I u A, SiteIdx croissants
-        std::size_t i = 0;
-        for (u64 rest = masks[r]; i < inner.size() || rest != 0;) {
-          const u32 j = rest != 0 ? static_cast<u32>(__builtin_ctzll(rest)) : 0;
-          const bool from_inner = rest == 0 || (i < inner.size() && idx(inner[i]) < idx(shell[j]));
-          if (f.k == kMaxPart) return fail(Reason::tower_invariant, k);
-          f.id[f.k++] = idx(from_inner ? inner[i++] : shell[j]);
-          if (!from_inner) rest &= rest - 1;
-        }
-        if (f.k != k) return fail(Reason::tower_invariant, k);
-        auto target = resolve_part(self.context, f, ranks[c], workspace, counters);
-        if (!target.ok()) return target.outcome();
-        targets[r] = target.value();
-      }
-    }
-    return {};
-  }
-};
-
-Outcome resolve_orders(const Domain& d, Resolution& out, const std::array<PopulationTable, kMaxPart>& tables,
-                       Workers& workers, sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {
-  for (Order k = 1; k <= out.orders(); ++k) {
-    const Stopwatch watch;
-    ResolvedOrder& order = StageAccess::order(out, k);
-    if (k == 1) {
-      FirstOrder first{d.catalogue, order};
-      MHGP12_TRY(pool.parallel_for(order.cells(), kCellGrain, &first, &FirstOrder::body));
-    } else {
-      for (u32 w = 0; w < pool.size(); ++w) workers.counters[w] = OrderCounters{};
-      const ResolveContext context{d, out, OrderView{k, order.birth_keys(), &tables[k - 1]}};
-      OrderPass pass{context, order, workers};
-      MHGP12_TRY(pool.parallel_for(order.cells(), kCellGrain, &pass, &OrderPass::body));
-      OrderCounters& total = StageAccess::counters(order);
-      for (u32 w = 0; w < pool.size(); ++w) add_counters(total, workers.counters[w]);
-      // Controles globaux : un controle par plus petite boule et par succes de sonde ; une chaine par representant.
-      u64 chains = 0;
-      for (const u64 bin : total.chain_histogram) chains += bin;
-      if (total.controls != total.smallest_balls() + total.first_probe_hits + total.probe_hits_after_steps ||
-          chains != order.representatives() ||
-          chains != total.first_probe_hits + total.probe_hits_after_steps + total.cell_stops + total.birth_stops)
-        return fail(Reason::tower_invariant, k);
-    }
-    diag.order_ns[k] = watch.nanoseconds();
-  }
-  return {};
-}
-
-Result<Buffer<num::Point>> prepare_points(const Cloud& cloud, MemoryBudget& budget) noexcept {
+Result<Buffer<num::Point>> prepare(const Cloud& cloud, const Catalogue& catalogue, MemoryBudget& budget,
+                                   sched::Pool& pool) noexcept {
   Buffer<num::Point> points;
   MHGP12_TRY(points.allocate(cloud.sites(), budget));
-  for (u32 s = 0; s < cloud.sites(); ++s) {
-    auto p = num::Point::make(cloud.x()[s], cloud.y()[s], cloud.z()[s]);
-    if (!p.ok()) return p.outcome();
-    points[s] = p.value();
-  }
+  Prepare work{cloud, catalogue, points.span()};
+  MHGP12_TRY(pool.parallel_for(slices(catalogue.population().size()), 1, &work, &Prepare::population_body));
+  MHGP12_TRY(pool.parallel_for(slices(catalogue.balls()), 1, &work, &Prepare::supports_body));
+  MHGP12_TRY(pool.parallel_for(slices(cloud.sites()), 1, &work, &Prepare::points_body));
   return points;
 }
 
-// Coherence du catalogue avec l'index : tout SiteIdx de S* et des populations designe un site du nuage.
-Outcome check_catalogue(const Catalogue& cat, u32 sites) noexcept {
-  for (const SiteIdx s : cat.population())
-    if (idx(s) >= sites) return fail(Reason::tower_invariant);
-  for (const auto& ball : cat.balls_data())
-    for (u32 i = 0; i < ball.qmin && i < 4; ++i)
-      if (idx(ball.support[i]) >= sites) return fail(Reason::tower_invariant);
-  return {};
-}
-
-Outcome plan_and_fill(const Domain& d, Resolution& out, MemoryBudget& budget, sched::Pool& pool,
-                      ResolutionDiagnostics& diag) noexcept {
+// Sorties par ordre : capacite (ordre 1 : les n sites sont les naissances), admission, allocation.
+Outcome allocate_outputs(const Domain& d, const CellPlan& plan, Resolution& out, MemoryBudget& budget) noexcept {
   const u32 n = d.index.cloud().sites(), balls = d.catalogue.balls();
-  CellPlan plan;
-  plan.orders = out.orders();
-  plan.blocks = (u64{balls} + kBallBlock - 1) / kBallBlock;
-  const u64 fields = plan.blocks * kMaxPart * kCountFields, workers = pool.size();
-  MHGP12_TRY(budget.admit((2 * fields + 2 * plan.blocks + workers * kScratchWordsPerWorker) * sizeof(u64) +
-                          workers * kMaxCellCombinations * sizeof(u32)));
-  MHGP12_TRY(plan.counts.allocate(fields, budget));
-  MHGP12_TRY(plan.starts.allocate(fields, budget));
-  MHGP12_TRY(plan.windows.allocate(plan.blocks, budget));
-  MHGP12_TRY(plan.window_starts.allocate(plan.blocks, budget));
-  Buffer<u64> words;
-  Buffer<u32> parent;
-  MHGP12_TRY(words.allocate(workers * kScratchWordsPerWorker, budget));
-  MHGP12_TRY(parent.allocate(workers * kMaxCellCombinations, budget));
-  const Stopwatch count;
-  MHGP12_TRY(count_cells(d, plan, words.span(), parent.span(), pool));
-  diag.count_ns = count.nanoseconds();
-  // Capacite par ordre (ordre 1 : les n sites sont les naissances), puis admission de toutes les sorties.
   u64 bytes = (u64{balls} + 1) * sizeof(u64) + plan.total_windows * sizeof(u32) + u64{balls};
   for (Order k = 1; k <= plan.orders; ++k) {
     const auto& t = plan.totals[k - 1];
@@ -197,6 +113,32 @@ Outcome plan_and_fill(const Domain& d, Resolution& out, MemoryBudget& budget, sc
     const auto& t = plan.totals[k - 1];
     MHGP12_TRY(allocate_order(StageAccess::order(out, k), k, k == 1 ? n : t[kBirths], t[kCells], t[kReps], budget));
   }
+  return {};
+}
+
+Outcome plan_and_fill(const Domain& d, Resolution& out, MemoryBudget& budget, sched::Pool& pool,
+                      ResolutionDiagnostics& diag) noexcept {
+  const u32 n = d.index.cloud().sites(), balls = d.catalogue.balls();
+  CellPlan plan;
+  plan.orders = out.orders();
+  plan.blocks = (u64{balls} + kBallBlock - 1) / kBallBlock;
+  const u64 fields = plan.blocks * kMaxPart * kCountFields, workers = pool.size();
+  const Stopwatch counting;
+  MHGP12_TRY(budget.admit((2 * fields + 2 * plan.blocks + workers * kScratchWordsPerWorker) * sizeof(u64) +
+                          workers * kMaxCellCombinations * sizeof(u32)));
+  MHGP12_TRY(plan.counts.allocate(fields, budget));
+  MHGP12_TRY(plan.starts.allocate(fields, budget));
+  MHGP12_TRY(plan.windows.allocate(plan.blocks, budget));
+  MHGP12_TRY(plan.window_starts.allocate(plan.blocks, budget));
+  Buffer<u64> words;
+  Buffer<u32> parent;
+  MHGP12_TRY(words.allocate(workers * kScratchWordsPerWorker, budget));
+  MHGP12_TRY(parent.allocate(workers * kMaxCellCombinations, budget));
+  MHGP12_TRY(count_cells(d, plan, words.span(), parent.span(), pool));
+  diag.count_ns = counting.nanoseconds();
+  const Stopwatch setting;
+  MHGP12_TRY(allocate_outputs(d, plan, out, budget));
+  diag.setup_ns = setting.nanoseconds();
   const Stopwatch fill;
   MHGP12_TRY(fill_cells(d, plan, out, words.span(), parent.span(), pool));
   ResolvedOrder& first = StageAccess::order(out, 1);
@@ -217,56 +159,47 @@ Outcome plan_and_fill(const Domain& d, Resolution& out, MemoryBudget& budget, sc
   return {};
 }
 
+// Memoire des ordres, admise avant tout calcul : espaces de census et compteurs des fils, puis index des naissances,
+// garde d'un ordre a l'autre (borne : toutes les naissances du plus grand ordre, fiches de K mots ; un tampon ne grandit
+// qu'a la taille du plus grand ordre). La voie G-L7 n'alloue rien d'autre.
+u64 orders_bytes(const Resolution& out, u64 workers, u32 sites) noexcept {
+  u64 table = 0;
+  for (Order k = 2; k <= out.orders(); ++k)
+    table = std::max(table, PopulationTable::bytes_for(out.order(k).births(), out.orders()));
+  return table + workers * (u64{sites} * sizeof(SiteIdx) + sizeof(OrderCounters) + sizeof(SectionCycles));
+}
+
 Result<Resolution> run_stage(const GlobalIndex& index, const Catalogue& catalogue, MemoryBudget& budget,
                              sched::Pool& pool, ResolutionDiagnostics& diag) noexcept {
   const Order kmax = catalogue.kmax();
   if (kmax < 1 || kmax > kMaxPart) return fail(Reason::kmax_out_of_range);
   const u32 n = index.cloud().sites();
   if (n == 0) return fail(Reason::empty_input);
-  MHGP12_TRY(check_catalogue(catalogue, n));
-  auto points = prepare_points(index.cloud(), budget);
+  const Stopwatch preparing;
+  auto points = prepare(index.cloud(), catalogue, budget, pool);
   if (!points.ok()) return points.outcome();
+  diag.prepare_ns = preparing.nanoseconds();
   const Domain d{index, catalogue, points.value().span()};
   Resolution out;
   StageAccess::set_orders(out, kmax, static_cast<Order>(std::min<u32>(kmax, n)));
   MHGP12_TRY(plan_and_fill(d, out, budget, pool, diag));
-  // Tables de populations (un ordre par tache, insertion sequentielle : disposition deterministe).
-  std::array<PopulationTable, kMaxPart> tables;
-  u64 table_bytes = 0;
-  for (Order k = 2; k <= out.orders(); ++k)
-    table_bytes += PopulationTable::capacity_for(population_entries(catalogue, out.order(k).birth_keys(), k)) * 8;
   const u64 workers = pool.size();
-  MHGP12_TRY(budget.admit(table_bytes + workers * (u64{n} * sizeof(SiteIdx) + sizeof(OrderCounters))));
-  const Stopwatch tabling;
-  struct Tables {
-    const Catalogue& catalogue;
-    const Resolution& out;
-    std::array<PopulationTable, kMaxPart>& tables;
-    MemoryBudget& budget;
-    static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {
-      auto& self = *static_cast<Tables*>(raw);
-      for (u64 i = begin; i < end; ++i) {
-        const Order k = static_cast<Order>(i + 2);
-        MHGP12_TRY(self.tables[k - 1].build(self.catalogue, self.out.order(k).birth_keys(), k, self.budget));
-      }
-      return {};
-    }
-  } build{catalogue, out, tables, budget};
-  if (out.orders() >= 2) MHGP12_TRY(pool.parallel_for(out.orders() - 1u, 1, &build, &Tables::body));
-  diag.tables_ns = tabling.nanoseconds();
+  const Stopwatch staffing;
+  MHGP12_TRY(budget.admit(orders_bytes(out, workers, n)));
   Workers team;
   MHGP12_TRY(team.counters.allocate(workers, budget));
+  if constexpr (kProfile) MHGP12_TRY(team.profiles.allocate(workers, budget));
   for (u32 w = 0; w < workers; ++w) {
     auto made = CensusWorkspace::make(index, budget);
     if (!made.ok()) return made.outcome();
     team.census[w] = std::move(made.value());
   }
-  const Stopwatch resolving;
-  MHGP12_TRY(resolve_orders(d, out, tables, team, pool, diag));
-  diag.resolve_ns = resolving.nanoseconds();
+  diag.workspace_ns = staffing.nanoseconds();
+  OrderBuffers buffers;
+  MHGP12_TRY(resolve_orders(d, out, buffers, team, budget, pool, diag));
   diag.threads = workers;
+  diag.profiled = kProfile;
   diag.workspace_bytes = workers * u64{n} * sizeof(SiteIdx);
-  diag.table_bytes = table_bytes;
   diag.peak_bytes = budget.peak();
   return out;
 }

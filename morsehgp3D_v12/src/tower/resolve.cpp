@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "tower/internal.hpp"
+#include "tower/profile.hpp"
 #include "tower/proposal.hpp"
 
 namespace mhgp12::tower_detail {
@@ -110,17 +111,21 @@ struct Located {
   Route route = kT1;
 };
 
-Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n) noexcept {
+Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n, SectionClock& clock) noexcept {
   const auto& cat = d.catalogue;
   Located out;
   const Proposal prop = propose(d, f);
+  const bool in_part = prop.ok && sorted_subset(std::span<const u32>(prop.s.data(), prop.q), f);
+  clock.lap(kProfileProposal);
+  const auto t1 = in_part ? lem_t1(d, f, std::span<const u32>(prop.s.data(), prop.q)) : std::nullopt;
+  clock.lap(kProfileT1);
   std::optional<Certified> cert;
   if (!prop.ok) ++n.fallback_no_proposal;
-  else if (!sorted_subset(std::span<const u32>(prop.s.data(), prop.q), f)) ++n.fallback_not_in_part;
+  else if (!in_part) ++n.fallback_not_in_part;
   else {
-    if (const auto b = lem_t1(d, f, std::span<const u32>(prop.s.data(), prop.q))) {
+    if (t1) {
       ++n.route_t1;
-      out.ball = *b;
+      out.ball = *t1;
       return out;
     }
     auto made = certify_part(d, f, std::span<const u32>(prop.s.data(), prop.q));
@@ -130,6 +135,7 @@ Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n) noexcep
   }
   const bool fallback = !cert.has_value();
   if (fallback) {  // repli exact : un support strict de la plus petite boule, puis le meme certificat
+    if (in_part) clock.lap(kProfileCertificate);  // certificat du support propose, en echec
     std::array<u32, 4> support{};
     auto q = exact_support(d, f, support);
     if (!q.ok()) return q.outcome();
@@ -141,8 +147,9 @@ Result<Located> locate(const Domain& d, const Part& f, OrderCounters& n) noexcep
   std::array<SiteIdx, 4> key{};
   for (u32 i = 0; i < cert->arity; ++i) key[i] = make_id<SiteIdx>(cert->support[i]);
   const auto b = cat.find_support(std::span<const SiteIdx>(key.data(), cert->arity));
+  if (b && !part_in_population(cat, f, idx(*b))) return fail(Reason::tower_invariant);  // meme sphere : F dans P_b
+  clock.lap(fallback ? kProfileFallback : kProfileCertificate);
   if (b) {
-    if (!part_in_population(cat, f, idx(*b))) return fail(Reason::tower_invariant);  // meme sphere : F dans P_b
     ++(fallback ? n.route_fallback_table : n.route_cert_table);
     out.ball = idx(*b);
     out.route = fallback ? kFallbackTable : kCertTable;
@@ -254,7 +261,7 @@ void add_counters(OrderCounters& total, const OrderCounters& part) noexcept {
 }
 
 Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_rank, CensusWorkspace& workspace,
-                         OrderCounters& n) noexcept {
+                         OrderCounters& n, SectionClock& clock, const FirstProbe& first) noexcept {
   const Domain& d = c.domain;
   const auto& cat = d.catalogue;
   const Order k = c.order.k;
@@ -264,14 +271,17 @@ Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_ran
   u64 chain = 0;
   for (;;) {
     ++n.probes;
-    if (const auto birth = c.order.table->find(cat, c.order.birth_keys, f)) {  // LEM-POP
-      MHGP12_TRY(control_rank(cat, prev, cat.balls_data()[c.order.birth_keys[*birth]].rank, n, k));
+    const auto birth = chain == 0 && first.done ? first.hit : c.order.table->find(f);  // LEM-POP
+    if (birth) {
+      MHGP12_TRY(control_rank(cat, prev, birth->rank, n, k));
       ++(chain == 0 ? n.first_probe_hits : n.probe_hits_after_steps);
       record_chain(n, chain);
-      return birth_target(*birth);
+      clock.lap(kProfileProbe);
+      return birth_target(birth->birth);
     }
+    clock.lap(kProfileProbe);
     ++chain;
-    auto located = locate(d, f, n);
+    auto located = locate(d, f, n, clock);
     if (!located.ok()) return fail(located.outcome().reason, k);
     u32 b = located.value().ball;
     if (b != kNone) {
@@ -281,6 +291,7 @@ Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_ran
       MHGP12_TRY(control_level(cat, prev, ball.sphere().level(), n, k));  // AVANT toute sortie par saut
       CensusStep step{d, k, n, ball.sphere(), false, false, kNone, Part{}};
       MHGP12_TRY(workspace.query(d.index, ball, k, &step, &CensusStep::consume));
+      clock.lap(step.saturated ? kProfileCensusSaturated : kProfileCensusComplete);
       if (step.saturated) {
         ++n.jumps_census;
         f = step.next;
@@ -294,23 +305,31 @@ Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_ran
       b = step.ball;
     }
     const auto& data = cat.balls_data()[b];
-    const auto inner = cat.interior(make_id<BallIdx>(b)), shell = cat.shell(make_id<BallIdx>(b));
     if (data.p >= u32{k}) {  // saut : les k plus petits SiteIdx de I (politique de la v11)
       ++n.jumps_catalogue;
-      f = inner_and_shell(inner.first(k), shell, 0);
+      f = inner_and_shell(cat.interior(make_id<BallIdx>(b)).first(k), cat.shell(make_id<BallIdx>(b)), 0);
+      clock.lap(kProfileStep);
       continue;
     }
     if (u32{k} + 2 <= data.p + data.qmin) {  // sous la fenetre : pas inerte
       ++n.inert_steps;
-      f = inner_and_shell(inner, shell, k - data.p);
+      f = inner_and_shell(cat.interior(make_id<BallIdx>(b)), cat.shell(make_id<BallIdx>(b)), k - data.p);
+      clock.lap(kProfileStep);
       continue;
     }
-    const u32 target = c.windows.window_target(make_id<BallIdx>(b), k);  // premiere cellule de fenetre : arret
+    const u32 target = window_target_of(c.windows, b, data, k);  // premiere cellule de fenetre : arret
     if (target == kNoTarget) return fail(Reason::tower_invariant, k);
     ++(target_is_cell(target) ? n.cell_stops : n.birth_stops);
     record_chain(n, chain);
+    clock.lap(kProfileStop);
     return target;
   }
+}
+
+Result<u32> resolve_part(const ResolveContext& c, Part f, LevelRank junction_rank, CensusWorkspace& workspace,
+                         OrderCounters& n) noexcept {
+  SectionClock clock(nullptr);
+  return resolve_part(c, f, junction_rank, workspace, n, clock, FirstProbe{});
 }
 
 }  // namespace mhgp12::tower_detail

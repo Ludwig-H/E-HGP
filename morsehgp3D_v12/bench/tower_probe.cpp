@@ -30,6 +30,10 @@
 #include "tower/tower.hpp"
 #include "tower_export.hpp"
 
+#if defined(MHGP12_TOWER_PROFILE)
+#include <x86intrin.h>
+#endif
+
 using namespace mhgp12;
 
 namespace {
@@ -136,6 +140,14 @@ void order_json(const ResolvedOrder& order) {
   std::printf("]}}\n");
 }
 
+void ns_array(const char* name, const std::array<u64, 13>& v, int from, int kmax) {
+  std::printf(",\"%s\":[", name);
+  for (int k = from; k <= kmax && k < 13; ++k) std::printf("%s%llu", k > from ? "," : "", (unsigned long long)v[k]);
+  std::printf("]");
+}
+
+// Ligne tour_g : mur de resolve_tower et diagnostics aux frontieres disjointes de ResolutionDiagnostics (tower.hpp) ;
+// reste_ns = mur - (prepare + count + setup + fill + workspace + orders) : liberations a la sortie et appel.
 void stage_json(u64 pass, const Options& o, u32 sites, const Outcome& outcome, u64 wall,
                 const ResolutionDiagnostics& d) {
   std::printf("{\"phase\":\"tour_g\",\"pass\":%llu,\"status\":\"%s\",\"reason\":\"%s\",\"order\":%u,\"coord_bits\":%d,"
@@ -144,17 +156,82 @@ void stage_json(u64 pass, const Options& o, u32 sites, const Outcome& outcome, u
               std::string(reason_name(outcome.reason)).c_str(), unsigned{outcome.order}, kCoordBits, o.params.kmax,
               (unsigned long long)o.threads, sites, (unsigned long long)wall);
   if (outcome.ok()) {
-    std::printf(",\"diagnostics\":{\"count_ns\":%llu,\"fill_ns\":%llu,\"tables_ns\":%llu,\"resolve_ns\":%llu,"
-                "\"workspace_bytes\":%llu,\"table_bytes\":%llu,\"peak_bytes\":%llu,\"order_ns\":[",
-                (unsigned long long)d.count_ns, (unsigned long long)d.fill_ns, (unsigned long long)d.tables_ns,
-                (unsigned long long)d.resolve_ns, (unsigned long long)d.workspace_bytes,
+    const u64 inside = d.prepare_ns + d.count_ns + d.setup_ns + d.fill_ns + d.workspace_ns + d.orders_ns;
+    std::printf(",\"diagnostics\":{\"prepare_ns\":%llu,\"count_ns\":%llu,\"setup_ns\":%llu,\"fill_ns\":%llu,"
+                "\"workspace_ns\":%llu,\"tables_ns\":%llu,\"joins_ns\":%llu,\"resolve_ns\":%llu,\"orders_ns\":%llu,"
+                "\"reste_ns\":%llu,\"workspace_bytes\":%llu,\"table_bytes\":%llu,\"peak_bytes\":%llu",
+                (unsigned long long)d.prepare_ns, (unsigned long long)d.count_ns, (unsigned long long)d.setup_ns,
+                (unsigned long long)d.fill_ns, (unsigned long long)d.workspace_ns, (unsigned long long)d.tables_ns,
+                (unsigned long long)d.joins_ns, (unsigned long long)d.resolve_ns, (unsigned long long)d.orders_ns,
+                (unsigned long long)(wall > inside ? wall - inside : 0), (unsigned long long)d.workspace_bytes,
                 (unsigned long long)d.table_bytes, (unsigned long long)d.peak_bytes);
-    for (int k = 1; k <= o.params.kmax && k < 13; ++k)
-      std::printf("%s%llu", k > 1 ? "," : "", (unsigned long long)d.order_ns[k]);
-    std::printf("]}");
+    ns_array("order_ns", d.order_ns, 1, o.params.kmax);
+    ns_array("table_ns", d.table_ns, 2, o.params.kmax);
+    ns_array("join_ns", d.join_ns, 2, o.params.kmax);
+    ns_array("pass_ns", d.pass_ns, 1, o.params.kmax);
+    std::printf("}");
   }
   std::printf("}\n");
   std::fflush(stdout);
+}
+
+// Profil par composante (construction MHGP12_TOWER_PROFILE seulement) : une ligne par ordre k >= 2, cycles et
+// occurrences par section, reste = total des tranches moins la somme des sections ; frequence du compteur estimee sur
+// la passe (cycles / nanosecondes de l'appel). Physique : jamais dans une empreinte.
+u64 tsc_now() {
+#if defined(MHGP12_TOWER_PROFILE)
+  return __rdtsc();
+#else
+  return 0;
+#endif
+}
+
+// Biais d'une section : cycles moyens entre deux lectures encadrees consecutives (meilleure de cinq series), comme
+// tsc_section_bias de la replique (microbancs/mes_m3_m4_tour) ; a retrancher par occurrence.
+double section_bias() {
+#if defined(MHGP12_TOWER_PROFILE)
+  constexpr u64 kReads = 1u << 16;
+  u64 best = ~u64{0};
+  for (int rep = 0; rep < 5; ++rep) {
+    u64 sum = 0;
+    for (u64 i = 0; i < kReads; ++i) {
+      _mm_lfence();
+      const u64 a = __rdtsc();
+      _mm_lfence();
+      _mm_lfence();
+      const u64 b = __rdtsc();
+      _mm_lfence();
+      sum += b - a;
+    }
+    best = std::min(best, sum);
+  }
+  return double(best) / double(kReads);
+#else
+  return 0.0;
+#endif
+}
+
+void profile_json(u64 pass, const ResolutionDiagnostics& d, int kmax, double ghz) {
+  const double bias = section_bias();
+  static constexpr const char* names[kProfileSections] = {"trace", "sonde", "proposition", "t1", "certificat", "repli",
+                                                          "census_sature", "census_complet", "pas", "arret", "total"};
+  for (int k = 2; k <= kmax && k < 13; ++k) {
+    const SectionCycles& p = d.profile[k];
+    u64 sum = 0;
+    for (int s = 0; s < kProfileTotal; ++s) sum += p.cycles[s];
+    const u64 total = p.cycles[kProfileTotal], rest = total > sum ? total - sum : 0;
+    std::printf("{\"phase\":\"profil_g\",\"pass\":%llu,\"k\":%d,\"ghz_tsc\":%.4f,\"biais_cycles\":%.1f,"
+                "\"table_ns\":%llu,\"join_ns\":%llu,\"sections\":{",
+                (unsigned long long)pass, k, ghz, bias, (unsigned long long)d.table_ns[k],
+                (unsigned long long)d.join_ns[k]);
+    for (int s = 0; s < kProfileSections; ++s)
+      std::printf("%s\"%s\":{\"cycles\":%llu,\"n\":%llu,\"part\":%.4f,\"ns\":%.1f}", s ? "," : "", names[s],
+                  (unsigned long long)p.cycles[s], (unsigned long long)p.count[s],
+                  total ? double(p.cycles[s]) / double(total) : 0.0,
+                  ghz > 0 && p.count[s] ? double(p.cycles[s]) / ghz / double(p.count[s]) : 0.0);
+    std::printf("},\"reste\":{\"cycles\":%llu,\"part\":%.4f}}\n", (unsigned long long)rest,
+                total ? double(rest) / double(total) : 0.0);
+  }
 }
 
 Outcome export_to(const Options& o, const Cloud& cloud, const Catalogue& catalogue, const Resolution& r) {
@@ -195,9 +272,12 @@ Outcome run(const Options& o) {
   for (u64 pass = 0; pass < o.passes; ++pass) {
     ResolutionDiagnostics diag;
     const Stopwatch watch;
+    const u64 tsc0 = tsc_now();
     auto r = resolve_tower(index.value(), catalogue.value(), budget, *pool.value(), &diag);
-    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), watch.nanoseconds(), diag);
+    const u64 tsc1 = tsc_now(), wall = watch.nanoseconds();
+    stage_json(pass, o, index.value().cloud().sites(), r.ok() ? Outcome{} : r.outcome(), wall, diag);
     if (!r.ok()) return r.outcome();
+    if (diag.profiled) profile_json(pass, diag, o.params.kmax, wall ? double(tsc1 - tsc0) / double(wall) : 0.0);
     if (pass + 1 < o.passes) continue;
     for (Order k = 1; k <= r.value().orders(); ++k) order_json(r.value().order(k));
     if (o.digest) {

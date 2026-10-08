@@ -18,6 +18,15 @@ mhgp12_add_unit(mhgp12_tower_unit SOURCES unit.cpp
                        capacity_refusals budget determinism
                 LABELS fast TIMEOUT 300)
 
+# Index des naissances et premieres sondes (T2-c) : tri par base stable et deterministe (1 et 8 fils), index contre une
+# reference independante avec l'empreinte du produit et des masques faibles (collisions : dichotomie dans le seau,
+# jamais de produit de deux groupes egaux), candidats de la jointure triee (G-L5) egaux a ceux d'une sonde par
+# representant, resolution rejouee avec un index a collisions (G-L5 et file G-L7) : memes cibles et memes compteurs ;
+# table S* -> boule du catalogue contre une table ordonnee ; population repetee refusee.
+mhgp12_add_unit(mhgp12_tower_index SOURCES index_unit.cpp
+                GROUPS radix_stable index_reference weak_key_resolution support_table duplicate_population
+                LABELS fast TIMEOUT 300)
+
 # Oracle borne : chaque cible egale a celle de resolve_v12 (politique v12_indices) et dans la composante attendue a la
 # coupe ouverte de sa jonction (foret de l'etage B), sur la suite rapide (n <= 14) ; doublons refuses (D8).
 mhgp12_python_gate(mhgp12_tower_oracle 0 g_oracle.py ${tower_probe}

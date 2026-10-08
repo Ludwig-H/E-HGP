@@ -127,11 +127,36 @@ class ResolvedOrder {
   OrderCounters counters_;
 };
 
-// Diagnostics PHYSIQUES (jamais dans une empreinte) : fils, octets, durees par etape et par ordre.
+// Profil par composante de la resolution (MES-M7 sur le produit), rempli seulement si la construction definit
+// MHGP12_TOWER_PROFILE (compteur de cycles encadre par lfence, src/tower/profile.hpp) ; zeros sinon. Sections d'un
+// representant : construction de la trace, sonde de la table, proposition flottante, LEM-T1 (table S* et F dans P_b),
+// certificat, repli, census sature, census complet, pas (saut ou pas inerte, controle compris), arret sur une
+// cellule ; kProfileTotal : cycles des tranches du fil (le reste est total moins la somme des sections). Physique :
+// jamais dans une empreinte.
+inline constexpr int kProfileSections = 11;
+enum ProfileSection : int { kProfileTrace = 0, kProfileProbe, kProfileProposal, kProfileT1, kProfileCertificate,
+                            kProfileFallback, kProfileCensusSaturated, kProfileCensusComplete, kProfileStep,
+                            kProfileStop, kProfileTotal };
+struct SectionCycles {
+  std::array<u64, kProfileSections> cycles{}, count{};
+};
+
+// Diagnostics PHYSIQUES (jamais dans une empreinte) : fils, octets, durees par etape et par ordre. Frontieres (T2-c),
+// disjointes et dans l'ordre de l'etage : prepare_ns (controle du catalogue et points exacts), count_ns (comptage des
+// cellules), setup_ns (admission et allocation des sorties), fill_ns (remplissage des cellules), workspace_ns (espaces
+// de census et compteurs des fils), puis par ordre k : table_ns[k] (index des naissances), join_ns[k] (premieres sondes
+// en masse G-L5, nul sur la voie G-L7), pass_ns[k] (passe de resolution, fusion des compteurs et controles ; ordre 1 :
+// les sites), dans order_ns[k] (enveloppe de l'ordre). tables_ns, joins_ns et resolve_ns sont les sommes de table_ns,
+// join_ns et pass_ns (resolve_ns n'inclut ni les index ni les jointures) ; orders_ns la somme des enveloppes. Le reste du
+// mur (liberations a la sortie, appel) vaut mur - (prepare + count + setup + fill + workspace + orders). table_bytes :
+// octets tenus par l'index et la jointure (gardes d'un ordre a l'autre, au plus grand ordre).
 struct ResolutionDiagnostics {
   u64 threads = 0, workspace_bytes = 0, table_bytes = 0, peak_bytes = 0;
-  u64 count_ns = 0, fill_ns = 0, tables_ns = 0, resolve_ns = 0;
-  std::array<u64, 13> order_ns{};  // resolution de l'ordre k (indice k)
+  u64 prepare_ns = 0, count_ns = 0, setup_ns = 0, fill_ns = 0, workspace_ns = 0;
+  u64 tables_ns = 0, joins_ns = 0, resolve_ns = 0, orders_ns = 0;
+  std::array<u64, 13> order_ns{}, table_ns{}, join_ns{}, pass_ns{};  // indice k
+  bool profiled = false;                     // construction MHGP12_TOWER_PROFILE
+  std::array<SectionCycles, 13> profile{};  // par ordre, sommes sur les fils
 };
 
 // Resultat de l'etage G : un ResolvedOrder par ordre 1..orders() (orders() = min(K, n)), et la table des cellules

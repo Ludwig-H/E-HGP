@@ -108,7 +108,8 @@ inline Direct resolve_direct(Case& c, const tower_detail::Part& f, Order k, Leve
   Direct out;
   tower_detail::PopulationTable table;
   const auto keys = c.resolution->order(k).birth_keys();
-  if (const Outcome o = table.build(*c.catalogue, keys, k, c.budget); !o.ok()) {
+  if (const Outcome o = table.build(*c.catalogue, keys, c.resolution->order(k).birth_ranks(), k, c.budget, *c.pool);
+      !o.ok()) {
     out.target = o;
     return out;
   }

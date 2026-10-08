@@ -143,7 +143,16 @@ Result<std::optional<Certified>> certify_part(const Domain& d, const Part& f, st
   const num::Sphere& sphere = made.value()->sphere();
   std::array<u32, kMaxPart> on{};
   u32 count = 0;
+  std::size_t next_support = 0;
   for (u32 i = 0; i < f.k; ++i) {
+    // S trie inclus dans F (les deux appelants : proposition apres sorted_subset, repli exact_support) et sphere
+    // certifiee passant par S : ses sites sont sur la sphere, sans predicat (proposition de l'auditeur, recu
+    // audit_g_pistes_20261007 : au plus q appels evites, memes sites << sur >>, meme ordre, meme canonisation).
+    if (next_support < support.size() && f.id[i] == support[next_support]) {
+      on[count++] = f.id[i];
+      ++next_support;
+      continue;
+    }
     auto side = num::side(sphere, d.points[f.id[i]]);
     if (!side.ok()) return side.outcome();
     if (side.value() > 0) return std::optional<Certified>{};  // un site de F sort de la boule proposee
