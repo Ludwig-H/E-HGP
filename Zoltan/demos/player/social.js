@@ -2,8 +2,9 @@
  * Lecteur des vidéos courtes « HGP vs HDBSCAN » pour téléphone (LinkedIn), en anglais.
  *
  * Format portrait 1080 x 1350 (4:5). Deux panneaux superposés, HGP en haut, HDBSCAN en bas, mêmes points, même
- * caméra fixe ; les deux hiérarchies balaient le rayon r EN MÊME TEMPS. Seuls textes : HGP, HDBSCAN, r, et les
- * clusters (lettres des objets, coches). Fin : le meilleur nœud de chaque hiérarchie pour chaque objet (best_sites de
+ * caméra : une petite orbite pendant la vérité terrain (comme player/duel.js), puis fixe ; les deux hiérarchies
+ * balaient l'échelle epsilon EN MÊME TEMPS. Seuls textes : HGP, HDBSCAN, epsilon, et les clusters (lettres des objets,
+ * coches, commentaires des événements). Fin : le meilleur nœud de chaque hiérarchie pour chaque objet (best_sites de
  * la scène, écrit par tools/duel_scene.py), encadré en vert s'il retrouve l'objet (IoU > 0,5), en rouge sinon.
  *
  * Même rejeu exact que player/duel.js (union-find des événements par plateaux) ; scènes data/duel_k<k>_en.js. Une
@@ -18,9 +19,10 @@
   const FONT = '"DejaVu Sans", "Helvetica Neue", Arial, sans-serif';
   const EPS = 1 + 1e-12;
   // Chronologie d'une scène (secondes)
-  const T_INTRO = 2.4, T_MIX = 0.6, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35;
+  const T_INTRO = 3.4, T_HOLD = 0.6, T_MIX = 0.6, T_FINAL_IN = 0.8, T_FINAL = 4.6, T_FADE = 0.35;
   const PAUSE = { found: 1.6, sep: 2.2, merge: 2.5, chute: 1.6 };  // secondes d'arrêt, selon l'événement
   const SWEEP0 = T_INTRO + T_MIX;
+  const ORBIT = 26, LIFT = 10;  // degrés : orbite de l'introduction, qui finit sur la vue du balayage
   let SWEEP1 = 0, FINAL0 = 0, DURATION = 0;  // propres à la scène : le balayage s'arrête aux événements importants
 
   // Objets en bleu, ambre, violet : le vert et le rouge sont réservés au verdict (retrouvé / réuni ou manqué).
@@ -99,16 +101,24 @@
         // tous les objets retrouvés : la hiérarchie se fige au dernier de leurs maxima (elle a réussi)
         freeze: m.best.every((v) => v > 0.5) ? Math.max(...m.best_level) : Infinity };
     }
-    S.cam = camera(scene.view || { az: 0, el: 30 });
+    S.view = scene.view || { az: 0, el: 30 };
     fit();
     schedule();
+    // étiquettes de la vérité : position relative choisie une fois sur la vue finale, gardée pendant l'orbite
+    const tmp = document.createElement('canvas').getContext('2d');
+    S.introPick = {};
+    for (const P of PANELS) {
+      const forced = new Array(S.nobj).fill(-1);
+      for (const lb of labelSlots(tmp, P, 'truth', null, 26 + measure(tmp, P.name, 48, true) + 24, null)) forced[lb.o] = lb.k;
+      S.introPick[P.key] = forced;
+    }
     return DURATION;
   }
 
-  function camera(view) {
+  function camera(az, el) {
     let rad = 0, zmax = 0;
     for (let i = 0; i < S.n; i++) if (S.gt[i] >= 0) { rad = Math.max(rad, Math.hypot(S.x[i], S.y[i], S.z[i])); zmax = Math.max(zmax, S.z[i]); }
-    const a = view.az * Math.PI / 180, e = view.el * Math.PI / 180, tg = [0, 0, zmax / 2], dist = 5.5 * Math.max(rad, 0.5);
+    const a = az * Math.PI / 180, e = el * Math.PI / 180, tg = [0, 0, zmax / 2], dist = 5.5 * Math.max(rad, 0.5);
     const pos = [tg[0] + dist * Math.cos(e) * Math.sin(a), tg[1] - dist * Math.cos(e) * Math.cos(a), tg[2] + dist * Math.sin(e)];
     const f = norm([tg[0] - pos[0], tg[1] - pos[1], tg[2] - pos[2]]);
     const right = norm(cross(f, [0, 0, 1]));
@@ -116,9 +126,8 @@
   }
   function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
   function norm(a) { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; }
-  // Projection fixe (caméra immobile) : coordonnées écran relatives au panneau, calculées une fois.
-  function fit() {
-    const cam = S.cam, n = S.n, px = new Float64Array(n), py = new Float64Array(n), pz = new Float64Array(n);
+  function projectAll(az, el) {
+    const cam = camera(az, el), n = S.n, px = new Float64Array(n), py = new Float64Array(n), pz = new Float64Array(n);
     for (let i = 0; i < n; i++) {
       const dx = S.x[i] - cam.pos[0], dy = S.y[i] - cam.pos[1], dz = S.z[i] - cam.pos[2];
       const zc = dx * cam.f[0] + dy * cam.f[1] + dz * cam.f[2];
@@ -126,14 +135,31 @@
       py[i] = -(dx * cam.up[0] + dy * cam.up[1] + dz * cam.up[2]) / zc;
       pz[i] = zc;
     }
+    return { px, py, pz };
+  }
+  // Cadrage commun à toutes les poses de l'orbite et à la vue finale : les objets restent dans le cadre.
+  function fit() {
+    const v = S.view;
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-    for (let i = 0; i < n; i++) if (S.gt[i] >= 0) { x0 = Math.min(x0, px[i]); x1 = Math.max(x1, px[i]); y0 = Math.min(y0, py[i]); y1 = Math.max(y1, py[i]); }
+    for (const u of [0, 0.25, 0.5, 0.75, 1]) {
+      const { px, py } = projectAll(v.az - ORBIT * u, v.el + LIFT * u);
+      for (let i = 0; i < S.n; i++) if (S.gt[i] >= 0) { x0 = Math.min(x0, px[i]); x1 = Math.max(x1, px[i]); y0 = Math.min(y0, py[i]); y1 = Math.max(y1, py[i]); }
+    }
     const P = PANELS[0], top = 96, bottom = 86;  // place pour le nom de la méthode et le verdict
-    const scale = Math.min(0.84 * P.w / (x1 - x0), (P.h - top - bottom) / (y1 - y0)) * (S.background ? 0.94 : 1);
-    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    S.fit = { scale: Math.min(0.84 * P.w / (x1 - x0), (P.h - top - bottom) / (y1 - y0)) * (S.background ? 0.94 : 1),
+      cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, top, bottom };
+    S.pose = null;
+    setPose(v.az, v.el);
+  }
+  // Coordonnées écran (relatives au panneau) et ordre de profondeur pour une pose de la caméra.
+  function setPose(az, el) {
+    const key = `${az},${el}`;
+    if (S.pose === key) return;
+    const { px, py, pz } = projectAll(az, el), F = S.fit, P = PANELS[0], n = S.n;
     S.sx = new Float64Array(n); S.sy = new Float64Array(n);
-    for (let i = 0; i < n; i++) { S.sx[i] = P.w / 2 + scale * (px[i] - cx); S.sy[i] = top + (P.h - top - bottom) / 2 + scale * (py[i] - cy); }
+    for (let i = 0; i < n; i++) { S.sx[i] = P.w / 2 + F.scale * (px[i] - F.cx); S.sy[i] = F.top + (P.h - F.top - F.bottom) / 2 + F.scale * (py[i] - F.cy); }
     S.order = Array.from({ length: n }, (_, i) => i).sort((a, b) => pz[b] - pz[a]);
+    S.pose = key;
   }
 
   // État d'une hiérarchie au niveau r (rejeu des événements des plateaux de niveau <= r), comme player/duel.js.
@@ -281,7 +307,8 @@
     pass((s, g) => s <= 1 && g < 0); pass((s, g) => s <= 1 && g >= 0); pass((s) => s >= 2);
   }
   // Étiquettes des objets au-dessus de leurs points : « A · bicycle » sur la vérité, puis « A », « A ✓ », « A ✗ ».
-  function drawLabels(ctx, P, mode, marks, reserve) {
+  // forced[o] : indice de position relative imposé (orbite de l'introduction), sinon la première position libre.
+  function labelSlots(ctx, P, mode, marks, reserve, forced) {
     const size = 34, placed = [];
     for (let o = 0; o < S.nobj; o++) {
       let mx = 0, cnt = 0, top = Infinity, bot = -Infinity;
@@ -298,11 +325,14 @@
       const cx = P.x + mx / cnt, ya = P.y + top - h - 10, yb = P.y + bot + 12, cands = [];
       for (const y of [ya, ya - h - 8, ya + h + 8]) for (const dx of [0, 1, -1, 2, -2]) cands.push([cx + dx * (w * 0.75 + 12), y]);
       for (const dx of [0, 1, -1]) cands.push([cx + dx * (w * 0.75 + 12), yb]);
-      const pick = cands.find(([x, y]) => fits(x, y)) || [clamp(cx, P.x + w / 2 + 10, P.x + P.w - w / 2 - 10), clamp(ya, P.y + 12, P.y + P.h - 92 - h)];
-      const lb = { x: pick[0], y: pick[1], w };
-      placed.push(lb);
-      pill(ctx, parts, lb.x, lb.y, size, rgba(C.objects[o], 0.95));
+      const k = forced && forced[o] >= 0 ? forced[o] : cands.findIndex(([x, y]) => fits(x, y));
+      const pick = k >= 0 ? cands[k] : [cx, ya];
+      placed.push({ o, parts, w, k, x: clamp(pick[0], P.x + w / 2 + 10, P.x + P.w - w / 2 - 10), y: clamp(pick[1], P.y + 12, P.y + P.h - 92 - h) });
     }
+    return placed;
+  }
+  function drawLabels(ctx, P, mode, marks, reserve, forced) {
+    for (const lb of labelSlots(ctx, P, mode, marks, reserve, forced)) pill(ctx, lb.parts, lb.x, lb.y, 34, rgba(C.objects[lb.o], 0.95));
   }
   // Commentaire d'un événement, sur une ou deux lignes (formulation des vidéos longues, sans les IoU).
   function listParts(objs) {
@@ -420,6 +450,10 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
     const phase = t < T_INTRO ? 'intro' : (t < SWEEP1 ? 'sweep' : 'final');
+    {  // orbite de l'introduction : immobile pendant T_HOLD, puis vers la vue du balayage
+      const u = phase === 'intro' ? smooth((t - T_HOLD) / (T_INTRO - T_HOLD)) : 1;
+      setPose(S.view.az - ORBIT * (1 - u), S.view.el + LIFT * (1 - u));
+    }
     const r = phase === 'intro' ? S.rmin : rAt(t);
     // vers la fin : les points se fondent sur toute la transition ; les textes du balayage sortent pendant la
     // première moitié, ceux de la fin entrent pendant la seconde
@@ -467,7 +501,7 @@
           for (const e of stop.events.filter((x) => x.key === P.key).reverse()) bottom -= card(ctx, captionOf(e), P.x + P.w / 2, bottom) + 10;
           ctx.globalAlpha = 1;
         }
-      } else drawLabels(ctx, P, 'truth', null, reserveName);
+      } else drawLabels(ctx, P, 'truth', null, reserveName, S.introPick[P.key]);
       ctx.restore();
       text(ctx, P.name, P.x + 26, P.y + 60, 48, C.text, { bold: true });
       if (phase === 'sweep' && r > M.freeze) {

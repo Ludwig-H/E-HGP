@@ -5,7 +5,7 @@ Versions courtes du duel HGP contre HDBSCAN, faites pour un écran de téléphon
 ## LinkedIn
 
 `LinkedIn/hgp_vs_hdbscan_dark.mp4` (fond sombre) et `LinkedIn/hgp_vs_hdbscan_light.mp4` (fond clair) : 1080 × 1350
-(portrait 4:5), anglais, environ 97 s. Quatre scènes à la suite, dans cet ordre :
+(portrait 4:5), anglais, environ 101 s. Quatre scènes à la suite, dans cet ordre :
 
 1. `06_000800_pieton_deux_velos_2_8_12/sans_sol`, k = 10 ;
 2. `08_002852_deux_velos_6_51/sans_sol`, k = 5 ;
@@ -14,7 +14,8 @@ Versions courtes du duel HGP contre HDBSCAN, faites pour un écran de téléphon
 
 Déroulé d'une scène :
 
-- **Les objets** : la vérité terrain, nommée (« A · bicycle »).
+- **Les objets** : la vérité terrain, nommée (« A · bicycle »), immobile un instant puis vue en 3D par une petite
+  orbite de la caméra (26° autour, 10° de descente), qui finit sur la vue du balayage.
 - **Le balayage** : HGP (en haut) et HDBSCAN (en bas) balaient l'échelle $\varepsilon$ (le rayon, comme le paramètre
   de DBSCAN) **en même temps**, jusqu'au dernier événement qui décide du résultat.
   - **Ralentis** : le balayage freine à l'approche de chaque événement, s'y arrête, puis repart doucement.
