@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`c40318ebd`**.
+8 octobre 2026, base publiée **`56efbcf92`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -46,6 +46,10 @@ de Cloud/index à T/M/V/R en mémoire ; admission de la future campagne en contr
 
 **Aide au développeur et prochains contrôles.**
 
+- **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
+  `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
+  Preuve, 147 cas et neuf fixtures ; sur les comptes ng00 existants, au moins 78,81 % des requêtes R K5
+  et 71,95 % K10 évitables. Aucun pourcentage de temps ni implantation native acquis.
 - **Census G** : [garde resserrée proposée](../receipts/audit_reponses_20261008/garde_census/README.md),
   preuve MEB, 1 617 points/2 470 boîtes exacts, nouveau témoin de débordement intermédiaire. Deux lignes exécutables,
   voies conservées ; promotions plus fines prouvées séparément. Anciens mutants à reclasser, gain G4 à mesurer.
