@@ -46,9 +46,34 @@ struct FinishInput {
 // Diagnostics physiques de la fin d'etage (jamais dans une empreinte) ; durees des etapes nettes des transferts de
 // l'executeur (comptes a part par son TransferMeter, CST-0235).
 struct FinishStats {
-  u64 chains_repaired = 0, chain_elements = 0;
+  u64 chains_repaired = 0, chain_elements = 0, slices = 0;  // slices : tranches de la voie par tranches (T1-d)
   u64 keys_ns = 0, sort_ns = 0, check_ns = 0, emit_ns = 0, table_ns = 0, take_ns = 0;
 };
+
+// Tableaux des sites (rangs lexicographiques) ; puis ceux des boules (n boules, incidences), sans ceux de la table
+// (voie par tranches : table construite sur l'hote, finish_slices.hpp) ou avec (voie complete).
+template <class B>
+Outcome finish_reserve_sites(B& b, FinishArrays<B>& a, u32 sites) noexcept {
+  MHGP12_TRY(radix_reserve(b, a.sites, sites));
+  MHGP12_TRY(b.ensure(a.lexrank, sites));
+  MHGP12_TRY(b.ensure(a.fault, 1));
+  return b.put(a.fault, 0u, 0);
+}
+
+template <class B>
+Outcome finish_reserve_balls(B& b, FinishArrays<B>& a, u64 n, u64 incidences) noexcept {
+  MHGP12_TRY(radix_reserve(b, a.positions, n));
+  MHGP12_TRY(radix_reserve(b, a.keys, n));
+  MHGP12_TRY(b.ensure(a.verdict, n));
+  MHGP12_TRY(b.ensure(a.levels, n));
+  MHGP12_TRY(b.ensure(a.fkey, n));
+  MHGP12_TRY(b.ensure(a.flag, n));
+  MHGP12_TRY(b.ensure(a.before, n));
+  MHGP12_TRY(b.ensure(a.offset, n + 1));
+  MHGP12_TRY(b.ensure(a.pkey, n));
+  MHGP12_TRY(b.ensure(a.balls, n));
+  return b.ensure(a.values, incidences);
+}
 
 template <class B>
 Outcome finish_reserve(B& b, FinishArrays<B>& a, const FinishInput& in) noexcept {
@@ -79,16 +104,20 @@ Outcome read_fault(B& b, FinishArrays<B>& a, u32 allowed) noexcept {
   return (fault.value() & ~allowed) == 0 ? Outcome{} : fail(Reason::catalogue_invariant);
 }
 
-// Etapes 1 a 3 : cles, puis ordre trie (cle F3, positions) ; rend l'indice du tampon de a.keys qui le porte.
+// Etape 1 : rangs lexicographiques des sites (a.lexrank).
 template <class B>
-Result<int> finish_order(B& b, FinishArrays<B>& a, const FinishInput& in, FinishStats& stats) noexcept {
-  const u64 n = in.balls;
-  const NetWatch<B> watch(b);
-  MHGP12_TRY(b.launch(SiteKeyKernel{in.x, in.y, in.z, in.sites, a.sites.keys[0].data(), a.sites.vals[0].data()},
-                      tiles_of(in.sites)));
-  const auto cs = radix_sort(b, a.sites, in.sites, 16);
+Outcome finish_lexrank(B& b, FinishArrays<B>& a, const u32* x, const u32* y, const u32* z, u32 sites) noexcept {
+  MHGP12_TRY(b.launch(SiteKeyKernel{x, y, z, sites, a.sites.keys[0].data(), a.sites.vals[0].data()}, tiles_of(sites)));
+  const auto cs = radix_sort(b, a.sites, sites, 16);
   if (!cs.ok()) return cs.outcome();
-  MHGP12_TRY(b.launch(LexRankKernel{a.sites.vals[cs.value()].data(), in.sites, a.lexrank.data()}, tiles_of(in.sites)));
+  return b.launch(LexRankKernel{a.sites.vals[cs.value()].data(), sites, a.lexrank.data()}, tiles_of(sites));
+}
+
+// Etapes 2 et 3 (rangs des sites deja dans a.lexrank) : cles des boules, puis ordre trie (cle F3, positions).
+template <class B>
+Result<int> finish_ball_order(B& b, FinishArrays<B>& a, const FinishInput& in, FinishStats& stats,
+                              const NetWatch<B>& watch) noexcept {
+  const u64 n = in.balls;
   const BallKeyKernel keys{in.x,           in.y,         in.z,         in.sites,
                            in.records,     n,            in.incidences, a.lexrank.data(),
                            width_of(in.sites), a.levels.data(), a.fkey.data(), a.pkey.data(),
@@ -107,6 +136,14 @@ Result<int> finish_order(B& b, FinishArrays<B>& a, const FinishInput& in, Finish
   MHGP12_TRY(b.sync());  // diagnostic : chaque etape porte son propre travail (CST-0235)
   stats.sort_ns += sort_watch.nanoseconds();
   return ck.value();
+}
+
+// Etapes 1 a 3 : cles, puis ordre trie (cle F3, positions) ; rend l'indice du tampon de a.keys qui le porte.
+template <class B>
+Result<int> finish_order(B& b, FinishArrays<B>& a, const FinishInput& in, FinishStats& stats) noexcept {
+  const NetWatch<B> watch(b);
+  MHGP12_TRY(finish_lexrank(b, a, in.x, in.y, in.z, in.sites));
+  return finish_ball_order(b, a, in, stats, watch);
 }
 
 // Etape 4 : verification exacte des voisins, repli exact si une chaine est mal ordonnee, puis reverification.

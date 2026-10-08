@@ -7,7 +7,8 @@
 //   mhgp12_catalogue_probe <xyz.u32le> <ids.u32le> [options]
 //   mhgp12_catalogue_probe --uniform=N,GRAINE,BITS [options]      nuage synthetique (SplitMix64, positions distinctes)
 //   options : [--k=K] [--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--cache=OCTETS]
-//             [--digest] [--digest-complet] [--sorties] [--out=DOSSIER] [--frame=NOM] [--device]
+//             [--digest] [--digest-complet] [--sorties] [--tranches] [--budget-appareil=OCTETS] [--out=DOSSIER]
+//             [--frame=NOM] [--device]
 //
 // Defauts : K = 5, feuille 24, max_leaf 256, un fil, une passe, budget illimite sans cache de blocs, voie CPU. --digest
 // ecrit l'empreinte canonique (catalogue_digest : SHA-256 de l'export MHGP12DP) de chaque passe. --device : la ligne
@@ -17,6 +18,10 @@
 // octets, tranches du flux) ; --digest-complet ecrit apres chaque empreinte une ligne "digest_complet" (niveaux
 // publies, mots du numerateur et du denominateur ; table S* -> boule : boule rendue pour le S* de chaque boule, et
 // nombre d'ecarts) : l'export MHGP12DP ne porte ni les niveaux ni la table. --cache : cache de blocs du budget.
+// Tranche T1-d (catalogue en flux), sur demande seulement : --tranches ecrit apres chaque passe une ligne "tranches"
+// (tranches de la fin d'etage, lots d'arene rapatries, octets et pic du budget de l'appareil) ; avec --device,
+// --budget-appareil=OCTETS compte les tableaux de l'appareil dans un budget propre de cette limite
+// (CatalogueDevice::open(budget, device)), sinon dans celui de la sonde.
 // Codes : 0 conforme, 2 refus (usage, entree, parametres, ressources, degenerescence, appareil indisponible),
 // 3 invariant viole (dont device_fault).
 #include <algorithm>
@@ -42,10 +47,10 @@ struct Options {
   u64 uniform = 0, seed = 0, bits = 0;
   bool digest = false;
   CatalogueParams params;
-  u64 threads = 1, passes = 1, budget = MemoryBudget::kUnlimited, cache = 0;
+  u64 threads = 1, passes = 1, budget = MemoryBudget::kUnlimited, cache = 0, device_budget = 0;
   const char* out = nullptr;
   std::string_view frame = "probe";
-  bool device = false, full_digest = false, outputs = false;
+  bool device = false, full_digest = false, outputs = false, slices = false;
 };
 
 bool number(std::string_view text, u64& value) {
@@ -87,6 +92,8 @@ bool parse(int argc, char** argv, Options& o) {
     else if (a == "--digest") o.digest = true;
     else if (a == "--digest-complet") o.full_digest = true;
     else if (a == "--sorties") o.outputs = true;
+    else if (a == "--tranches") o.slices = true;
+    else if (number(value("--budget-appareil="), v) && v >= 1) o.device_budget = v;
     else if (a == "--device") o.device = true;
     else if (a.substr(0, 6) == "--out=" && o.xyz != nullptr) o.out = argv[i] + 6;
     else if (a.substr(0, 8) == "--frame=" && a.size() > 8 && a.size() < 8 + 24) o.frame = a.substr(8);
@@ -146,6 +153,14 @@ void outputs_json(u64 pass, const CatalogueDiagnostics& d) {
               "\"stream_chunks\":%llu}\n",
               (unsigned long long)pass, (unsigned long long)d.outputs_ns, (unsigned long long)d.outputs_bytes,
               (unsigned long long)d.stream_chunks);
+}
+
+// Ligne "tranches" (tranche T1-d) : voie de la fin d'etage et memoire de l'appareil de la passe.
+void slices_json(u64 pass, const CatalogueDiagnostics& d, const MemoryBudget* device) {
+  std::printf("{\"phase\":\"tranches\",\"pass\":%llu,\"finish_slices\":%llu,\"arena_streamed\":%llu,"
+              "\"device_bytes\":%llu,\"device_peak\":%llu}\n",
+              (unsigned long long)pass, (unsigned long long)d.finish_slices, (unsigned long long)d.arena_streamed,
+              (unsigned long long)d.device_bytes, (unsigned long long)(device != nullptr ? device->peak() : 0));
 }
 
 // Ligne "digest_complet" : SHA-256 des niveaux publies (pour chaque rang, mots du numerateur puis du denominateur,
@@ -227,7 +242,8 @@ Outcome export_to(const Options& o, const Cloud& cloud, const Catalogue& catalog
 }
 
 // Passes du catalogue sur la voie CPU (device nul) ou la voie appareil.
-Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBudget& budget, CatalogueDevice* device) {
+Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBudget& budget, CatalogueDevice* device,
+               const MemoryBudget* device_budget) {
   for (u64 pass = 0; pass < o.passes; ++pass) {
     CatalogueDiagnostics diag;
     Stopwatch watch;
@@ -249,6 +265,7 @@ Outcome passes(const Options& o, const Cloud& cloud, sched::Pool& pool, MemoryBu
     }
     std::printf("}\n");
     if (catalogue.ok() && o.outputs) outputs_json(pass, diag);
+    if (catalogue.ok() && o.slices) slices_json(pass, diag, device_budget);
     std::fflush(stdout);
     if (!catalogue.ok()) return catalogue.outcome();
     if (o.digest) {
@@ -275,14 +292,16 @@ Outcome run(const Options& o) {
   input.value() = {};
   auto pool = sched::make_pool({static_cast<u32>(o.threads)});
   if (!pool.ok()) return pool.outcome();
-  if (!o.device) return passes(o, cloud.value(), *pool.value(), budget, nullptr);
+  if (!o.device) return passes(o, cloud.value(), *pool.value(), budget, nullptr, nullptr);
   Stopwatch open_watch;
-  auto device = CatalogueDevice::open(budget);
+  std::unique_ptr<MemoryBudget> own;
+  if (o.device_budget != 0) own = std::make_unique<MemoryBudget>(o.device_budget);
+  auto device = own != nullptr ? CatalogueDevice::open(budget, *own) : CatalogueDevice::open(budget);
   std::printf("{\"phase\":\"open\",\"status\":\"%s\",\"reason\":\"%s\",\"open_ns\":%llu}\n",
               std::string(status_name(device.outcome().status())).c_str(),
               std::string(reason_name(device.outcome().reason)).c_str(), (unsigned long long)open_watch.nanoseconds());
   if (!device.ok()) return device.outcome();
-  return passes(o, cloud.value(), *pool.value(), budget, &device.value());
+  return passes(o, cloud.value(), *pool.value(), budget, &device.value(), own.get());
 }
 
 }  // namespace
@@ -292,6 +311,7 @@ int main(int argc, char** argv) {
   if (!parse(argc, argv, o)) {
     std::fprintf(stderr, "usage : mhgp12_catalogue_probe (<xyz.u32le> <ids.u32le> | --uniform=N,GRAINE,BITS) [--k=K] "
                          "[--leaf=L] [--max-leaf=M] [--threads=W] [--passes=P] [--budget=OCTETS] [--cache=OCTETS] "
+                         "[--tranches] [--budget-appareil=OCTETS] "
                          "[--digest] [--digest-complet] [--sorties] [--out=DOSSIER] [--frame=NOM] [--device]\n");
     return 2;
   }

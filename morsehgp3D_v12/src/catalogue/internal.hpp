@@ -12,6 +12,7 @@ namespace mhgp12::catalogue_detail {
 
 namespace fin {
 struct FinishOutput;
+struct FinishStats;
 }
 
 // Boule emise par une feuille, en SiteIdx globaux : S* croissant (kNone au-dela de qmin), debut de sa population
@@ -74,6 +75,11 @@ struct Assembly {
   static Result<Catalogue> finish(const Cloud& cloud, const CatalogueParams& params, std::vector<Chunk>& chunks,
                                   u64 balls, const CatalogueLedger& ledger, MemoryBudget& budget, sched::Pool& pool,
                                   CatalogueDiagnostics& diagnostics) noexcept;
+  // Voie CPU par tranches (T1-d, finish_slices.hpp) : arene des lots lue sans rassemblement ; moved : transferts et
+  // publication de l'executeur Pool (comptes dans l'assemblage).
+  static Outcome sliced(const Cloud& cloud, std::vector<Chunk>& chunks, u64 incidences, MemoryBudget& budget,
+                        sched::Pool& pool, fin::FinishOutput& out, fin::FinishStats& stats, u64& moved) noexcept;
+  static void publish_stats(const fin::FinishStats& stats, u64 assemble_ns, CatalogueDiagnostics& d) noexcept;
   // Publication commune aux deux voies : sorties de la fin d'etage (videes ; niveaux deja materialises par le flux).
   static Result<Catalogue> adopt(fin::FinishOutput& out, Order kmax, const CatalogueLedger& ledger) noexcept;
 };

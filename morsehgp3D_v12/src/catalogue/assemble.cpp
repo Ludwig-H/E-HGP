@@ -7,6 +7,7 @@
 
 #include "catalogue/exec_host.hpp"
 #include "catalogue/finish_driver.hpp"
+#include "catalogue/finish_slices.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp12::catalogue_detail {
@@ -71,6 +72,28 @@ Result<Catalogue> Assembly::adopt(fin::FinishOutput& out, Order kmax, const Cata
   return result;
 }
 
+// Voie CPU par tranches (tranche T1-d) : l'arene des lots est lue sans etre rassemblee ; la memoire de travail des
+// tranches est la moitie de ce qui reste du budget une fois comptees les sorties tenues pendant les tranches ; les
+// tableaux de l'executeur sont rendus avant les niveaux et la table.
+Outcome Assembly::sliced(const Cloud& cloud, std::vector<Chunk>& chunks, u64 incidences, MemoryBudget& budget,
+                         sched::Pool& pool, fin::FinishOutput& out, fin::FinishStats& stats, u64& moved) noexcept {
+  Buffer<u64> ball_at, incidence_at;
+  fin::ArenaView view;
+  MHGP12_TRY(fin::arena_bases(chunks, ball_at, incidence_at, view, budget));
+  const u64 room = budget.limit() - budget.used(), host = fin::sliced_host_bytes(view.balls, incidences);
+  const u64 slice_bytes = room > host ? (room - host) / 2 : fin::kSliceBytesPerBall;
+  const fin::SliceInput in{cloud.x().data(), cloud.y().data(), cloud.z().data(), cloud.sites(), view, &chunks};
+  fin::SliceWords words;
+  {
+    PoolExecutor executor{pool, budget};
+    fin::FinishArrays<PoolExecutor> arrays;
+    fin::SliceArrays<PoolExecutor> slices;
+    MHGP12_TRY(fin::slices_run(executor, arrays, slices, in, out, slice_bytes, budget, pool, stats, words));
+    moved = executor.meter.off_stage();
+  }
+  return fin::slices_close(in, out, words, budget, pool, stats);
+}
+
 Result<Catalogue> Assembly::finish(const Cloud& cloud, const CatalogueParams& params, std::vector<Chunk>& chunks,
                                    u64 balls, const CatalogueLedger& ledger, MemoryBudget& budget, sched::Pool& pool,
                                    CatalogueDiagnostics& diagnostics) noexcept {
@@ -79,6 +102,31 @@ Result<Catalogue> Assembly::finish(const Cloud& cloud, const CatalogueParams& pa
   Buffer<u64> record_at, population_at;
   u64 incidences = 0;
   MHGP12_TRY(chunk_offsets(chunks, record_at, population_at, balls, incidences, budget));
+  // Choix de la voie (tranche T1-d) : la voie complete (rassemblement, fin d'etage sur toute l'arene, sorties) quand
+  // son pic estime tient dans la place libre, comme avant ; sinon la voie par tranches ; si celle-ci refuse faute de
+  // memoire avant d'avoir rendu l'arene et que le minimum du pic de la voie complete tient, la voie complete est
+  // jouee : une limite qui porte le pic de la voie complete la sert toujours.
+  const u64 room = budget.limit() - budget.used();
+  if (fin::full_finish_upper(balls, incidences, cloud.sites()) > room) {
+    const u64 lots = chunks.size();
+    Outcome refusal;
+    {
+      fin::FinishStats stats;
+      fin::FinishOutput out;
+      u64 moved = 0;
+      refusal = sliced(cloud, chunks, incidences, budget, pool, out, stats, moved);
+      if (refusal.ok()) {
+        auto result = adopt(out, static_cast<Order>(params.kmax), ledger);
+        if (!result.ok()) return result.outcome();
+        const u64 elapsed = gather_watch.nanoseconds(), parts = stats.keys_ns + stats.sort_ns + stats.table_ns;
+        publish_stats(stats, elapsed > parts ? elapsed - parts : 0, diagnostics);
+        return result;
+      }
+    }
+    if (refusal.reason != Reason::memory_budget || chunks.size() != lots ||
+        fin::full_finish_floor(balls, incidences, cloud.sites()) > room)
+      return refusal;
+  }
   PoolExecutor executor{pool, budget};
   FrontArray<BallRecord> records;
   FrontArray<SiteIdx> population;
@@ -100,16 +148,22 @@ Result<Catalogue> Assembly::finish(const Cloud& cloud, const CatalogueParams& pa
   Stopwatch adopt_watch;
   auto result = adopt(out, static_cast<Order>(params.kmax), ledger);
   if (!result.ok()) return result.outcome();
-  diagnostics.levels_ns = stats.keys_ns;
-  diagnostics.sort_ns = stats.sort_ns;
   // voie CPU : les copies de l'executeur Pool (sorties prises, lectures) et la materialisation des niveaux restent
   // dans l'assemblage (transfer_ns et publish_ns nuls)
-  diagnostics.assemble_ns = gather_ns + stats.check_ns + stats.emit_ns + stats.take_ns + executor.meter.off_stage() +
-                            adopt_watch.nanoseconds();
-  diagnostics.table_ns = stats.table_ns;
-  diagnostics.chains_repaired = stats.chains_repaired;
-  diagnostics.chain_elements = stats.chain_elements;
+  publish_stats(stats, gather_ns + stats.check_ns + stats.emit_ns + stats.take_ns + executor.meter.off_stage() +
+                           adopt_watch.nanoseconds(),
+                diagnostics);
   return result;
+}
+
+void Assembly::publish_stats(const fin::FinishStats& stats, u64 assemble_ns, CatalogueDiagnostics& d) noexcept {
+  d.levels_ns = stats.keys_ns;
+  d.sort_ns = stats.sort_ns;
+  d.assemble_ns = assemble_ns;
+  d.table_ns = stats.table_ns;
+  d.chains_repaired = stats.chains_repaired;
+  d.chain_elements = stats.chain_elements;
+  d.finish_slices = stats.slices;
 }
 
 }  // namespace mhgp12::catalogue_detail

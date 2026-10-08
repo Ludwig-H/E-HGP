@@ -1,4 +1,5 @@
-// Refus sous budget serre de la voie appareil (tranche T2-d, prelecture de l'auditeur Codex du 8 octobre) : les
+// Refus sous budget serre de la voie appareil (tranche T2-d, prelecture de l'auditeur Codex du 8 octobre ; budget de
+// l'appareil revu par la tranche T1-d : sous son pic, la voie appareil passe en flux et par tranches) : les
 // sorties hote anticipees vivent des le dernier lot, la memoire de transit suit les demandes du flux ; le pic de chaque
 // budget change, et un petit budget peut refuser a un autre endroit qu'avant T2-d. Ce qui ne change pas : un refus est
 // entier (memory_budget, rien de publie), aucune reservation ne depasse la limite, tout est rendu a la destruction, et
@@ -34,7 +35,7 @@ std::vector<BudgetCase> budget_cases() {
 // tenues ; budgets entierement rendus une fois l'etat, l'executeur et le catalogue detruits.
 struct Trial {
   bool ok = false, refused = false, same = false, within = false, released = false;
-  u64 host_peak = 0, device_peak = 0;
+  u64 host_peak = 0, device_peak = 0, slices = 0, streamed = 0;
 };
 
 // Limite de l'un des deux budgets (l'autre illimite) : side 0 = hote, 1 = appareil.
@@ -50,8 +51,11 @@ Trial staged_trial(const Cloud& cloud, const CatalogueParams& params, sched::Poo
   Trial t;
   MemoryBudget host(limits.host), device(limits.device);
   {
-    auto got = staged_device(cloud, params, pool, host, device, 4096, 2);
+    CatalogueDiagnostics diag;
+    auto got = staged_device(cloud, params, pool, host, device, 4096, 2, &diag);
     t.ok = got.ok();
+    t.slices = diag.finish_slices;
+    t.streamed = diag.arena_streamed;
     t.refused = !got.ok() && got.outcome().reason == Reason::memory_budget;
     t.same = got.ok() && same(cloud, ref, got.value());
     t.host_peak = host.peak();
@@ -83,19 +87,29 @@ MHGP12_TEST(pipeline_budget, 40) {
     const Trial free = staged_trial(cloud.value(), params, *pool.value(), ref.value(), none);
     REQUIRE(free.ok && free.same && free.released);
     REQUIRE(free.host_peak > 0 && free.device_peak > 0);
-    for (int side = 0; side < 2; ++side) {
-      const u64 peak = side == 0 ? free.host_peak : free.device_peak;
-      const Trial at = staged_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(side, peak));
-      if (!CHECK(at.ok && at.same && at.within && at.released))
-        std::fprintf(stderr, "budget au pic : %s, cote %d\n", c.name, side);
-      CHECK_EQ(side == 0 ? at.host_peak : at.device_peak, peak);  // sequence des reservations deterministe
-      for (const u64 limit : below(peak)) {
-        const Trial t = staged_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(side, limit));
-        if (!CHECK(t.refused && t.within && t.released))
-          std::fprintf(stderr, "budget serre : %s, cote %d, limite %llu\n", c.name, side,
-                       static_cast<unsigned long long>(limit));
-      }
+    // Hote : au pic exact, identique ; en dessous, refus (sequence des reservations deterministe).
+    const Trial at = staged_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(0, free.host_peak));
+    CHECK(at.ok && at.same && at.within && at.released);
+    CHECK_EQ(at.host_peak, free.host_peak);
+    for (const u64 limit : below(free.host_peak)) {
+      const Trial t = staged_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(0, limit));
+      if (!CHECK(t.refused && t.within && t.released))
+        std::fprintf(stderr, "budget serre de l'hote : %s, limite %llu\n", c.name,
+                     static_cast<unsigned long long>(limit));
     }
+    // Appareil (tranche T1-d) : sous le pic, etat du parcours rendu avant la fin d'etage, arene en flux, fin d'etage
+    // par tranches : le meme catalogue tant que la memoire de travail minimale tient, sinon refus memory_budget ;
+    // jamais au-dela de la limite, tout rendu. Un succes sous le pic est une adaptation (l'une des trois).
+    u64 adapted = 0;
+    for (const u64 limit : below(free.device_peak)) {
+      const Trial t = staged_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(1, limit));
+      if (!CHECK(((t.ok && t.same) || t.refused) && t.within && t.released))
+        std::fprintf(stderr, "budget de l'appareil : %s, limite %llu\n", c.name,
+                     static_cast<unsigned long long>(limit));
+      if (t.ok) ++adapted;
+      if (limit <= 4096) CHECK(t.refused);
+    }
+    CHECK(adapted >= 1);
   }
 }
 
@@ -193,7 +207,9 @@ MHGP12_TEST(device_open_budget, 1) {
       const u64 peak = side == 0 ? free.host_peak : free.device_peak;
       const Trial at = device_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(side, peak));
       const Trial under = device_trial(cloud.value(), params, *pool.value(), ref.value(), limit_on(side, peak - 1));
-      if (!CHECK(at.ok && at.same && at.within && at.released && under.refused && under.within && under.released))
+      // hote : un octet de moins refuse ; appareil (T1-d) : arene en flux et tranches, ou refus memory_budget
+      const bool below_ok = side == 0 ? under.refused : (under.ok && under.same) || under.refused;
+      if (!CHECK(at.ok && at.same && at.within && at.released && below_ok && under.within && under.released))
         std::fprintf(stderr, "budget appareil : %s, cote %d, pic %llu\n", c.name, side,
                      static_cast<unsigned long long>(peak));
       trials += 2;

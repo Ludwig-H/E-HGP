@@ -51,6 +51,13 @@ struct PoolExecutor {
   Outcome ensure(FrontArray<T>& a, u64 n) noexcept {
     return a.ensure(n, budget);
   }
+  // Place libre du budget des tableaux (dimensionnement des tranches, finish_slices.hpp) ; tableau rendu.
+  u64 room() const noexcept { return budget.limit() - budget.used(); }
+  template <class T>
+  Outcome release(FrontArray<T>& a) noexcept {
+    a.buffer.reset();
+    return {};
+  }
   template <class T>
   Outcome ensure_keep(FrontArray<T>& a, u64 n, u64 keep) noexcept {
     return a.ensure_keep(n, keep, budget);

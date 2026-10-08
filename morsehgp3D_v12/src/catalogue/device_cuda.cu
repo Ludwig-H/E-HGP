@@ -32,6 +32,11 @@ inline constexpr u32 kWarpsPerBlock = 4;
 inline constexpr u32 kThreads = 32 * kWarpsPerBlock;
 inline constexpr u64 kStagingMin = u64{1} << 20;           // memoire epinglee de transit, par tranches
 inline constexpr u64 kStagingMax = u64{64} << 20;
+// Tranche T1-d (memoire de l'appareil bornee) : quand le contenu n'est pas garde (keep = 0), l'ancien tableau et sa
+// reservation sont rendus AVANT la reservation et l'allocation du nouveau, comme FrontArray de l'executeur Pool : plus
+// de pic transitoire ancien + nouveau. Capacites inchangees. Levier coupe par substitution exacte (false : l'ancien
+// tableau est rendu apres l'allocation du nouveau, comme avant).
+inline constexpr bool kReleaseBeforeGrow = true;
 
 // Noyau de warps generique : un warp par indice, memoire partagee propre a chaque warp.
 template <class K>
@@ -103,6 +108,7 @@ struct CudaExecutor {
     if (a.cap >= n) return {};
     const u64 cap = n > a.cap + a.cap / 2 + 1024 ? n : a.cap + a.cap / 2 + 1024;
     if (cap > ~u64{0} / sizeof(T)) return fail(Reason::memory_budget);
+    if (kReleaseBeforeGrow && keep == 0 && a.ptr != nullptr) MHGP12_TRY(release(a));
     BudgetReservation reservation;
     MHGP12_TRY(reservation.reserve(cap * sizeof(T), device_budget));
     T* fresh = nullptr;
@@ -122,6 +128,21 @@ struct CudaExecutor {
     ++allocations;
     return {};
   }
+  // Tableau rendu (contenu non garde) : attente des noyaux en file qui peuvent le lire, puis liberation et reservation
+  // rendue ; un refus qui suit laisse le tableau vide (il sera reserve de nouveau au besoin).
+  template <class T>
+  Outcome release(Array<T>& a) noexcept {
+    if (a.ptr == nullptr) return {};
+    MHGP12_TRY(sync());
+    cudaFree(a.ptr);
+    device_bytes -= a.cap * sizeof(T);
+    a.ptr = nullptr;
+    a.cap = 0;
+    a.reservation.reset();
+    return {};
+  }
+  // Place libre du budget de l'appareil (dimensionnement des tranches, finish_slices.hpp).
+  u64 room() const noexcept { return device_budget.limit() - device_budget.used(); }
   template <class T>
   Outcome ensure(Array<T>& a, u64 n) noexcept {
     return grow(a, n, 0);

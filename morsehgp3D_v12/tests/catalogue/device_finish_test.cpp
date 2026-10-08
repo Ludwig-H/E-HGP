@@ -420,3 +420,75 @@ MHGP12_TEST(finish_budget, 16) {
     }
   }
 }
+
+// Voie par tranches de cles (tranche T1-d) sur les enregistrements construits : un lot de l'hote, memoire de travail
+// de toute l'arene divisee par `parts` ; meme reference que la voie complete. Rend l'issue et le nombre de tranches.
+namespace {
+
+Outcome sliced_finish(const Cloud& cloud, const Records& r, u64 parts, u64& slices, Match& match) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  auto pool = sched::make_pool({3});
+  if (!pool.ok()) return pool.outcome();
+  std::vector<Chunk> chunks(1);
+  MHGP12_TRY(chunks[0].records.allocate(r.records.size(), budget));
+  MHGP12_TRY(chunks[0].population.allocate(r.population.size(), budget));
+  std::copy(r.records.begin(), r.records.end(), chunks[0].records.begin());
+  std::copy(r.population.begin(), r.population.end(), chunks[0].population.begin());
+  u64 total = 0;
+  for (const BallRecord& b : r.records)
+    total += fin::kSliceBytesPerBall + fin::kSliceBytesPerIncidence * (u64{b.p} + b.m);
+  PoolExecutor b{*pool.value(), budget};
+  fin::FinishArrays<PoolExecutor> arrays;
+  fin::SliceArrays<PoolExecutor> sa;
+  Buffer<u64> ball_at, incidence_at;
+  fin::ArenaView view;
+  MHGP12_TRY(fin::arena_bases(chunks, ball_at, incidence_at, view, budget));
+  const fin::SliceInput in{cloud.x().data(), cloud.y().data(), cloud.z().data(), cloud.sites(), view, &chunks};
+  fin::FinishOutput o;
+  fin::FinishStats stats;
+  MHGP12_TRY(fin::finish_sliced(b, arrays, sa, in, o, total / parts + 1, budget, *pool.value(), stats));
+  slices = stats.slices;
+  match = compare_outputs(cloud, r, o);
+  return {};
+}
+
+}  // namespace
+
+// Tranches sur les jeux construits : supports aleatoires (niveaux egaux en nombre), quasi-egalites et egalites de
+// representations differentes (chaine retriee), chaine longue de 202 elements. Une tranche ne coupe jamais une chaine
+// de voisins incertains : avec une memoire de travail plus petite que la chaine, refus memory_budget (plateau
+// incoupable) ; sinon, la meme fin d'etage que la reference, a l'octet.
+MHGP12_TEST(finish_sliced, 10) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  const auto [a, b] = inverted_right_triangle();
+  REQUIRE(a != 0);
+  const Points chain_pts = long_chain_points(a, b);
+  auto chain_cloud = make_cloud(chain_pts, budget);
+  REQUIRE(chain_cloud.ok());
+  const Records chain = records_of(chain_cloud.value(), long_chain(chain_cloud.value(), chain_pts));
+  const Points dense = scatter(45, 6, 11);
+  auto dense_cloud = make_cloud(dense, budget);
+  REQUIRE(dense_cloud.ok());
+  Mix mix{12};
+  Crafted c;
+  std::map<std::array<u32, 4>, bool> seen;
+  while (c.q.size() < 600) {  // comme finish_random : supports distincts d'un nuage dense, niveaux egaux en nombre
+    const u32 q = 2 + mix.below(3);
+    std::array<u32, 4> s{kNone, kNone, kNone, kNone};
+    for (u32 k = 0; k < q; ++k) s[k] = mix.below(dense_cloud.value().sites());
+    sort_first(s, q);
+    if (!distinct_first(s, q) || seen.count(s) || !level_of(dense_cloud.value(), s, q)) continue;
+    seen[s] = true;
+    add(c, s, q, mix, dense_cloud.value().sites());
+  }
+  const Records random = records_of(dense_cloud.value(), c);
+  for (const u64 parts : {u64{1}, u64{2}, u64{7}}) {
+    u64 slices = 0;
+    Match m;
+    CHECK(sliced_finish(chain_cloud.value(), chain, parts, slices, m).ok() == (parts == 1));
+    if (parts == 1) CHECK(m.all() && slices == 1);
+    const Outcome done = sliced_finish(dense_cloud.value(), random, parts, slices, m);
+    if (done.ok()) CHECK(m.all() && slices >= parts);
+    else CHECK(done.reason == Reason::memory_budget);  // plateau de niveaux egaux plus lourd qu'une tranche
+  }
+}

@@ -29,6 +29,7 @@ CAT_OK_KEYS = CAT_BASE_KEYS | {'balls', 'incidences', 'levels', 'ledger', 'diagn
 CAT_INTS = ('pass', 'coord_bits', 'kmax', 'leaf', 'threads', 'sites', 'wall_ns')
 COUNTS = ('sites', 'balls', 'incidences', 'levels')
 SORTIES_KEYS = frozenset(('phase', 'pass', 'outputs_ns', 'outputs_bytes', 'stream_chunks'))
+TRANCHES_KEYS = frozenset(('phase', 'pass', 'finish_slices', 'arena_streamed', 'device_bytes', 'device_peak'))
 CAT_OPEN_KEYS = frozenset(('phase', 'status', 'reason', 'open_ns'))
 EXIT_KEYS = frozenset(('phase', 'status', 'reason'))
 REFUSALS = ('invalid_input', 'unsupported_degeneracy', 'resource_exhausted')
@@ -58,9 +59,12 @@ def is_hex(x):
     return type(x) is str and re.fullmatch(r'[0-9a-f]{64}', x) is not None
 
 
-def catalogue_spec(path, k, threads, passes, digest=False, complet=False, sorties=False, cache=0):
+def catalogue_spec(path, k, threads, passes, digest=False, complet=False, sorties=False, cache=0, tranches=False,
+                   device_budget=0):
+    """Commande de la sonde du catalogue ; tranches et device_budget : catalogue en flux (tranche T1-d)."""
     return {'path': path, 'k': k, 'leaf': LEAF, 'threads': threads, 'passes': passes, 'digest': digest,
-            'complet': complet, 'sorties': sorties, 'cache': cache}
+            'complet': complet, 'sorties': sorties, 'cache': cache, 'tranches': tranches,
+            'device_budget': device_budget}
 
 
 def catalogue_options(spec):
@@ -73,6 +77,8 @@ def catalogue_options(spec):
     opts += ['--digest-complet'] if spec['complet'] else []
     opts += ['--sorties'] if spec['sorties'] else []
     opts += ['--cache=%d' % spec['cache']] if spec['cache'] else []
+    opts += ['--tranches'] if spec.get('tranches') else []
+    opts += ['--budget-appareil=%d' % spec['device_budget']] if spec.get('device_budget') else []
     return opts
 
 
@@ -110,8 +116,8 @@ def read_tail(rows, i, parsed):
     return ''
 
 
-EXTRAS = (('sorties', 'sorties', 'sorties'), ('digest', 'digest', 'digests'), ('digest_complet', 'complet',
-                                                                                  'complets'))
+EXTRAS = (('sorties', 'sorties', 'sorties'), ('tranches', 'tranches', 'tranches'), ('digest', 'digest', 'digests'),
+          ('digest_complet', 'complet', 'complets'))
 
 
 def check_extra(row, phase, p):
@@ -119,6 +125,9 @@ def check_extra(row, phase, p):
     if phase == 'sorties':
         ok = set(row) == SORTIES_KEYS and all(is_int(row[k]) for k in ('pass', 'outputs_ns', 'outputs_bytes',
                                                                          'stream_chunks')) and row['pass'] == p
+    elif phase == 'tranches':
+        ok = set(row) == TRANCHES_KEYS and all(is_int(row[k]) for k in TRANCHES_KEYS if k != 'phase') and \
+            row['pass'] == p
     elif phase == 'digest':
         ok = set(row) == {'phase', 'catalogue_sha256'} and is_hex(row['catalogue_sha256'])
     else:
@@ -147,7 +156,7 @@ def read_passes(rows, i, parsed, spec):
         i += 1
         for phase, flag, bucket in EXTRAS:
             nxt = rows[i] if i < len(rows) else None
-            if not spec[flag] or type(nxt) is not dict or nxt.get('phase') != phase:
+            if not spec.get(flag) or type(nxt) is not dict or nxt.get('phase') != phase:
                 continue
             why = check_extra(nxt, phase, p)
             if why:
@@ -160,7 +169,8 @@ def read_passes(rows, i, parsed, spec):
 def read_catalogue(run, spec):
     """(etat, raison, lu) d'une sonde du catalogue liee a sa commande : 'ok' (code 0, passes completes), 'invariant'
     (code 3, cause lue), 'refus' (code 2, cause lue), 'signal', 'delai' ou 'illisible'."""
-    parsed = {'open': None, 'passes': [], 'sorties': [], 'digests': [], 'complets': [], 'exit': None, 'failed': None}
+    parsed = {'open': None, 'passes': [], 'sorties': [], 'tranches': [], 'digests': [], 'complets': [], 'exit': None,
+              'failed': None}
     if type(run) is not dict:
         return 'illisible', 'execution absente', parsed
     if run.get('timeout') is True:
@@ -191,6 +201,7 @@ def complete_pass(parsed, spec, p):
     if p < 0:
         return True
     return len(parsed['passes']) > p and (not spec['sorties'] or len(parsed['sorties']) > p) and \
+        (not spec.get('tranches') or len(parsed['tranches']) > p) and \
         (not spec['digest'] or len(parsed['digests']) > p) and (not spec['complet'] or len(parsed['complets']) > p)
 
 

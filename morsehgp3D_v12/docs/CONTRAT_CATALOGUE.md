@@ -320,3 +320,124 @@ d'admission Codex (`receipts/audit_reponses_20261008/t2d_c_admission/`) traitée
 absent n'est jamais une mesure nulle, la sonde de la base sans ligne `sorties` étant une exception déclarée), mutant
 sans comparaison refusé, A/A écrit, bornes non arrondies ; un cas d'auto-test par défaut relevé (39 injections dont
 25 d'admission).
+
+## 12. Catalogue en flux pour les scènes de plusieurs millions de sites (tranche T1-d, 8 octobre 2026), à juger sur G4
+
+Travail d'agent pour le développeur, livré sur `main` `27eca166b` ; **rien n'a tourné sur un GPU** : la voie appareil
+est jouée sur l'hôte par l'exécuteur Pool et par l'exécuteur à transit simulé (budgets de l'hôte et de l'appareil
+séparés, comptes de l'exécuteur CUDA), la construction CUDA est vérifiée sans avertissement aux profils 21, 24 et 32.
+Constat des sessions L1 et L2 (`MES-B`, régime (b), [reçu L1](../receipts/g4_mesb1r_20261008/README.md),
+[reçu L2](../receipts/g4_mesb2_20261008/README.md)) : la voie appareil refuse au budget de l'appareil (88 Gio) dès
+5,2 M de sites à K5 et dès 1,5 M à K10 ; la voie CPU tient, mais l'étage C y culmine à 10 à 16 Ko par site, 3,7 à 3,9
+fois le catalogue final. Ce qui domine : les tableaux de la fin d'étage (284 octets par boule : trois tris par base de
+paires, clés, drapeaux, niveaux en mots et niveaux des rangs, boules), puis l'arène (32 octets par boule et 4 par
+incidence), puis les cases d'un lot de feuilles (au plus 192 Mio, fixes). **Le catalogue ne change pas** (export
+`MHGP12DP`, niveaux publiés et table identiques à l'octet ; voie appareil = voie CPU).
+
+**Fondement.** L'ordre du catalogue est celui de la fin d'étage : clé F3 du niveau, puis clé des positions de S*
+(unique), chaînes de voisins d'ordre F4 incertain retriées en exact, rangs denses des niveaux distincts. Entre deux
+voisins dont l'ordre F4 est certain, les niveaux exacts diffèrent strictement : aucune chaîne ne traverse la coupe et
+aucun rang n'y est partagé ; et si l'ordre F4 de deux clés est certain, il l'est pour toute clé plus petite que la
+première et toute clé plus grande que la seconde. Une tranche, intervalle de clés dont les bords sont des coupes
+certaines, traitée seule, rend donc exactement la portion de l'ordre global qui lui revient, à ses trois bases près
+(boule, incidence, rang).
+
+Changements déclarés d'avance :
+
+1. **Arène en flux** (voie appareil, `device_pipeline.hpp`) : arène résidente tant que le budget de l'appareil la
+   porte ; si sa croissance est refusée (`memory_budget`), l'arène déjà écrite est rapatriée en un lot de l'hôte
+   (`Chunk`, décalages de population locaux, le format des lots de la voie CPU) et ses tableaux sont rendus ; ensuite
+   chaque lot écrit son arène à la base 0 de l'appareil, puis la rapatrie.
+2. **Fin d'étage par tranches de clés** (`finish_slices.hpp` pour l'exécuteur, `slices.hpp` et `slices.cpp` pour
+   l'hôte ; source unique pour les exécuteurs Pool et CUDA) : rangs lexicographiques des sites une fois ; passe des
+   clés F3 lot par lot, par morceaux d'au plus une tranche (`FKeyKernel`, mêmes contrôles que `BallKeyKernel`) ; plan :
+   histogramme de 2^16 cases sur les bits des clés ; les cases voisines d'ordre F4 incertain forment des unités
+   insécables, rangées dans la tranche courante tant que sa mémoire de travail (278 octets par boule et 8 par
+   incidence) tient dans la taille de tranche, de sorte qu'une coupe ne tombe qu'entre deux cases d'ordre certain ;
+   une unité trop lourde est redécoupée 16 bits plus fin, puis clé par clé ; un plateau incoupable plus lourd que la
+   tranche est refusé (`memory_budget`) ; répartition stable des boules ; par tranche : rassemblement (populations
+   rebasées), envoi, fin d'étage locale (tri, vérification et repli exacts, rangs, CSR), rebasage sur l'exécuteur
+   (`RebaseKernel` : rang de base, incidence de base), sorties en flux directement dans les tableaux finaux, mots des
+   niveaux gardés par tranche et matérialisés une fois leur nombre connu ; table S* → boule construite sur l'hôte
+   (comptes par S*[0], lignes triées par la clé de `TableKeyKernel`).
+3. **Choix de la voie** : la voie complète, inchangée, quand ses tableaux tiennent dans la place libre
+   (`full_finish_bytes`) ; sinon, voie appareil : état du parcours rendu (front, lots de feuilles), voie complète si
+   elle tient alors, sinon arène rapatriée, tableaux de la fin d'étage rendus avant les tranches et de nouveau après
+   (dimensionnés sur la place libre de cet appel, ils serreraient l'appel suivant), tranches de la moitié de la place
+   libre ; voie CPU : si le pic estimé de la voie complète (`full_finish_upper`) dépasse la place libre, tranches de la
+   moitié de la place libre une fois comptées l'arène et les sorties tenues pendant les tranches (`sliced_host_bytes`,
+   92 octets par boule et 4 par incidence), les tableaux de l'exécuteur rendus avant les niveaux et la table ; si la
+   voie par tranches refuse faute de mémoire avant d'avoir rendu l'arène (réseau à niveaux égaux en nombre, dont le pic
+   estimé dépasse le vrai pic) et que le minimum du pic de la voie complète (`full_finish_floor` : les tableaux neufs
+   de `finish_reserve`) tient, la voie complète est jouée. Une limite qui porte le pic de la voie complète la sert donc
+   toujours, comme avant T1-d (les portes de la Session recouverte en dépendent). Une trame de 60 000 sites reste
+   résidente, en un lot, sans tranche ; elle ne paie qu'une comparaison.
+
+S'y ajoute le levier (a) de la contre-lecture du 8 octobre : `kReleaseBeforeGrow` (exécuteur CUDA) rend l'ancien
+tableau avant d'allouer le nouveau quand rien n'est gardé.
+
+**Mémoire.** Appareil, voie en flux : nuage, front du parcours, cases d'un lot de 2^17 feuilles, arène d'un lot, puis
+une tranche (la moitié de la place libre, une fois le front et les lots rendus) : indépendante de la taille du nuage,
+**sauf le front du parcours, que T1-d ne borne pas** (à K2 et feuilles de 5 sites sur un nuage uniforme de 400 000
+sites, il occupe 9,8 Go pour une arène de 0,2 Go ; sur le LiDAR à K5 et K10, feuilles de 24, il reste petit devant la
+fin d'étage). Hôte : la voie par tranches garde l'arène, les boules, décalages et populations finales, la
+répartition (4 octets par boule) et les mots des niveaux (48 par rang) au lieu des tableaux de la fin d'étage complète ;
+les niveaux (`num::Level`, 64 octets par rang) et la table viennent une fois l'arène rendue. La place libre et
+`full_finish_bytes` décident, chaque réservation reste contrôlée par son budget.
+
+**Comptes locaux** (exécuteur Pool et transit simulé, 3 fils du codespace ; ce ne sont pas des mesures G4). Trames
+ng00 à ng02 à K5 et K10 : voie appareil = voie CPU sans budget et sous chaque budget de l'appareil qui aboutit ; à la
+moitié de son pic, arène rapatriée à la fin et 3 tranches ; au quart, à K10, 6 ou 7 lots rapatriés un à un et 6
+tranches (pic de l'appareil 0,47 à 0,63 Go contre 2,15 à 2,84 Go) ; plus bas, refus `memory_budget` propre (le front
+et les cases d'un lot ne tiennent plus). Boreas 10 trames sans sol (1 513 483 sites, K5, 62 601 646 boules) : voie
+appareil sous 3 Go d'appareil (la voie complète en garde 21,5 Gio sur G4, session L1r) : 50 lots dont 34 rapatriés un
+à un, 14 tranches, pic de l'appareil 2,76 Go, pic de l'hôte 9,24 Go ; voie CPU par tranches sous 12 Go d'hôte : 21
+tranches, pic de l'hôte 10,2 Go contre 24,45 Go pour la voie complète (session L1r), soit environ 1,5 fois le
+catalogue final au lieu de 3,6 fois ; empreintes `MHGP12DP`, niveaux et table identiques entre les deux voies. Tour
+complète (sonde FULL, voie CPU) sur les trames seules de Boreas, étage C par tranches sous un budget de la Session qui
+refuse la voie complète : FUL1 identique à la voie complète et aux sessions L1 et L1r (`f2ec1106…` sans sol, 146 316
+sites, pic de l'étage C 1,65 → 1,11 Go ; `52c5cf71…` avec sol, 215 665 sites, 2,21 → 1,32 Go ; tour séquentielle :
+la Session recouverte admet sa région d'un coup et demande, sous budget, plus que son pic). Sur Boreas 10 trames, la
+tour et sa validation ne tiennent pas dans la mémoire du codespace : FUL1 y est confiée au plan G4.
+
+**Refus.** Ceux de la voie complète (`catalogue_invariant`, `index_overflow_u32`, `memory_budget`), plus
+`memory_budget` pour un plateau incoupable ou un budget de l'appareil qui ne porte plus le front, les cases et l'arène
+d'un lot ; transactionnels, rien de publié, budgets rendus.
+
+**Diagnostics et sonde.** `finish_slices` et `arena_streamed` dans `CatalogueDiagnostics` ; la sonde du catalogue écrit
+une ligne `tranches` sur demande (`--tranches` : tranches, lots rapatriés, octets et pic du budget de l'appareil) et
+compte la voie appareil dans un budget propre (`--budget-appareil=OCTETS`, `CatalogueDevice::open(budget, device)`).
+
+**Portes.** `finish_sliced` (jeux construits : chaîne longue jamais coupée, refus sous une tranche plus petite
+qu'elle), `slices_identity` (identité contre la voie complète à 1, 2, 7 et beaucoup de tranches sur quatre nuages),
+`slices_plan` (coupes certaines, bornes, ordre stable ; grappes de clés d'ordre incertain à cheval sur deux cases
+jamais coupées ; plateau incoupable refusé), `slices_cpu_budget` (au pic exact de la voie complète : identique, et un
+réseau à niveaux égaux par le repli ; à 3/4, 3/5 et 1/2 de ce pic : par tranches et identique, ou refus ; à 1/16 :
+refus), `slices_device_budget` (voie appareil à 1/2 et 1/3 de son pic : arène en flux et tranches, identique),
+`slices_device_reuse` (même contexte : nuage par tranches, témoin, nuage), `pipeline_budget` et `device_open_budget`
+adaptées (sous le pic de l'appareil : identique ou refus, jamais au-delà de la limite, tout rendu), porte longue
+`slices_streaming`
+(uniforme de 150 000 sites à K5, six lots ; sous 18 % du pic de l'appareil : bascule en flux au deuxième lot, six lots
+rapatriés, 8 tranches, pic 0,87 Go sur 5,49, identique à la voie CPU) ; juge du pilote G4
+(`mhgp12_catalogue_g4_t1d_judge`, 15 injections). Dix mutants nouveaux (`tests/mutants/catalogue.json`, plancher 24 →
+34) : coupe incertaine, rang et incidence sans base, lignes de la table inversées, niveaux décalés, clés du seul premier
+morceau, voie CPU toujours par tranches, voie CPU sans repli sur la voie complète, voie appareil toujours en flux, lot
+non rapatrié (porte longue).
+
+**Session G4 préparée** : pilote `bench/g4_catalogue_t1d.py`, juge `bench/g4_catalogue_t1d_judge.py`, auto-test
+`bench/g4_catalogue_t1d_selftest.py` ; règle `REGLE_T1D` écrite d'avance (adopté si les empreintes sont identiques
+partout, si la borne haute **non arrondie** de l'IC 95 % du rapport après/avant de l'étage C est au plus 1,01 sur
+chacune de ng00, ng01, ng02 à K5, et si la voie en flux tient sur l'appareil réel : sous des budgets de 1/2 à 1/32
+des octets de la voie complète, F2 ou refus `memory_budget`, au moins une prise identique à 2 tranches et un lot
+rapatrié par trame et par K, et à K10 au moins une prise identique à 2 lots rapatriés ; rejeté sinon ; refusé si une
+prise manque ou sort de sa commande, si un binaire change, si le GPU n'est pas isolé, ou si l'A/A sort de
+[0,985 ; 1,015]). Scènes entières : `MES-B` (`microbancs/mes_b_scenes/pilote_b.py`, inchangé) sur les paquets L1 et
+L2, voie appareil, budget de l'appareil 88 Gio, et Boreas 10 trames sans sol sous 8 Gio d'appareil (FUL1 de la voie en
+flux contre la voie CPU).
+
+**Points ouverts.** Le front du parcours n'est pas borné (prochaine limite du régime (b) sur l'appareil) ;
+`full_finish_bytes` est un compte des tableaux neufs : des tableaux résidents d'une trame précédente peuvent croître
+au-delà (×1,5 sur l'exécuteur CUDA), et la voie complète choisie peut alors refuser là où la voie par tranches aurait
+tenu (refus entier, jamais un préfixe) ; le diagnostic des octets par tableau de l'appareil reste un essai hors du
+produit ; l'arène en flux lot par lot n'est couverte que par la porte longue et les essais locaux ; rien n'est mesuré
+sur G4.

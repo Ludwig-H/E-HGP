@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 24,
+  "plancher": 34,
   "mutants": [
     {
       "id": "temoin_perdu_du_reservoir",
@@ -160,8 +160,8 @@
     {
       "id": "sorties_anticipees_sans_reprise_hote",
       "fichier": "src/catalogue/device_pipeline.hpp",
-      "cherche": "    if (last && fin::kAnticipateOutputs) MHGP12_TRY(prepare(grown, grown_incidences));  // pendant Copy et Replay",
-      "remplace": "    if (last && fin::kAnticipateOutputs) MHGP12_TRY(prepare(balls + c.balls, incidences + c.incidences));",
+      "cherche": "    if (last && fin::kAnticipateOutputs && !streaming) MHGP12_TRY(prepare(grown, grown_incidences));  // pendant Copy",
+      "remplace": "    if (last && fin::kAnticipateOutputs && !streaming) MHGP12_TRY(prepare(balls + c.balls, incidences + c.incidences));",
       "porte": "mhgp12_catalogue_device_unit_pipeline_witnesses",
       "note": "sorties anticipees (tranche T2-d) : reservees sans les boules de la reprise exacte sur l'hote (coquille de 48 sites) ; la fin d'etage doit refuser une sortie d'une autre taille"
     },
@@ -196,6 +196,86 @@
       "remplace": "  return full;",
       "porte": "mhgp12_catalogue_device_unit_stream_staging",
       "note": "transit du flux (tranche T2-d, prelecture Codex) : toujours cases * 8 Mio, meme pour de petites sorties ; la demande doit suivre le plus grand segment"
+    },
+    {
+      "id": "tranche_coupe_incertaine",
+      "fichier": "src/catalogue/slices.cpp",
+      "cherche": "      if (unit.balls != 0 && key_order(unit.hi, b.lo) < 0) {  // coupe certaine : l'unite est close",
+      "remplace": "      if (unit.balls != 0) {",
+      "porte": "mhgp12_catalogue_device_unit_slices_plan",
+      "note": "plan des tranches (tranche T1-d) : chaque case est une unite, coupe aussi entre deux cles d'ordre F4 incertain ; une grappe de cles incertaines a cheval sur deux cases est coupee"
+    },
+    {
+      "id": "tranche_rang_sans_base",
+      "fichier": "src/catalogue/finish_slices.hpp",
+      "cherche": "          balls[i].rank = static_cast<LevelRank>(static_cast<u32>(static_cast<u32>(balls[i].rank) + ranks));",
+      "remplace": "          balls[i].rank = static_cast<LevelRank>(static_cast<u32>(balls[i].rank));",
+      "porte": "mhgp12_catalogue_device_unit_slices_identity",
+      "note": "rebasage des tranches : rangs locaux publies sans le rang de base"
+    },
+    {
+      "id": "tranche_incidence_sans_base",
+      "fichier": "src/catalogue/finish_slices.hpp",
+      "cherche": "          offset[i] += incidences;",
+      "remplace": "          offset[i] += 0;",
+      "porte": "mhgp12_catalogue_device_unit_slices_identity",
+      "note": "rebasage des tranches : decalages CSR locaux publies sans l incidence de base"
+    },
+    {
+      "id": "tranche_table_lignes_inversees",
+      "fichier": "src/catalogue/slices.cpp",
+      "cherche": "        return key2_cmp(table_key(t.balls[idx(a)], t.sites, t.bits), table_key(t.balls[idx(b)], t.sites, t.bits)) < 0;",
+      "remplace": "        return key2_cmp(table_key(t.balls[idx(a)], t.sites, t.bits), table_key(t.balls[idx(b)], t.sites, t.bits)) > 0;",
+      "porte": "mhgp12_catalogue_device_unit_slices_identity",
+      "note": "table S* -> boule de l'hote : lignes triees a rebours de TableKeyKernel"
+    },
+    {
+      "id": "tranche_niveaux_decales",
+      "fichier": "src/catalogue/slices.cpp",
+      "cherche": "    Materialize m{w.data(), levels.data() + at};",
+      "remplace": "    Materialize m{w.data(), levels.data() + at - 1};",
+      "porte": "mhgp12_catalogue_device_unit_slices_identity",
+      "note": "niveaux finaux materialises une case trop tot (le niveau nul ecrase)"
+    },
+    {
+      "id": "tranche_cles_premier_morceau",
+      "fichier": "src/catalogue/finish_slices.hpp",
+      "cherche": "    for (u64 first = 0; first < chunk.records.size(); first += piece) {",
+      "remplace": "    for (u64 first = 0; first < chunk.records.size() && first < piece; first += piece) {",
+      "porte": "mhgp12_catalogue_device_unit_slices_identity",
+      "note": "passe des cles : seul le premier morceau de chaque lot a sa cle"
+    },
+    {
+      "id": "voie_cpu_toujours_par_tranches",
+      "fichier": "src/catalogue/assemble.cpp",
+      "cherche": "  if (fin::full_finish_upper(balls, incidences, cloud.sites()) > room) {",
+      "remplace": "  if (true) {",
+      "porte": "mhgp12_catalogue_device_unit_slices_cpu_budget",
+      "note": "choix de la voie CPU : par tranches meme quand la voie complete tient (la trame paierait le flux)"
+    },
+    {
+      "id": "voie_appareil_toujours_en_flux",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "  if (!hook.streaming && full <= b.room()) {",
+      "remplace": "  if (false) {",
+      "porte": "mhgp12_catalogue_device_unit_slices_device_budget",
+      "note": "choix de la voie appareil : arene rapatriee et tranches meme quand la voie complete tient"
+    },
+    {
+      "id": "flux_lot_non_rapatrie",
+      "fichier": "src/catalogue/device_pipeline.hpp",
+      "cherche": "    if (streaming) MHGP12_TRY(take_arena());  // arene du lot rapatriee, appareil reemploye",
+      "remplace": "    if (false) MHGP12_TRY(take_arena());",
+      "porte": "mhgp12_catalogue_slices_long_slices_streaming",
+      "note": "arene en flux : un lot ecrit a la base 0 sans etre rapatrie (porte longue, plusieurs lots)"
+    },
+    {
+      "id": "voie_cpu_sans_repli_complet",
+      "fichier": "src/catalogue/assemble.cpp",
+      "cherche": "    if (refusal.reason != Reason::memory_budget || chunks.size() != lots ||",
+      "remplace": "    if (true || refusal.reason != Reason::memory_budget || chunks.size() != lots ||",
+      "porte": "mhgp12_catalogue_device_unit_slices_cpu_budget",
+      "note": "voie CPU sans repli sur la voie complete quand la voie par tranches refuse avant de rendre l'arene : au pic exact de la voie complete, un petit nuage refuse la ou il tenait"
     }
   ]
 }

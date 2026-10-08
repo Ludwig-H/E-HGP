@@ -98,6 +98,9 @@ struct CatalogueDiagnostics {
   u64 rewritten_device = 0, rewritten_host = 0, device_bytes = 0, pinned_bytes = 0, allocations = 0;
   u64 arena_bytes = 0, transfer_ns = 0, transfer_h2d_bytes = 0, transfer_d2h_bytes = 0, transfer_ops = 0;
   u64 publish_ns = 0, outputs_ns = 0, outputs_bytes = 0, stream_chunks = 0;
+  // Tranche T1-d (catalogue en flux) : tranches de la fin d'etage par tranches de cles (0 : voie complete) ; lots de
+  // feuilles dont l'arene a ete rapatriee sur l'hote (voie appareil en flux ; 0 : arene residente).
+  u64 finish_slices = 0, arena_streamed = 0;
 };
 
 // Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction

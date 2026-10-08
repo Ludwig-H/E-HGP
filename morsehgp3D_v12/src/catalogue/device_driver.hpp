@@ -14,6 +14,7 @@
 
 #include "catalogue/device_leaves.hpp"
 #include "catalogue/finish_driver.hpp"
+#include "catalogue/finish_slices.hpp"
 #include "catalogue/traversal_driver.hpp"
 
 namespace mhgp12::catalogue_detail::dev {
@@ -41,6 +42,7 @@ struct DeviceState {
   typename B::template Array<BallRecord> records;
   typename B::template Array<SiteIdx> population;
   fin::FinishArrays<B> finish;
+  fin::SliceArrays<B> slices;  // arene d'une tranche (fin d'etage par tranches, T1-d)
 };
 
 // Comptes et diagnostics accumules sur les lots. Reprises sur l'hote (feuilles non resolues) par cause : plus de 32

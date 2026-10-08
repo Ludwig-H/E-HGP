@@ -24,12 +24,20 @@ mhgp12_add_unit(mhgp12_catalogue_unit SOURCES unit.cpp
 # device_fault. Tranche T2-d : chaine longue du repli exact (fenetres de cles doublees), premier toucher des pages
 # (intervalle respecte), sorties en flux sur un transit simule (sequence des tranches de l'executeur CUDA), refus sous
 # budget serre de l'hote et de l'appareil (transit simule ; device_open_budget : la vraie voie appareil sur G4).
+# Tranche T1-d (catalogue en flux) : fin d'etage par tranches de cles (identite contre la voie complete a 1, 2, 7 et
+# beaucoup de tranches, plan, jeux construits), voie CPU et voie appareil sous budgets serres (arene en flux).
 mhgp12_add_unit(mhgp12_catalogue_device_unit SOURCES device_unit.cpp device_finish_test.cpp device_pipeline_test.cpp
-                device_budget_test.cpp
+                device_budget_test.cpp slices_test.cpp
                 GROUPS level_words radix_and_scan stream_staging device_reasons finish_random finish_ties finish_plateau
-                       finish_long_chain finish_budget prefault_pages pipeline_witnesses pipeline_staged
-                       pipeline_budget pipeline_budget_reuse pipeline_resident device_open device_open_budget
+                       finish_long_chain finish_budget finish_sliced prefault_pages pipeline_witnesses pipeline_staged
+                       pipeline_budget pipeline_budget_reuse pipeline_resident slices_identity slices_plan
+                       slices_cpu_budget slices_device_budget slices_device_reuse device_open
+                       device_open_budget
                 LABELS fast TIMEOUT 300)
+
+# Arene en flux sur plusieurs lots de feuilles (tranche T1-d) : 150 000 sites a K5, six lots, porte longue.
+mhgp12_add_unit(mhgp12_catalogue_slices_long SOURCES slices_long_test.cpp GROUPS slices_streaming LABELS long
+                TIMEOUT 1800)
 
 # Session G4 de la tranche T1-b (bench/g4_catalogue_device.py) : juge a regle ecrite d'avance, auto-test par injections
 # (adopte, rejete, refuse) ; motifs des mutants appareil (bench/g4_catalogue_mutants.json) presents une seule fois.
@@ -46,6 +54,11 @@ mhgp12_python_gate(mhgp12_catalogue_g4_flux_judge 0 ${PROJECT_SOURCE_DIR}/bench/
                    LINE "juge_g4_t2dc_ok injections=39 admission=25 cohorte=8" LABELS fast)
 mhgp12_python_gate(mhgp12_catalogue_g4_flux_substitutions 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_flux.py
                    --check-substitutions ${PROJECT_SOURCE_DIR} LINE "substitutions_ok bras=4 mutant=1" LABELS fast)
+
+# Session G4 de la tranche T1-d (bench/g4_catalogue_t1d.py, catalogue en flux) : juge a regle ecrite d'avance (A/A,
+# A/B de la trame, voie en flux sous budgets de l'appareil), auto-test par injections.
+mhgp12_python_gate(mhgp12_catalogue_g4_t1d_judge 0 ${PROJECT_SOURCE_DIR}/bench/g4_catalogue_t1d.py --selftest-judge
+                   LINE "juge_g4_t1d_ok injections=15" LABELS fast)
 
 # Oracle borne : egalite avec l'etage B de reference/hgp12_ref sur la suite rapide (n <= 14) ; doublons refuses (D8).
 mhgp12_python_gate(mhgp12_catalogue_oracle 0 oracle.py ${catalogue_probe}

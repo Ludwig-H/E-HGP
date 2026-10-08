@@ -179,7 +179,10 @@ v11, contre 96 Go sur la carte de G4 (hôte : 180 Gio, 48 fils).
 - **Catalogue en flux par lots de feuilles** : le parcours des boîtes produit les feuilles dans l'ordre de Morton ; un
   lot tient dans un budget d'appareil fixé par la Session ; ses boules et incidences sont rapatriées dans des CSR de
   l'hôte, puis l'appareil est réutilisé. Un nuage de 60 000 sites tient en un seul lot : le contrat principal ne paie
-  rien pour le flux.
+  rien pour le flux. Tranche T1-d (8 octobre, [`CONTRAT_CATALOGUE.md`](CONTRAT_CATALOGUE.md) § 12) : l'arène n'est
+  rapatriée lot par lot que si le budget de l'appareil ne la porte plus, et la fin d'étage passe alors par tranches de
+  clés, coupées seulement entre voisins d'ordre F4 certain (même catalogue à l'octet) ; le front du parcours n'est pas
+  encore borné.
 - **Tour** : les événements de chaque ordre sont triés par rang (tri par base, parallèle) ; le noyau union-find
   (`LEM-T4`) est le seul passage séquentiel par ordre, et les $K$ ordres sont indépendants jusqu'aux verticales, donc
   traités en parallèle.

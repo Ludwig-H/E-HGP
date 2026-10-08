@@ -11,6 +11,7 @@
 
 #include "catalogue/device_pipeline.hpp"
 #include "catalogue/exec_host.hpp"
+#include "catalogue/finish_slices.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp12::device_test {
@@ -209,6 +210,56 @@ inline Result<Catalogue> staged_device(const Cloud& cloud, const CatalogueParams
                                        MemoryBudget& budget, u64 slot_size, u64 slot_count,
                                        CatalogueDiagnostics* diagnostics = nullptr) {
   return staged_device(cloud, params, pool, budget, budget, slot_size, slot_count, diagnostics);
+}
+
+// Arene de la voie CPU (lots de LeafStage) et grand livre, sans fin d'etage (tranche T1-d).
+struct LeafArena {
+  std::vector<catalogue_detail::Chunk> chunks;
+  u64 balls = 0;
+  CatalogueLedger ledger;
+};
+
+inline Outcome leaf_arena(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
+                          LeafArena& out) {
+  catalogue_detail::LeafStage stage(cloud, params, budget, pool);
+  const catalogue_detail::bfs::Params traversal{static_cast<u32>(params.kmax), params.leaf_size, params.max_leaf,
+                                                static_cast<u32>(kCoordBits)};
+  catalogue_detail::TraversalLedger walked;
+  catalogue_detail::TraversalDiagnostics front;
+  MHGP12_TRY(catalogue_detail::traverse(cloud, traversal, budget, pool, stage, walked, front));
+  out.chunks = std::move(stage.chunks());
+  out.balls = stage.balls();
+  out.ledger = catalogue_detail::make_ledger(walked, stage.totals().counts);
+  return {};
+}
+
+// Memoire de travail de toutes les boules de l'arene, au tarif d'une tranche (kSliceBytesPerBall, par incidence).
+inline u64 arena_slice_bytes(const LeafArena& a) {
+  u64 total = 0;
+  for (const auto& c : a.chunks)
+    for (const auto& r : c.records)
+      total += catalogue_detail::fin::kSliceBytesPerBall +
+               catalogue_detail::fin::kSliceBytesPerIncidence * (u64{r.p} + r.m);
+  return total;
+}
+
+// Voie par tranches de cles sur l'executeur Pool (memoire de travail slice_bytes), publiee comme la voie complete ;
+// slices : nombre de tranches.
+inline Result<Catalogue> sliced_catalogue(const Cloud& cloud, LeafArena& arena, int kmax, u64 slice_bytes,
+                                          MemoryBudget& budget, sched::Pool& pool, u64* slices = nullptr) {
+  namespace fin = catalogue_detail::fin;
+  PoolExecutor executor{pool, budget};
+  fin::FinishArrays<PoolExecutor> arrays;
+  fin::SliceArrays<PoolExecutor> sa;
+  Buffer<u64> ball_at, incidence_at;
+  fin::ArenaView view;
+  MHGP12_TRY(fin::arena_bases(arena.chunks, ball_at, incidence_at, view, budget));
+  const fin::SliceInput in{cloud.x().data(), cloud.y().data(), cloud.z().data(), cloud.sites(), view, &arena.chunks};
+  fin::FinishOutput out;
+  fin::FinishStats stats;
+  MHGP12_TRY(fin::finish_sliced(executor, arrays, sa, in, out, slice_bytes, budget, pool, stats));
+  if (slices != nullptr) *slices = stats.slices;
+  return catalogue_detail::Assembly::adopt(out, static_cast<Order>(kmax), arena.ledger);
 }
 
 // Deux catalogues identiques : meme export (empreinte), meme grand livre, memes niveaux (numerateurs et
