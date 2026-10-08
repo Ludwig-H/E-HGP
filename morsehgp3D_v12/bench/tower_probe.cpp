@@ -1,8 +1,10 @@
 // Sonde de l'etage G de la tour (tranche T2) : lit une entree u32le et ses ids.u32le (ou un nuage synthetique),
 // construit l'index, le catalogue Cat_K et la resolution (module tower, voie CPU de reference), ecrit une ligne JSON
 // par passe et par ordre (compteurs de l'objet et du travail, diagnostics physiques), et, sur demande, l'empreinte
-// de la resolution et un export (exportateur de TEST, hors du chemin chronometre) : cat.bin (MHGP12DP genre 1, export
-// du catalogue) et res.bin (MHGP12DP genre 4, << resolution >>), dans un dossier transactionnel.
+// de l'OBJET de la resolution (resolution_sha256 : naissances, cellules, traces, cibles, compteurs de l'objet ; les
+// compteurs du travail n'y entrent pas, bench/tower_export.hpp) et un export (exportateur de TEST, hors du chemin
+// chronometre) : cat.bin (MHGP12DP genre 1, export du catalogue) et res.bin (MHGP12DP genre 4, << resolution >>, tous
+// les compteurs), dans un dossier transactionnel.
 //
 //   mhgp12_tower_probe <xyz.u32le> <ids.u32le> [options]
 //   mhgp12_tower_probe --uniform=N,GRAINE,BITS [options]

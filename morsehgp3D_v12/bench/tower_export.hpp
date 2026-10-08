@@ -2,8 +2,15 @@
 // fixe, et fichier res.bin au format MHGP12DP version 1, genre 4 << resolution >> (disposition de
 // microbancs/mes_m3_m4_tour/common/format.hpp : en-tete de 64 octets ; section = etiquette de 8 octets, taille d'un
 // element u32, reserve u32 nul, nombre d'elements u64, elements, zeros jusqu'a un multiple de 8 octets). Lu par
-// tests/tower/g_dump.py. Empreinte : SHA-256 des octets exacts des sections de cet export, en-tete exclu (portes de
-// determinisme ; memes empreintes aux trois profils sur les memes coordonnees).
+// tests/tower/g_dump.py ; res.bin porte TOUS les compteurs (section CNTR : objet puis travail).
+//
+// Empreinte de la resolution (portes de determinisme et d'echelle ; memes empreintes aux trois profils sur les memes
+// coordonnees) : SHA-256 des sections de l'OBJET seulement (CONTRAT_TOUR.md, paragraphe 8 : seule la classe << objet >>
+// fait l'empreinte), en-tete exclu : naissances (cles, rangs), cellules (boules, rangs, drapeaux, decalages), traces,
+// cibles (sous la politique de saut declaree, v12_indices) et, a la place de CNTR, une section COBJ des seuls compteurs
+// de l'objet. Les compteurs du travail (sondes, routes, censuses, sauts, chaines...) restent publies dans les lignes
+// << ordre >> de la sonde et dans res.bin, HORS de l'empreinte : un levier qui change le travail sans changer l'objet
+// garde l'empreinte ; les portes comparent le travail ligne a ligne entre nombres de fils (g_determinism.py).
 #pragma once
 
 #include <array>
@@ -81,9 +88,10 @@ Outcome column(Out& out, std::string_view tag, int k, std::span<const T> values)
 }
 
 // header = false : sections seules (empreinte : l'en-tete porte le profil et la trame, les sections sont les memes aux
-// profils 21, 24 et 32 sur les memes coordonnees).
+// profils 21, 24 et 32 sur les memes coordonnees) ; object_only : section COBJ (compteurs de l'objet) au lieu de CNTR.
 template <class Out>
-Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view frame, Out& out, bool header = true) {
+Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view frame, Out& out, bool header = true,
+                  bool object_only = false) {
   if (frame.size() >= 24) return fail(Reason::parameter_out_of_range);
   constexpr u32 kPerOrder = 9;
   std::array<u8, 64> h{};
@@ -109,7 +117,8 @@ Outcome write_all(const Cloud& cloud, const Resolution& r, std::string_view fram
     MHGP12_TRY(column(out, "TMSK", k, o.trace_masks()));
     MHGP12_TRY(column(out, "TARG", k, o.targets()));
     const auto v = counter_values(o.counters());
-    MHGP12_TRY(column(out, "CNTR", k, std::span<const u64>(v.data(), v.size())));
+    if (object_only) MHGP12_TRY(column(out, "COBJ", k, std::span<const u64>(v.data(), kObjectCounters)));
+    else MHGP12_TRY(column(out, "CNTR", k, std::span<const u64>(v.data(), v.size())));
   }
   return {};
 }
@@ -133,9 +142,10 @@ inline Outcome write_resolution(const Cloud& cloud, const Resolution& r, std::st
   return detail::write_all(cloud, r, frame, out);
 }
 
+// Empreinte de l'OBJET de la resolution (voir l'en-tete) : sections sans en-tete, COBJ au lieu de CNTR.
 inline Result<io::Digest> resolution_digest(const Cloud& cloud, const Resolution& r, std::string_view frame) {
   detail::DigestSink sink;
-  MHGP12_TRY(detail::write_all(cloud, r, frame, sink, false));
+  MHGP12_TRY(detail::write_all(cloud, r, frame, sink, false, true));
   return sink.sha.finish();
 }
 

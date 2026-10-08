@@ -24,13 +24,16 @@ mhgp12_python_gate(mhgp12_tower_oracle 0 g_oracle.py ${tower_probe}
                    LINE "g_oracle_ok nuages=342 doublons_refuses=34 cibles=21225 cibles_cellule=2359 cellules=7821 inertes=876"
                    LABELS oracle fast TIMEOUT 300)
 
-# Determinisme et invariants globaux a l'echelle (jamais un juge exhaustif) : la sonde a 1 et 8 fils, empreinte de la
-# resolution (naissances, cellules, traces, cibles, compteurs de l'objet et du travail) et lignes par ordre identiques ;
-# un controle de decroissance par plus petite boule et par succes de sonde ; une chaine par representant. Nuages
-# synthetiques de la porte d'echelle du catalogue (--uniform=N,20261007,18), puis la trame ng00 (MHGP12_DATA_DIR).
-set(tower_scale_8000 "empreinte=5304d1c8fe7c25ff naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896")
-set(tower_scale_16000 "empreinte=fdd42b4e0fba5d08 naissances=772572 cellules=1238402 representants=3674998 cibles_cellule=774576")
-set(tower_scale_32000 "empreinte=9fd0fd9e98fa5305 naissances=1580630 cellules=2540941 representants=7550507 cibles_cellule=1594813")
+# Determinisme et invariants globaux a l'echelle (jamais un juge exhaustif) : la sonde a 1 et 8 fils, empreinte de
+# l'OBJET de la resolution (naissances, cellules, traces, cibles, compteurs de l'objet : CONTRAT_TOUR.md, paragraphe 8)
+# et compteurs de l'objet identiques ; compteurs du travail identiques ligne a ligne, hors empreinte ; un controle de
+# decroissance par plus petite boule et par succes de sonde ; une chaine par representant. Nuages synthetiques de la
+# porte d'echelle du catalogue (--uniform=N,20261007,18), puis la trame ng00 (MHGP12_DATA_DIR). Empreintes de l'objet
+# du 7 octobre (T2-c) : exports res.bin et cat.bin identiques a l'octet a ceux d'avant ; seule la definition de
+# l'empreinte a change (anciennes, travail compris : 5304d1c8, fdd42b4e, 9fd0fd9e, 231d826b).
+set(tower_scale_8000 "empreinte=a40f1b2ef8547269 naissances=376649 cellules=600630 representants=1780799 cibles_cellule=370896")
+set(tower_scale_16000 "empreinte=cf7c7745fcb4ae6e naissances=772572 cellules=1238402 representants=3674998 cibles_cellule=774576")
+set(tower_scale_32000 "empreinte=d1f08fd0dbdf48eb naissances=1580630 cellules=2540941 representants=7550507 cibles_cellule=1594813")
 foreach(n 8000 16000 32000)
   mhgp12_python_gate(mhgp12_tower_scale${n} 0 g_determinism.py ${tower_probe} synth_u${n}_k5
                      --uniform=${n},20261007,18 --k=5 --threads=1,8
@@ -38,7 +41,7 @@ foreach(n 8000 16000 32000)
 endforeach()
 mhgp12_python_gate(mhgp12_tower_determinism_lidar_ng00_k5 0 g_determinism.py ${tower_probe} lidar_ng00_k5
                    --data=lidar_ng00 --k=5 --threads=1,8
-                   LINE "g_determinism_ok cas=lidar_ng00_k5 fils=1,8 empreinte=231d826bb0d4fe57 naissances=897776 cellules=1306872 representants=3622258 cibles_cellule=650932"
+                   LINE "g_determinism_ok cas=lidar_ng00_k5 fils=1,8 empreinte=e5a81154fb1b15f1 naissances=897776 cellules=1306872 representants=3622258 cibles_cellule=650932"
                    LABELS lidar long TIMEOUT 1800)
 
 # Juge du determinisme contre ses faux succes (contre-lecture de l'auditeur Codex du 7 octobre, CST-0018) : la fausse
@@ -52,6 +55,12 @@ mhgp12_python_gate(mhgp12_tower_juge_temoin 0 g_determinism.py ${tower_fausse_so
                    ENV MHGP12_FAUSSE_SONDE=ok)
 foreach(mode k1_seul ordre_double empreinte_courte sans_sortie sortie_ordre_booleen sortie_ordre_flottant)
   mhgp12_python_gate(mhgp12_tower_juge_refus_${mode} 2 g_determinism.py ${tower_fausse_sonde} fausse
+                     --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
+endforeach()
+# L'empreinte ne porte que l'objet (T2-c) : un ecart du travail ou de l'objet entre 1 et 8 fils, a empreinte egale,
+# reste un ecart (code 1).
+foreach(mode travail_8 objet_8)
+  mhgp12_python_gate(mhgp12_tower_juge_ecart_${mode} 1 g_determinism.py ${tower_fausse_sonde} fausse
                      --uniform=10,1,18 --k=5 --threads=1,8 LABELS fast ENV MHGP12_FAUSSE_SONDE=${mode})
 endforeach()
 

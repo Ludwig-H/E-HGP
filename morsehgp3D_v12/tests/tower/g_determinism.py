@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Determinisme et invariants globaux de l'etage G a l'echelle (CONTRAT_TOUR.md, paragraphes 8 et 9.5-9.6) : la sonde
-joue la meme entree a plusieurs nombres de fils ; l'empreinte de la resolution (naissances, cellules, traces, cibles,
-compteurs de l'objet et du travail : bench/tower_export.hpp) et les lignes par ordre doivent etre identiques ; par
-ordre, invariants globaux (jamais un juge exhaustif) : un controle de decroissance par plus petite boule et par succes
-de sonde, une longueur de chaine par representant, chaque representant termine par une sonde ou un arret.
+joue la meme entree a plusieurs nombres de fils. L'EMPREINTE de la resolution ne porte que l'objet (naissances,
+cellules, traces, cibles, compteurs de l'objet : bench/tower_export.hpp, paragraphe 8) ; elle et les compteurs de
+l'objet doivent etre identiques. Les compteurs du TRAVAIL (politique fixe, ordre canonique) sont hors de l'empreinte
+mais doivent etre identiques eux aussi (W1 = W48), compares ligne a ligne, ordre par ordre ; un ecart dit lequel des
+deux differe. Par ordre, invariants globaux (jamais un juge exhaustif) : un controle de decroissance par plus petite
+boule et par succes de sonde, une longueur de chaine par representant, chaque representant termine par une sonde ou un
+arret.
 Admission : une passe tour_g conforme a K/fils, tous les ordres 1..min(K,sites), naissances k1 = sites, compteurs
 entiers non negatifs, histogrammes de 16 cases et SHA-256 complet ; au moins deux nombres de fils distincts.
 Le generateur deduplique : --uniform=N borne les sites par N sans imposer leur egalite. Le digest complet est compare
@@ -160,9 +163,17 @@ def main(argv):
             return 3
         if first is None:
             first = (orders, digest)
-        elif (orders, digest) != first:
-            print('g_determinism_ecart fils=%d : sorties ou compteurs differents de %d fils' % (w, threads[0]))
+            continue
+        if digest != first[1] or [r['objet'] for r in orders] != [r['objet'] for r in first[0]]:
+            print('g_determinism_ecart fils=%d : objet (empreinte ou compteurs de l\'objet) different de %d fils'
+                  % (w, threads[0]))
             return 1
+        for mine, ref in zip(orders, first[0]):
+            if mine['travail'] != ref['travail']:
+                keys = sorted(key for key in ref['travail'] if mine['travail'][key] != ref['travail'][key])
+                print('g_determinism_ecart fils=%d : travail de l\'ordre %d different de %d fils, hors empreinte (%s)'
+                      % (w, mine['k'], threads[0], ','.join(keys)))
+                return 1
     orders, digest = first
     total = dict((key, sum(r['objet'][key] for r in orders)) for key in ('births', 'cells', 'representatives'))
     cell_targets = sum(r['travail']['cell_stops'] for r in orders)

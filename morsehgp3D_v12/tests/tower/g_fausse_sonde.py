@@ -3,8 +3,10 @@
 contre-lecture de l'auditeur Codex du 7 octobre (reçu audit_t2g_prepublication_20261007) ; le juge doit les refuser
 (code 2). Mode lu dans MHGP12_FAUSSE_SONDE : k1_seul (sortie tronquee apres l'ordre 1, ligne CTest imitee),
 ordre_double, empreinte_courte, sans_sortie (ligne exit absente), sortie_ordre_booleen et sortie_ordre_flottant
-(ordre de la ligne exit False ou 0.0, egaux a 0 pour Python). Arguments de la vraie sonde acceptes et ignores, sauf
---threads, recopie dans la passe. Bibliotheque standard seule.
+(ordre de la ligne exit False ou 0.0, egaux a 0 pour Python) ; et deux ecarts entre nombres de fils que le juge doit
+voir (code 1) a empreinte egale : travail_8 (un compteur du travail differe a 8 fils, hors empreinte) et objet_8 (un
+compteur de l'objet differe a 8 fils). Arguments de la vraie sonde acceptes et ignores, sauf --threads, recopie dans
+la passe. Bibliotheque standard seule.
 """
 import json
 import os
@@ -35,6 +37,10 @@ def main(argv):
     ks = [1] if mode == 'k1_seul' else [1, 1] + list(range(2, kmax + 1)) if mode == 'ordre_double' else \
         list(range(1, kmax + 1))
     rows += [order(k, sites) for k in ks]
+    if threads == 8 and mode == 'travail_8':
+        rows[3]['travail']['census_sites'] = 1  # ordre 3 : travail different, objet et empreinte egaux
+    if threads == 8 and mode == 'objet_8':
+        rows[3]['objet']['inert_cells'] = 1  # ordre 3 : objet different, empreinte egale
     rows.append(dict(phase='digest', resolution_sha256=('ab' * 8) if mode == 'empreinte_courte' else 'ab' * 32))
     if mode != 'sans_sortie':
         order_value = False if mode == 'sortie_ordre_booleen' else 0.0 if mode == 'sortie_ordre_flottant' else 0
