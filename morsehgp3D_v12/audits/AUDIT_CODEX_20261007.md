@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-8 octobre 2026, base publiée **`f6eaa4a66`**.
+8 octobre 2026, base publiée **`9c9c25893`**.
 Cadre : `exploration_v12_hors_registre`, `cpu_reference ; cuda_g4 pour le catalogue`,
 `full_pi0`, `quantized_u21_input_only`, `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -29,19 +29,13 @@ FULL puis D6 ; aucun résultat rapatrié au constat du 8 octobre 02:36:54 UTC.
 
 **Livraisons et qualifications.**
 
-- **Gc `4df326cc8` + `10050a96e`** : [16 sources tour identiques au prototype](../receipts/audit_reponses_20261008/gc_livraison/README.md),
-  cœur/catalogue inchangés. Empreinte objet et contrôle du travail séparés ; index parallèle, file de sondes G-L7.
-  J : 344 sources conformes, 675 portes et six LiDAR passées ; les 26 différentielles v10 locales sont absentes
-  sur G4. Campagne des 18 mutants passée. G-L7 et index adoptés, G-L5 rejeté. Pilote : défaut CLI huit maintenu,
-  plan G4 explicite dix ; erratum de l'ancien conducteur local conservé dans le registre.
-- **TMVR + Gc** : [repo6 u21](../receipts/audit_tmv_repo6_u21_20261008/README.md), arbre 382 fichiers,
-  690 tests + une sentinelle sautée, MES-M0 neuf cas × deux modes, EMST et neuf chaînes natives CPU conformes.
-  [27 mutants tués par code](../receipts/audit_tmv_repo6_mutants_20261008/README.md), 685 contrôles du pic passés.
-  [Livraison `7398aed7d`](../receipts/audit_reponses_20261008/tmvr_livraison/README.md) : 381/382 fichiers identiques,
-  seul PLAN diffère ; 716 portes passées, une LiDAR sautée, dont les 16 nouvelles TMVR passées.
-  Source qualifiée transférée explicitement ; binaire vivant non rétro-certifié. Budget fini/cache et FULL GPU ouverts.
-  Campagne repo6 arrêtée au début de u24, profils larges non qualifiés. [Repo5 historique](../receipts/audit_tmv_repo5_profils_20261008/README.md) :
-  u24 clos, u32 interrompu ; aucune qualification transférée à l'assemblage.
+- **Gc `4df326cc8` + `10050a96e`** : [sources livrées vérifiées](../receipts/audit_reponses_20261008/gc_livraison/README.md).
+  J valide index parallèle et file G-L7 ; G-L5 rejeté. Défaut CLI huit et collecte C restent ouverts.
+- **TMVR `7398aed7d`** : [livraison identique au prototype](../receipts/audit_reponses_20261008/tmvr_livraison/README.md).
+  MES-M0 neuf cas × deux modes, neuf chaînes CPU conformes sémantiquement à la v11, W1/W8 identiques, EMST.
+  Intégration : 716 portes passées + une LiDAR sautée ; [27 mutants](../receipts/audit_tmv_repo6_mutants_20261008/README.md),
+  685 contrôles du pic. Budget fini/cache, FULL GPU et u24/u32 de cet assemblage restent ouverts.
+  Repo6 arrêté pendant la construction u24 ; aucun résultat de repo5 transféré implicitement.
 - **D6 `0018/0207`** : [livraison `e37fd8935` vérifiée](../receipts/audit_reponses_20261008/d6_livraison_stricte/README.md),
   deux schémas exacts et admission du plan ; 27 corruptions et quatre plans fautifs refusés. Essai local ng00 K3 :
   huit journaux/seize passes relus, sans qualification de temps. **K conserve l’ancien lecteur**, sans transfert.
@@ -54,23 +48,23 @@ FULL puis D6 ; aucun résultat rapatrié au constat du 8 octobre 02:36:54 UTC.
   code de commande zéro insuffisant. Aucun temps brut déclaré faux ; contre-lecteur strict en préparation.
 - **R** : [classes à cellule unique](../receipts/audit_reponses_20261008/registre_classe_unique/README.md) :
   `q=d+1` autorise la copie des enfants sans recherche historique ni tri, mémoire temporaire réduite.
-  Preuve, 147 cas et neuf fixtures ; sur les comptes ng00 existants, au moins 78,81 % des requêtes R K5
-  et 71,95 % K10 évitables. Aucun pourcentage de temps ni implantation native acquis.
+  Preuve et modèle ; sur les comptes ng00, au moins 78,81 % des requêtes K5 et 71,95 % K10 évitables.
+  Aucun pourcentage de temps ni implantation native acquis. Comparer aussi les lignes/CSR de R :
+  [FUL1](../src/tower/export_full.cpp) ne les encode pas ; la porte native `branches` les compare à la coupe ouverte.
 - **Census G** : [garde resserrée proposée](../receipts/audit_reponses_20261008/garde_census/README.md),
-  preuve MEB, 1 617 points/2 470 boîtes exacts, nouveau témoin de débordement intermédiaire. Deux lignes exécutables,
-  voies conservées ; promotions plus fines prouvées séparément. Anciens mutants à reclasser, gain G4 à mesurer.
+  preuve MEB, modèles exacts et témoin de débordement intermédiaire. Voies du patch conservées ;
+  promotions plus fines prouvées séparément. Anciens mutants à reclasser, adoption et gain G4 à mesurer.
 - **`0239`** : [tri pur puis contrôle adjacent](../receipts/audit_reponses_20261007/comparateur_naissances/README.md)
   livré en `7398aed7d` ; faux doublon par auto-comparaison sous `_GLIBCXX_DEBUG`, configuration native non jouée.
 - **`0240`** : [historique altéré accepté par le validateur](../receipts/audit_foret_validation_20261008/README.md),
   aucune mauvaise sortie produit démontrée. [Certificat de toutes les coupes](../receipts/audit_reponses_20261008/histoire_coupes_0240/README.md)
-  en O(E+B log B), preuve et 27 238 historiques bornés ; gardes et certificat non intégrés. Le header livré
-  déclare sa limite, le contrat global reste à satisfaire ; aucune provenance union-find certifiée par le lemme.
+  en O(E+B log B), preuve et modèle ; gardes/certificat non intégrés. Header désormais explicite,
+  contrat global encore ouvert ; le lemme ne certifie pas la provenance union-find.
 - **`0104`** : [D2/MEMO natifs acquis](../receipts/audit_reponses_20261008/d2_memo/README.md) ;
   [mutant de date adapté à Gc](../receipts/audit_reponses_20261008/d2_memo_mutant_gc/README.md), exécution causale attendue.
-- [Translation TMVR](../receipts/audit_reponses_20261008/translation_tmvr/README.md) : permutation Morton réelle,
-  16 traces/13 classes, 30 requêtes et sept verticales exactes. Porte native proposée ; TARG général à comparer
-  via la composante ouverte, pas comme indice brut. `0105/0107` clos sur la livraison u21 : domaine refusé
-  par `verticales`, numérotation canonique, mutant et empreintes vérifiés ; aucune clôture implicite de `0240`.
+- [Translation TMVR](../receipts/audit_reponses_20261008/translation_tmvr/README.md) : modèle vérifié, porte native proposée ;
+  comparer TARG via la composante ouverte. `0105/0107` clos sur u21 (domaine, numérotation, mutant et empreintes),
+  indépendamment de `0240`.
 
 `0009` clos (repli de feuilles distribué et compté) ; `0008` ouvert (admission à un seul pilote).
 T7 natif, capacités 256/64 et compactage des réparations GPU restent suivis dans le registre et les reçus liés.

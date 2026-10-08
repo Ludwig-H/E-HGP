@@ -1,0 +1,99 @@
+{
+  "verification": {
+    "source_commit": "9c9c25893ca36022b702a55e837afac7794842a9",
+    "constats": 75,
+    "changed_cells": 11,
+    "first_nine_columns_and_states_equal": true,
+    "unselected_rows_equal": true,
+    "old_texts_and_all_proof_links_preserved": true,
+    "before_bytes": 51460,
+    "after_bytes": 48272,
+    "saved_bytes": 3188,
+    "channel_before_bytes": 63886,
+    "channel_after_bytes": 60698,
+    "proof_links_archived": 31,
+    "rows": [
+      {
+        "id": "CST-0003",
+        "before_bytes": 591,
+        "after_bytes": 235,
+        "proof_links_archived": 1
+      },
+      {
+        "id": "CST-0013",
+        "before_bytes": 643,
+        "after_bytes": 259,
+        "proof_links_archived": 3
+      },
+      {
+        "id": "CST-0014",
+        "before_bytes": 525,
+        "after_bytes": 241,
+        "proof_links_archived": 1
+      },
+      {
+        "id": "CST-0023",
+        "before_bytes": 472,
+        "after_bytes": 234,
+        "proof_links_archived": 3
+      },
+      {
+        "id": "CST-0108",
+        "before_bytes": 563,
+        "after_bytes": 262,
+        "proof_links_archived": 2
+      },
+      {
+        "id": "CST-0204",
+        "before_bytes": 451,
+        "after_bytes": 221,
+        "proof_links_archived": 3
+      },
+      {
+        "id": "CST-0208",
+        "before_bytes": 553,
+        "after_bytes": 227,
+        "proof_links_archived": 3
+      },
+      {
+        "id": "CST-0224",
+        "before_bytes": 437,
+        "after_bytes": 256,
+        "proof_links_archived": 2
+      },
+      {
+        "id": "CST-0233",
+        "before_bytes": 669,
+        "after_bytes": 246,
+        "proof_links_archived": 6
+      },
+      {
+        "id": "CST-0234",
+        "before_bytes": 504,
+        "after_bytes": 251,
+        "proof_links_archived": 4
+      },
+      {
+        "id": "CST-0238",
+        "before_bytes": 441,
+        "after_bytes": 229,
+        "proof_links_archived": 3
+      }
+    ]
+  },
+  "normal_optimized_identical": true,
+  "patch_check_and_application_on_isolated_pin_copy": true,
+  "check_constats_sha256": "852eca10a507f2bed8070dd8935451185619be5c483c8fc0c366ea9b85c7f644",
+  "hygiene_on_isolated_pin_copy": "OK: 75 constats, canal 60698 octets, cohérence structurelle seulement",
+  "main_mutated": false,
+  "patch_sha256": "1da6fce1dccffa085b3f97ee756e6ce2688f2d099fc23e51d7e74e75f79fc96f",
+  "scope": "Conservation documentaire, structure et liens ; aucune qualification produit.",
+  "root_application": {
+    "normal_optimized_identical": true,
+    "registry_sha256": "b0fdd9224be2445aa95d362607c34e7d8689e295e2f09fa431ae0847ed62d3d4",
+    "first_nine_columns_and_states_equal": true,
+    "channel_bytes": 59877,
+    "constats": 75,
+    "note_independently_reduced": true
+  }
+}

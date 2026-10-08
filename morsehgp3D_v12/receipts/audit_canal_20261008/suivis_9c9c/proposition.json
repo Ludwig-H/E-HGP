@@ -1,0 +1,89 @@
+{
+  "source_commit": "9c9c25893ca36022b702a55e837afac7794842a9",
+  "source_path": "morsehgp3D_v12/audits/CONSTATS.md",
+  "source_sha256": "0300c6974c9127827fa6354108d303df9b06d4469eb7b4161558a8a416699cb4",
+  "source_bytes": 51460,
+  "source_channel_bytes": 63886,
+  "expected_after_sha256": "b0fdd9224be2445aa95d362607c34e7d8689e295e2f09fa431ae0847ed62d3d4",
+  "expected_after_bytes": 48272,
+  "receipt": "morsehgp3D_v12/receipts/audit_canal_20261008/suivis_9c9c",
+  "rows": [
+    {
+      "id": "CST-0003",
+      "columns_1_9_sha256": "e9d2d2bdbb6c7fcb3226e7eff14629fa669859af8e4ce6ebeb4b984bce0775b7",
+      "before_sha256": "b5b8ef4c77f70b563dd368be7f79f0dc2c8040d9c9ae12a9da2371f14d0d3649",
+      "before_bytes": 591,
+      "after": " LiDAR absent : `Skipped` distinct de Passed ; jeton réservé au précontrôle. Vrai CTest : 69 contrôles normal/−O conformes (`274592a30`). [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0003). "
+    },
+    {
+      "id": "CST-0013",
+      "columns_1_9_sha256": "78a3a56b5b4c7cd23504daec20bb258356637cd68573f75dfedbc56d672e8064",
+      "before_sha256": "0eb846776f892f843d95e76228af6a63b870a17c81da34b020b09fac626b348e",
+      "before_bytes": 643,
+      "after": " E/D2 et SUP-KRUSKAL corrigés ; JUG-EMST livré. Contre-audit ordre 1 : 24 nuages, 64 CLI/mode ; annonces 308/neuf grands non contre-certifiées. PointId : `CST-0232`. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0013). "
+    },
+    {
+      "id": "CST-0014",
+      "columns_1_9_sha256": "ebec680b6a32da88ab005f7bbd5306dc20d80716019ee82ff2beb7a1a8394214",
+      "before_sha256": "ed1ce278d155dd572794d7bc4af4fb06f8e34ada13da31bae63ff2d32e6046c6",
+      "before_bytes": 525,
+      "after": " Garde textuelle CMake `[recus]`, sans confinement général des lectures ; contre-audit `274592a30` : 145 contrôles, style de 217 fichiers conforme. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0014). "
+    },
+    {
+      "id": "CST-0023",
+      "columns_1_9_sha256": "9fdb03ae0c50270add71cc924c14ea5d99a6fe749655c045f91be3f96b7119f5",
+      "before_sha256": "9d2217073b97c46bd3affa28e355a2f90f0ca4aeec3ae3866912683be992b5df",
+      "before_bytes": 472,
+      "after": " Contrat local et centres certifiés corrigés ; socle CPU u32 testé (`c3de9d73d`). Catalogue/GPU, exports et entrée D8 restent à qualifier. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0023). "
+    },
+    {
+      "id": "CST-0108",
+      "columns_1_9_sha256": "3c44c0d773d669465ce062cec623fb478e2e920fea070921fa5a45ffdfbc8e00",
+      "before_sha256": "0537d896b22b37dda134d8ee2bc7127f722c97d35a30177fa39a66bcd75b8f07",
+      "before_bytes": 563,
+      "after": " NUM-CERTIFIEE corrigé ; socle CPU u32 testé. Voisins/Morton : garde avant prédicat mixte, sans certificat intérieur implicite ; mutant et appelant natif à qualifier. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0108). "
+    },
+    {
+      "id": "CST-0204",
+      "columns_1_9_sha256": "054acfcb1dfe5291e05c8d695fa28fab6dede3cbe09669ea94fc8d728c86c27a",
+      "before_sha256": "a847240ecffca267b9836228e718188f6b26c558cb07d8974a4b31a959bf3d93",
+      "before_bytes": 451,
+      "after": " Contrat s33/bornes64 corrigé ; porte M5 hôte et socle CPU u32 conformes. Qualification du raccord catalogue/GPU encore ouverte. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0204). "
+    },
+    {
+      "id": "CST-0208",
+      "columns_1_9_sha256": "468f5023967353cf5fcbddd37bbff902766985669fe234d98827acd0ef271ebe",
+      "before_sha256": "c4e633b464959fbb572f1037ce46bf088984ebec6493defb245845fadb695342",
+      "before_bytes": 553,
+      "after": " Budget 2s+4 et seuil i64 s29 corrigés ; M5 et primitive CPU u32 testés aux paliers/dépassement. Appelant catalogue/GPU à qualifier. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0208). "
+    },
+    {
+      "id": "CST-0224",
+      "columns_1_9_sha256": "61e9a6b7af32c2c93575624828f71a70158c18607e0c10ec9feb6f30f5b1491b",
+      "before_sha256": "ea23bdbd8c1225a44723dcbd7c242df01b403fb3c5dede403814ae92e0a156b2",
+      "before_bytes": 437,
+      "after": " Arbre expurgé contrôlé avant copie et erreurs nettoyées ; 21 appels (`274592a30`), collisions/pannes/destinations existantes : refus et préservation conformes. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0224). "
+    },
+    {
+      "id": "CST-0233",
+      "columns_1_9_sha256": "43cef70da54b1bd124ca01f65195a7bca2056cfded610acddfba1bdd686fd554",
+      "before_sha256": "610b82d2c441aaba581c48677bd427ef82e7f6c5db53ac3ae0f1dcf4d091d56f",
+      "before_bytes": 669,
+      "after": " Gc retire la table 16 octets. I : catalogue GPU K5 31–38 ms, CPU 281–334 ms, sans ablation. Compactage des chaînes proposé, aucun gain temps acquis. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0233). "
+    },
+    {
+      "id": "CST-0234",
+      "columns_1_9_sha256": "392e002bde66c89d9edb34703aa5f1d413f0b0daa4b06668b6d0417ecd3feb9c",
+      "before_sha256": "b06cc21fdc40a210616594a4eee9c43d7accb6afe7ba36923fff0191b988ede1",
+      "before_bytes": 504,
+      "after": " B livré, sources testées identiques ; local : 15 mutants, ASan/UBSan 44/44, TSan 12/12, CUDA/cache actif désactivés. I mesure A/B sans isoler le gain de B. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0234). "
+    },
+    {
+      "id": "CST-0238",
+      "columns_1_9_sha256": "1de54c32a1249fee3e4bd9ceeb7f803b369702409434be3a41f083e05a4b0b61",
+      "before_sha256": "2085a0c03a453615b4597f691cda47f1998cc513331facd684d713097dd52936",
+      "before_bytes": 441,
+      "after": " Livraison `28cf75cd1` : cinq cohortes + cinq cas normal/−O. Clôture séparation/cohorte seulement ; limite du coût fixe H conservée. [Preuves et historique](../receipts/audit_canal_20261008/suivis_9c9c/README.md#cst-0238). "
+    }
+  ]
+}
