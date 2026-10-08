@@ -1,0 +1,4 @@
+{"phase":"open","status":"ok","reason":"none","wall_ns":115920585,"budget_appareil":"separe"}
+{"phase":"full","pass":0,"trame":"forinst_scion_plot61","voie":"device","status":"ok","coord_bits":21,"kmax":5,"threads":48,"sites":3589247,"wall_ns":43092740837,"etapes_ns":{"P":265901868,"C":6004005861,"G":14721534538,"raccord":3250,"TMVR":22101295100,"T":14830802253,"M":1743325555,"V":587298245,"R":4201046689},"c_ns":{"parcours":231230989,"feuilles":1734382591,"emission":429660986,"fin_etage":1317775794,"transferts":1829545351,"publication":456679000},"g_ns":{"tables":1056888834,"resolution":12959461273},"hors_mur_ns":{"validation":16053405484,"empreinte":0},"pic_octets":63787597001,"cpu_ns":994162089000,"rss_max_octets":63936311296,"appareil_octets":87152692652,"epinglee_octets":67108864,"pic_appareil_octets":87152692652}
+{"phase":"liberation","pass":0,"liberation_ns":1836316908}
+{"phase":"exit","status":"ok","reason":"none"}

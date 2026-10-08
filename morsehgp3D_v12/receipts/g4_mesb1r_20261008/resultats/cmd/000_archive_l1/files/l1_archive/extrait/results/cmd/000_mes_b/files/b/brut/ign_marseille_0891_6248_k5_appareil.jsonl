@@ -1,0 +1,4 @@
+{"phase":"open","status":"ok","reason":"none","wall_ns":115396521,"budget_appareil":"separe"}
+{"phase":"full","pass":0,"trame":"ign_marseille_0891_6248","voie":"device","status":"ok","coord_bits":21,"kmax":5,"threads":48,"sites":6709045,"wall_ns":31889698518,"etapes_ns":{"P":443288942,"C":4054176647,"G":6230245867,"raccord":3210,"TMVR":21161983592,"T":15608847037,"M":1363612906,"V":607555402,"R":2974117783},"c_ns":{"parcours":287634790,"feuilles":1082846387,"emission":401738940,"fin_etage":1106238075,"transferts":1041258505,"publication":129237940},"g_ns":{"tables":780882764,"resolution":4964695521},"hors_mur_ns":{"validation":14207397622,"empreinte":0},"pic_octets":40981606857,"cpu_ns":522175006000,"rss_max_octets":41182470144,"appareil_octets":59084130680,"epinglee_octets":67108864,"pic_appareil_octets":59084130680}
+{"phase":"liberation","pass":0,"liberation_ns":1183096025}
+{"phase":"exit","status":"ok","reason":"none"}
