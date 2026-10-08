@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 900s python3 $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/src/morsehgp3D_v12/microbancs/mes_g_appareil/pilote_g_appareil.py tout --src $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/src --produit $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/build --travail $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/build/g_app --donnees $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/data --sortie $HOME/ehgp-v12/ehgp-v12.1cXF56nCFZ/results/cmd/001_g_app_pilote/files/g_app --fils 48 --processus 5 --passes 5 --delai 120"
+	User time (seconds): 1039.91
+	System time (seconds): 38.45
+	Percent of CPU this job got: 1581%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:08.17
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8408080
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 808
+	Minor (reclaiming a frame) page faults: 17748039
+	Voluntary context switches: 498355
+	Involuntary context switches: 26573
+	Swaps: 0
+	File system inputs: 216808
+	File system outputs: 95808
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

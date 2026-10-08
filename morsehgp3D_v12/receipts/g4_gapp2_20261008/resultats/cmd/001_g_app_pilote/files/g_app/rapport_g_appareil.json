@@ -1,0 +1,662 @@
+{
+ "construction": {
+  "appareil": true,
+  "bibliotheque": "190539c8180184f673f580d6ca92414a8c1ed37c3e0947e3fc35c4a1a3f32ce7",
+  "binaires": {
+   "mes_g_app": "c88d82b155dda983448ed5c9037e61e4b33e624a1939fcb6ad8855399b0ec7dc",
+   "mes_g_app_mutant_cote_nul": "bff4f68e1242ffc4e059ce552cb86b45e538038fc6f28709b1b942a58156f1b5",
+   "mes_g_app_mutant_l4": "64c8ca20afa29f694c4d96805b94e21c7091b49ff99ad7ad2df0b9e9746d6c7b"
+  },
+  "bits": "21",
+  "gxx": [
+   "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+  ],
+  "nvcc": [
+   "Cuda compilation tools, release 12.9, V12.9.41",
+   "Build cuda_12.9.r12.9/compiler.35813241_0"
+  ],
+  "portees": {
+   "src/index/census_workspace.cpp": "bee79fd409488e710660aa788e83001bb68cd918c0f6852187cf0fe868f58fb4",
+   "src/num/guard.cpp": "5a5fc29b65e21b1b74f642986614eb1fb0801cc084ae7ec50bc3aedc7e5655fc",
+   "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+   "src/tower/populations.cpp": "0c002ae82ff48a0640a4e856632cc2fed665d6218c6567e3400b47bc4bcfdef6",
+   "src/tower/proposal.hpp": "92495aa67223577c8acef74967f89853c0dab3c5881afe1fb2c7826327f28c18",
+   "src/tower/resolve.cpp": "3d2bd04e02e60b6bab1d27b77a488112f80791f69395805273f539c6773dc1af"
+  },
+  "sources": {
+   "appareil.cu": "ebe935996d33a484aeef850473f809de23dc078e341a886cecc3dd24c2d5ff0d",
+   "appareil.hpp": "52c48dc8fc2d079e54fedac8efe0d459cf07c78d47e52d49329c5d3d94e46fb7",
+   "mes_g_app.cpp": "66350659a920a4b9d62a887ab780e22ab41fba1247f418fd1625be2968d2d423",
+   "noyau_g.hpp": "aea6c15863c6757dbbe00867a10471ec9777ba08961f7440612997e8170e1332",
+   "pilote_g_appareil.py": "556e029f3d88065217ec31cfbe6d215ee5e366feb48b882857f47376b15c4d3a"
+  }
+ },
+ "date_utc": "2026-10-08T11:34:02Z",
+ "decision": "aucune tranche sur cette base",
+ "fenetre_aa": [
+  0.9,
+  1.1
+ ],
+ "fils": 48,
+ "graine": 20261008,
+ "information_k10": {
+  "code": 0,
+  "entieres": 1390772,
+  "identite": {
+   "D1": true,
+   "D2": true,
+   "commune": true
+  },
+  "mecanismes": {
+   "l4": {
+    "certificat": 995205,
+    "repli_certificat": 0,
+    "repli_sans_proposition": 0,
+    "t1": 4375850
+   },
+   "l4f32": {
+    "certificat": 995205,
+    "repli_certificat": 5,
+    "repli_sans_proposition": 0,
+    "t1": 4375845
+   },
+   "p64": {
+    "certificat": 995206,
+    "repli_certificat": 0,
+    "repli_sans_proposition": 0,
+    "t1": 4375849
+   }
+  },
+  "mesures": {
+   "census": {
+    "aa_app": 1.0026508562015333,
+    "aa_hote": 0.9972781178599973,
+    "t_app_ms": 4.6027000000000005,
+    "t_hote_ms": 71.78909999999999
+   },
+   "propositions": {
+    "aa_app": 1.0023711460100708,
+    "aa_hote": 0.9995337752556068,
+    "t_app_ms": 26.808,
+    "t_hote_ms": 31.149949999999997
+   },
+   "propositions_l4": {
+    "aa_app": 1.0017554051263549,
+    "aa_hote": 0.9992797065784249,
+    "t_app_ms": 22.86615,
+    "t_hote_ms": 34.20405
+   },
+   "propositions_l4f32": {
+    "aa_app": 0.9916712685893332,
+    "aa_hote": 0.9998882759457979,
+    "t_app_ms": 47.170500000000004,
+    "t_hote_ms": 65.33070000000001
+   },
+   "sondes": {
+    "aa_app": 1.0004107240752336,
+    "aa_hote": 1.000782594167783,
+    "t_app_ms": 2.24955,
+    "t_hote_ms": 41.58395
+   }
+  },
+  "parties": 5371055,
+  "rapports": {
+   "D1": {
+    "neutralite_hote": 1.0980451011959893,
+    "propositions": 0.7340669888715713,
+    "total": 0.205630937636224
+   },
+   "D2": {
+    "propositions": 1.5143041963149222,
+    "total": 0.37380036395591015
+   },
+   "information": {
+    "l4f32_hote": 2.0972971064159016,
+    "p64_appareil": 0.8606113332445158,
+    "total_p64": 0.2329058350573957
+   }
+  },
+  "replis": {
+   "D1": 0.0,
+   "D2": 9.309158070434952e-07,
+   "p64": 0.0
+  },
+  "requetes": 1765151
+ },
+ "part_replis": 0.001,
+ "refus": [],
+ "regle": "REGLE_G_APPAREIL_2",
+ "rejets": {
+  "D1": [
+   "ng00 : D1 total, borne haute 0.1569 au-dessus de 0.15",
+   "ng00 : D1 propositions, borne haute 0.5254 au-dessus de 0.50",
+   "mediane : D1 total, borne haute 0.1552 au-dessus de 0.15",
+   "mediane : D1 propositions, borne haute 0.5107 au-dessus de 0.50",
+   "max : D1 propositions, borne haute 0.5115 au-dessus de 0.50"
+  ],
+  "D2": [
+   "ng00 : D2 total, borne haute 0.2471 au-dessus de 0.10",
+   "ng00 : D2 propositions, borne haute 1.0958 au-dessus de 0.20",
+   "mediane : D2 total, borne haute 0.2398 au-dessus de 0.10",
+   "mediane : D2 propositions, borne haute 0.9934 au-dessus de 0.20",
+   "max : D2 total, borne haute 0.2182 au-dessus de 0.10",
+   "max : D2 propositions, borne haute 0.9600 au-dessus de 0.20"
+  ]
+ },
+ "seuils": {
+  "D1": {
+   "neutralite_hote": 1.05,
+   "propositions": 0.5,
+   "total": 0.15
+  },
+  "D2": {
+   "propositions": 0.2,
+   "total": 0.1
+  }
+ },
+ "tirages": 10000,
+ "trames": {
+  "max": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 3.675,
+     "census_h2d_octets": 95914412,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 2.21,
+     "propositions_h2d_octets": 59546424,
+     "sm": 188,
+     "sondes_h2d_ms": 11.841,
+     "sondes_h2d_octets": 317992556
+    },
+    "census_hd_sur_produit": 0.5785404217781498,
+    "distinctes": 462107,
+    "entieres": 1316447,
+    "issues": {
+     "l4": {
+      "census": 498012,
+      "refus": 0,
+      "table": 1983089
+     },
+     "l4f32": {
+      "census": 498012,
+      "refus": 0,
+      "table": 1983089
+     },
+     "p64": {
+      "census": 498012,
+      "refus": 0,
+      "table": 1983089
+     }
+    },
+    "mecanismes": {
+     "l4": {
+      "certificat": 498015,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1983086
+     },
+     "l4f32": {
+      "certificat": 498012,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1983089
+     },
+     "p64": {
+      "certificat": 498015,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1983086
+     }
+    },
+    "non_resolues": 0,
+    "parties": 2481101,
+    "replis": {
+     "D1": 0.0,
+     "D2": 0.0,
+     "p64": 0.0
+    },
+    "representants": 9998189,
+    "requetes": 646621,
+    "sites": 99099,
+    "transferts": {
+     "census_d2h_ms": 6.923,
+     "census_d2h_octets": 230197076,
+     "phase": "transferts",
+     "propositions_d2h_ms": 14.802,
+     "propositions_d2h_octets": 416824968,
+     "sondes_d2h_ms": 1.714,
+     "sondes_d2h_octets": 39992756
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 0.9966239755593456,
+     "aa_hote": 0.9967647272172786,
+     "t_app_ms": 1.9289,
+     "t_hote_ms": 21.1901
+    },
+    "propositions": {
+     "aa_app": 0.9995997333244856,
+     "aa_hote": 0.9977953032233955,
+     "t_app_ms": 5.5053,
+     "t_hote_ms": 7.4412
+    },
+    "propositions_l4": {
+     "aa_app": 1.0003246350905615,
+     "aa_hote": 0.9963755349741039,
+     "t_app_ms": 3.7854,
+     "t_hote_ms": 6.9577
+    },
+    "propositions_l4f32": {
+     "aa_app": 1.0040031305803034,
+     "aa_hote": 0.9982135141010563,
+     "t_app_ms": 7.1164,
+     "t_hote_ms": 11.6677
+    },
+    "sondes": {
+     "aa_app": 0.997220221124733,
+     "aa_hote": 0.9945677519007949,
+     "t_app_ms": 0.7685,
+     "t_hote_ms": 16.5627
+    }
+   },
+   "processus": 5,
+   "rapports": {
+    "D1": {
+     "neutralite_hote": {
+      "ic95": [
+       0.934588735669975,
+       0.9369465640942795
+      ],
+      "rapport": 0.9355188176419639,
+      "seuil": 1.05
+     },
+     "propositions": {
+      "ic95": [
+       0.5081845484611737,
+       0.511489349004077
+      ],
+      "rapport": 0.5096833119711045,
+      "seuil": 0.5
+     },
+     "total": {
+      "ic95": [
+       0.14220239475930171,
+       0.14419567918563808
+      ],
+      "rapport": 0.1434301565996098,
+      "seuil": 0.15
+     }
+    },
+    "D2": {
+     "propositions": {
+      "ic95": [
+       0.9557570896904874,
+       0.9599898818900225
+      ],
+      "rapport": 0.9579430153641733,
+      "seuil": 0.2
+     },
+     "total": {
+      "ic95": [
+       0.21568034764850597,
+       0.2182248814115678
+      ],
+      "rapport": 0.21713116764432117,
+      "seuil": 0.1
+     }
+    },
+    "information": {
+     "l4f32_hote": 1.5690088127948123,
+     "p64_appareil": 0.7401637161620513,
+     "total_p64": 0.1813243432964005
+    }
+   }
+  },
+  "mediane": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 1.857,
+     "census_h2d_octets": 43630488,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 1.094,
+     "propositions_h2d_octets": 30086424,
+     "sm": 188,
+     "sondes_h2d_ms": 6.789,
+     "sondes_h2d_octets": 179834980
+    },
+    "census_hd_sur_produit": 0.585043601900935,
+    "distinctes": 211461,
+    "entieres": 683502,
+    "issues": {
+     "l4": {
+      "census": 224773,
+      "refus": 0,
+      "table": 1028828
+     },
+     "l4f32": {
+      "census": 224773,
+      "refus": 0,
+      "table": 1028828
+     },
+     "p64": {
+      "census": 224773,
+      "refus": 0,
+      "table": 1028828
+     }
+    },
+    "mecanismes": {
+     "l4": {
+      "certificat": 224773,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1028828
+     },
+     "l4f32": {
+      "certificat": 224773,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1028828
+     },
+     "p64": {
+      "certificat": 224773,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 1028828
+     }
+    },
+    "non_resolues": 0,
+    "parties": 1253601,
+    "replis": {
+     "D1": 0.0,
+     "D2": 0.0,
+     "p64": 0.0
+    },
+    "representants": 5477969,
+    "requetes": 290357,
+    "sites": 64740,
+    "transferts": {
+     "census_d2h_ms": 3.54,
+     "census_d2h_octets": 103367092,
+     "phase": "transferts",
+     "propositions_d2h_ms": 7.172,
+     "propositions_d2h_octets": 210604968,
+     "sondes_d2h_ms": 0.934,
+     "sondes_d2h_octets": 21911876
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 1.000836235142787,
+     "aa_hote": 0.9924089472901476,
+     "t_app_ms": 0.9335,
+     "t_hote_ms": 8.7353
+    },
+    "propositions": {
+     "aa_app": 0.9996017778803418,
+     "aa_hote": 0.9958746743915885,
+     "t_app_ms": 2.7287,
+     "t_hote_ms": 3.7222
+    },
+    "propositions_l4": {
+     "aa_app": 0.9980574716854387,
+     "aa_hote": 0.9964146575443792,
+     "t_app_ms": 1.8971,
+     "t_hote_ms": 3.4386
+    },
+    "propositions_l4f32": {
+     "aa_app": 0.9995201622672105,
+     "aa_hote": 0.9983251190439469,
+     "t_app_ms": 3.684,
+     "t_hote_ms": 5.9798
+    },
+    "sondes": {
+     "aa_app": 1.0018078858096064,
+     "aa_hote": 0.9905025093743355,
+     "t_app_ms": 0.4503,
+     "t_hote_ms": 8.9368
+    }
+   },
+   "processus": 5,
+   "rapports": {
+    "D1": {
+     "neutralite_hote": {
+      "ic95": [
+       0.9218069706767698,
+       0.9260016600186813
+      ],
+      "rapport": 0.9239146251880637,
+      "seuil": 1.05
+     },
+     "propositions": {
+      "ic95": [
+       0.5088767157105422,
+       0.5107074676783947
+      ],
+      "rapport": 0.5097912698752592,
+      "seuil": 0.5
+     },
+     "total": {
+      "ic95": [
+       0.15273669159253522,
+       0.15519846738245646
+      ],
+      "rapport": 0.1539626592659025,
+      "seuil": 0.15
+     }
+    },
+    "D2": {
+     "propositions": {
+      "ic95": [
+       0.9886830070157574,
+       0.9934153010145902
+      ],
+      "rapport": 0.990887003983521,
+      "seuil": 0.2
+     },
+     "total": {
+      "ic95": [
+       0.23644821160591786,
+       0.2398345357924363
+      ],
+      "rapport": 0.2380038436583674,
+      "seuil": 0.1
+     }
+    },
+    "information": {
+     "l4f32_hote": 1.6064801224250405,
+     "p64_appareil": 0.7336512076783486,
+     "total_p64": 0.19306831224397134
+    }
+   }
+  },
+  "ng00": {
+   "informations": {
+    "appareil": {
+     "bus_bits": 512,
+     "cc": "12.0",
+     "census_h2d_ms": 2.379,
+     "census_h2d_octets": 37449428,
+     "execution": 12090,
+     "horloge_khz": 2430000,
+     "horloge_memoire_khz": 12481000,
+     "l2": 134217728,
+     "memoire": 101973819392,
+     "nom": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+     "phase": "appareil",
+     "pilote": 13000,
+     "propositions_h2d_ms": 0.746,
+     "propositions_h2d_octets": 20331000,
+     "sm": 188,
+     "sondes_h2d_ms": 4.28,
+     "sondes_h2d_octets": 110527396
+    },
+    "census_hd_sur_produit": 0.5769015833396581,
+    "distinctes": 177863,
+    "entieres": 466813,
+    "issues": {
+     "l4": {
+      "census": 186573,
+      "refus": 0,
+      "table": 660552
+     },
+     "l4f32": {
+      "census": 186573,
+      "refus": 0,
+      "table": 660552
+     },
+     "p64": {
+      "census": 186573,
+      "refus": 0,
+      "table": 660552
+     }
+    },
+    "mecanismes": {
+     "l4": {
+      "certificat": 186573,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 660552
+     },
+     "l4f32": {
+      "certificat": 186573,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 660552
+     },
+     "p64": {
+      "certificat": 186573,
+      "repli_certificat": 0,
+      "repli_sans_proposition": 0,
+      "t1": 660552
+     }
+    },
+    "non_resolues": 0,
+    "parties": 847125,
+    "replis": {
+     "D1": 0.0,
+     "D2": 0.0,
+     "p64": 0.0
+    },
+    "representants": 3419932,
+    "requetes": 252152,
+    "sites": 39885,
+    "transferts": {
+     "census_d2h_ms": 2.969,
+     "census_d2h_octets": 89766112,
+     "phase": "transferts",
+     "propositions_d2h_ms": 5.367,
+     "propositions_d2h_octets": 142317000,
+     "sondes_d2h_ms": 0.646,
+     "sondes_d2h_octets": 13679728
+    }
+   },
+   "mesures": {
+    "census": {
+     "aa_app": 0.9954006258633897,
+     "aa_hote": 0.9911799374853211,
+     "t_app_ms": 0.8494,
+     "t_hote_ms": 7.5991
+    },
+    "propositions": {
+     "aa_app": 0.9996817933351597,
+     "aa_hote": 0.9891464057512057,
+     "t_app_ms": 1.8933,
+     "t_hote_ms": 2.5122
+    },
+    "propositions_l4": {
+     "aa_app": 1.0020948745864335,
+     "aa_hote": 0.9950647982876116,
+     "t_app_ms": 1.3072,
+     "t_hote_ms": 2.3157
+    },
+    "propositions_l4f32": {
+     "aa_app": 0.9950285765947245,
+     "aa_hote": 0.9985061460755024,
+     "t_app_ms": 2.7345,
+     "t_hote_ms": 4.487
+    },
+    "sondes": {
+     "aa_app": 0.9981311990874999,
+     "aa_hote": 0.9846434394063006,
+     "t_app_ms": 0.2996,
+     "t_hote_ms": 5.6586
+    }
+   },
+   "processus": 5,
+   "rapports": {
+    "D1": {
+     "neutralite_hote": {
+      "ic95": [
+       0.9184453943131731,
+       0.9238629984393327
+      ],
+      "rapport": 0.9210853533739416,
+      "seuil": 1.05
+     },
+     "propositions": {
+      "ic95": [
+       0.5191218649632549,
+       0.525391520948674
+      ],
+      "rapport": 0.5222472845221473,
+      "seuil": 0.5
+     },
+     "total": {
+      "ic95": [
+       0.1534150286977308,
+       0.15685028790472313
+      ],
+      "rapport": 0.1551292343447253,
+      "seuil": 0.15
+     }
+    },
+    "D2": {
+     "propositions": {
+      "ic95": [
+       1.079939368389728,
+       1.0958062898731458
+      ],
+      "rapport": 1.0886640377751802,
+      "seuil": 0.2
+     },
+     "total": {
+      "ic95": [
+       0.24352336425447732,
+       0.24714838775231268
+      ],
+      "rapport": 0.2451671243394958,
+      "seuil": 0.1
+     }
+    },
+    "information": {
+     "l4f32_hote": 1.7848732118830608,
+     "p64_appareil": 0.7531923548557494,
+     "total_p64": 0.19184023325072216
+    }
+   }
+  }
+ },
+ "verdicts": {
+  "D1": "rejete",
+  "D2": "rejete"
+ }
+}
