@@ -1,0 +1,112 @@
+--- a/morsehgp3D_v12/src/tower/pipeline.cpp
++++ b/morsehgp3D_v12/src/tower/pipeline.cpp
+@@ -35,10 +35,12 @@
+   const u64 per_order = sizeof(OrderCounters) + sizeof(SectionCycles) + sizeof(ForestWork) + sizeof(ForestPhysical);
+   u64 bytes = tower_detail::workers_bytes(p.threads, sites) + u64{p.threads} * sizeof(WorkerTotals) +
+               u64{p.threads} * p.orders * per_order;
+-  // numerotation par morceaux (levier N) : au plus un tampon de spheres vivant par fil, de la plus large cohorte
+-  u64 widest = 1;
+-  for (u32 i = 1; i < p.orders; ++i) widest = std::max(widest, widest_of[i]);
+-  if (p.orders >= 2) bytes += u64{p.threads} * widest * (sizeof(num::Sphere) + 4);
++  // Numerotation par morceaux (N) : seulement les ordres engages 2..K ; au plus un tampon de spheres par fil.
++  // Le tampon sequentiel des ordres non engages est deja compris dans t_bytes.
++  u64 widest = 0;
++  for (u32 i = 1; i < p.orders; ++i)
++    if (p.chain[i]) widest = std::max(widest, widest_of[i]);
++  if (widest != 0) bytes += u64{p.threads} * widest * (sizeof(num::Sphere) + 4);
+   for (u32 i = 0; i < p.orders; ++i) {
+     const ForestInput& in = p.forest.inputs[i];
+     const u64 nb = in.birth_key.size(), ne = nb == 0 ? 0 : nb - 1;
+@@ -188,6 +190,12 @@
+   r.pipeline = std::make_unique<Pipeline>(*r.domain, out, *r.forest, r.team, r.pool.size());
+   Pipeline& p = *r.pipeline;
+   p.orders = orders;
++  // Chaine A6c fixee avant le calcul de la borne memoire, la meme decision pour tous les ordres.
++  r.diag.chain_orders = 0;
++  for (u32 i = 0; i < p.orders; ++i) {
++    p.chain[i] = chain_engaged(r.index.cloud().sites(), r.chain_sites);
++    if (p.chain[i]) r.diag.chain_orders |= u32{1} << i;
++  }
+   for (u32 i = 0; i < orders; ++i)
+     p.g_items[i] = (u64{out.order(static_cast<Order>(i + 1)).cells()} + tower_detail::kCellGrain - 1) /
+                    tower_detail::kCellGrain;
+@@ -202,17 +210,14 @@
+ 
+ Outcome admit_session(SessionRun& r) noexcept {
+   const Stopwatch watch;
++  Pipeline& p = *r.pipeline;
++  const bool engaged = chain_engaged(r.index.cloud().sites(), r.chain_sites);
++  for (u32 i = 0; i < p.orders; ++i)
++    if (p.chain[i] != engaged) return fail(Reason::tower_invariant);
+   MHGP12_TRY(r.budget.admit(r.diag.admitted_bytes));
+   MHGP12_TRY(staff(*r.pipeline, r.index, r.budget));
+   r.diag.resolution.workspace_ns = watch.nanoseconds();
+   MHGP12_TRY(build_tables(*r.pipeline, r.budget, r.pool, r.diag.resolution));
+-  // chaine de l'ordre (A6c) : decision deterministe sur le nombre de sites, avant la region, la meme pour tous les ordres
+-  Pipeline& p = *r.pipeline;
+-  r.diag.chain_orders = 0;
+-  for (u32 i = 0; i < p.orders; ++i) {
+-    p.chain[i] = chain_engaged(r.index.cloud().sites(), r.chain_sites);
+-    if (p.chain[i]) r.diag.chain_orders |= u32{1} << i;
+-  }
+   prepare_graph(p);
+   r.diag.open_ns += watch.nanoseconds();
+   return {};
+--- a/morsehgp3D_v12/src/tower/pipeline.hpp
++++ b/morsehgp3D_v12/src/tower/pipeline.hpp
+@@ -17,7 +17,7 @@
+ //   - autres etapes : graphe ci-dessous, une etape part quand tous ses predecesseurs ont reussi.
+ // Chaine de l'ordre (A6c) : la numerotation par morceaux (N), l'historique par morceaux (H) et les indices de racine (I)
+ // ne sont engages que si la trame est assez grande pour que le noyau de l'ordre K de la base finisse APRES la fin de G
+-// (chain_engaged, decision prise a l'admission sur le seul nombre de sites, connu avant la region ; seuil kChainSites,
++// (chain_engaged, decision fixee a l'ouverture sur le seul nombre de sites, avant la borne memoire ; seuil kChainSites,
+ // etabli sur les trames v12set et ng00-02 des sessions a6b et a6b2). Un ordre non engage suit le chemin de la base : une
+ // etape kNumberOpen joue number_order et ouvre le noyau (kNumber, kNumberClose, kKernelOpen sans morceau), une etape
+ // kHistoryCheck joue build_history (kDepth, kHistory sans morceau), aucune tache d'indices. Sorties identiques.
+@@ -146,7 +146,7 @@
+   std::array<std::atomic<u64>, kMaxOrder> hint_next{};
+   std::array<std::atomic<u32>, kMaxOrder> hint_active{};
+   std::array<std::atomic<bool>, kMaxOrder> hint_closed{};
+-  std::array<bool, kMaxOrder> chain{};  // chaine de l'ordre engagee (A6c), fixee a l'admission, lue seulement ensuite
++  std::array<bool, kMaxOrder> chain{};  // chaine de l'ordre engagee (A6c), fixee a l'ouverture, lue seulement ensuite
+   std::array<std::array<StepState, kStepCount>, kMaxOrder> steps;
+   // Compteurs de G par (ordre, fil), case i * threads + w ; profils (MHGP12_TOWER_PROFILE) ; compteurs et durees de
+   // la foret des morceaux par (ordre, fil).
+@@ -172,8 +172,9 @@
+ 
+ // Session d'une trame en trois temps (build_tower les enchaine ; la porte << admission >> de tests/tower/
+ // pipeline_unit.cpp mesure le pic entre le deuxieme et la fin) : open_session ouvre l'etage G (sorties allouees,
+-// cellules remplies), prepare l'etat de la foret et calcule les octets de la region sans rien admettre ;
+-// admit_session admet ces octets d'un coup, puis alloue espaces des fils, accumulateurs et index des naissances ;
++// cellules remplies), prepare la foret, fixe la chaine A6c puis calcule les octets de la region sans les admettre ;
++// admit_session refuse une decision de chaine changee depuis l'ouverture, avant toute admission ou allocation ;
++// sinon il admet ces octets d'un coup, puis alloue espaces des fils, accumulateurs et index des naissances ;
+ // play_session joue la region et clot (issues dans l'ordre de la voie sequentielle, grand livre, diagnostics).
+ struct SessionRun {
+   SessionRun(const GlobalIndex& i, const Catalogue& c, MemoryBudget& b, sched::Pool& p) noexcept
+@@ -191,7 +192,7 @@
+   tower_detail::Workers team;
+   std::unique_ptr<Pipeline> pipeline;
+   TowerDiagnostics diag;
+-  u64 chain_sites = kChainSites;  // seuil de la chaine (A6c) ; les portes le forcent a 0 ou au maximum avant l'admission
++  u64 chain_sites = kChainSites;  // seuil A6c a fixer avant open_session ; un changement effectif ensuite est refuse
+ };
+ // open_session n'est PAS noexcept : ses deux std::make_unique (BuildState, Pipeline) peuvent lever std::bad_alloc, que
+ // la frontiere publique build_tower (noexcept, guarded) convertit en memory_budget apres avoir rendu les tampons
+--- a/morsehgp3D_v12/tests/tower/pipeline_levers.cpp
++++ b/morsehgp3D_v12/tests/tower/pipeline_levers.cpp
+@@ -444,12 +444,12 @@
+ // Priorite d'A6b : les aides passent apres la reclamation de toutes les tranches G. Le compteur est nul : une aide
+ // n'est reclamee que si aucune tranche de G ne l'est plus, et g_next ne fait que croitre. L'ancien ordre d'A6 (aides
+ // avant les etapes et G) peut le rendre positif tant que des tranches restent a reclamer.
+-// Session jouee par ses trois temps avec le seuil de la chaine donne (avant l'admission, ou il est lu).
++// Session jouee par ses trois temps avec le seuil de la chaine fixe avant l'ouverture et sa borne memoire.
+ std::unique_ptr<tower::detail::SessionRun> play(const Chain& c, MemoryBudget& budget, sched::Pool& pool,
+                                                 u64 chain_sites) {
+   auto run = std::make_unique<tower::detail::SessionRun>(*c.index, *c.catalogue, budget, pool);
++  run->chain_sites = chain_sites;
+   if (!tower::detail::open_session(*run).ok()) return nullptr;
+-  run->chain_sites = chain_sites;
+   if (!tower::detail::admit_session(*run).ok() || !tower::detail::play_session(*run).ok()) return nullptr;
+   return run;
+ }

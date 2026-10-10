@@ -1,0 +1,81 @@
+{
+  "schema": "ehgp.audit.b3b_prelecture.v1",
+  "native_runs": 0,
+  "native_source_files": 138,
+  "b3_native_files": 9,
+  "arm_files": 25,
+  "exact_substitutions": 46,
+  "unchanged_pilot_functions": 32,
+  "manifests": {
+    "tower": 74,
+    "catalogue": 38
+  },
+  "active_chain_memory_and_failure_gates_fixed": false,
+  "synthetic_cases": {
+    "nominal": {
+      "verdicts": {
+        "lot_b3": "adopte",
+        "cles": "adopte",
+        "balayage": "adopte"
+      },
+      "refus": []
+    },
+    "35_journaux_identite_resolution_absents": {
+      "verdicts": {
+        "lot_b3": "adopte",
+        "cles": "adopte",
+        "balayage": "adopte"
+      },
+      "refus": []
+    },
+    "FUL1_hash_faux_code137_resume_valide": {
+      "verdicts": {
+        "lot_b3": "adopte",
+        "cles": "adopte",
+        "balayage": "adopte"
+      },
+      "refus": []
+    },
+    "resolution_brut_en_echec_resume_valide": {
+      "verdicts": {
+        "lot_b3": "adopte",
+        "cles": "adopte",
+        "balayage": "adopte"
+      },
+      "refus": []
+    },
+    "identites_sans_chemin_hash_code": {
+      "verdicts": {
+        "lot_b3": "adopte",
+        "cles": "adopte",
+        "balayage": "adopte"
+      },
+      "refus": []
+    },
+    "controle_FUL1_resume_faux": {
+      "verdicts": {
+        "lot_b3": "rejete",
+        "cles": "rejete",
+        "balayage": "rejete"
+      },
+      "refus": []
+    },
+    "controle_journal_temps_modifie": {
+      "verdicts": {
+        "lot_b3": "refuse",
+        "cles": "refuse",
+        "balayage": "refuse"
+      },
+      "refus": [
+        "admission des journaux : journal modifie"
+      ]
+    }
+  },
+  "full_identity_logs_not_replayed": 25,
+  "resolution_logs_not_replayed": 10,
+  "key_storage_bytes_per_ball": 16,
+  "complete_gpu_key_D2H_bytes_per_ball": 16,
+  "sliced_gpu_key_D2H_bytes_per_ball": 0,
+  "source_composition_exact": true,
+  "campaign_timing_qualified": false
+}

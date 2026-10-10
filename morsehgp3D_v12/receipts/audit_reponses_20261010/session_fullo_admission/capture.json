@@ -1,0 +1,31 @@
+{
+  "captured_utc": "2026-10-10T19:34:08.286649+00:00",
+  "inputs": {
+    "DONE": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "package/package.tar.gz": {
+      "bytes": 18116317,
+      "sha256": "48fec2df010abb7b7ae5e9bc55837d051979378625d0f43790ab06a0868a25dd"
+    },
+    "package/plan.json": {
+      "bytes": 2028,
+      "sha256": "267d3e5956ebf698c2e045f297992f5a79844368626b127adfc14809ef50d9e1"
+    },
+    "preflight.json": {
+      "bytes": 5511,
+      "sha256": "ef1cb9e286476d26417291bc5084a13d0101c16f7efb25e87a1e1dcf89520fed"
+    },
+    "receipt.json": {
+      "bytes": 34945,
+      "sha256": "64802481f4f8b9d46a69d1321ce18c70e109f25fa3fb5873de6191a0af9578a3"
+    },
+    "results/results.tar.gz": {
+      "bytes": 1916923,
+      "sha256": "b5736a3028cdf59a2868ae1936c279b00d29b0c13dcbeaa2199a567e4790b5dc"
+    }
+  },
+  "reader_sha256": "e4da9c4e993e5be70d0e242e3068fcf4c0a1e8a6ed43dddbac447a699951dc1c",
+  "source_git": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66"
+}

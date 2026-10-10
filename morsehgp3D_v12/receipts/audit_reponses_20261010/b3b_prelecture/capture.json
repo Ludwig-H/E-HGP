@@ -1,0 +1,49 @@
+{
+  "captured_utc": "2026-10-10T19:35:15.244009+00:00",
+  "pins": {
+    "r1": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+    "b3": "545ed987e0f5a06dbb518fe42ed6c5f100f32770",
+    "a6c": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+    "b3b": "81b0883d11df14e4b63d82e85b6539d6abc7bf92"
+  },
+  "synthetic_witness_sha256": "20c6e8356351c740754235420d442369ed212cdc467e9e6af888c2227a5183d4",
+  "synthetic_source_pins": {
+    "microbancs/mes_t2d_b3/pilote_t2d_b3.py": {
+      "bytes": 49708,
+      "sha256": "5e9d920ef51cb634902633f01686b7cd090417084acecb6e2667900ebf868213"
+    },
+    "microbancs/mes_t2d_b3/bras_t2d_b3.json": {
+      "bytes": 60036,
+      "sha256": "c0bf73312210b3e6685f69cef3c131feccfb8bd42aabcea8cc86ea896900a289"
+    },
+    "microbancs/outils/lecteur_full.py": {
+      "bytes": 13663,
+      "sha256": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554"
+    },
+    "microbancs/outils/banc_full.py": {
+      "bytes": 5350,
+      "sha256": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904"
+    },
+    "microbancs/outils/test_lecteur_full.py": {
+      "bytes": 16595,
+      "sha256": "8eed4403670ced0640e43b1010e07422fef105fe6da242ba1db730643f7a371f"
+    },
+    "microbancs/mes_g_profil/profil_g.py": {
+      "bytes": 11053,
+      "sha256": "e024deb2609f3f6eecf6cbb882f1ce3c9edd3dd2c6c408e49312c6ddff260f0d"
+    }
+  },
+  "session": "v12.20261010.t2db3b",
+  "session_started_utc": "2026-10-10T19:13:51Z",
+  "rule_git_committed_utc": "2026-10-10T18:52:15Z",
+  "rule_declaration_utc": "2026-10-10T18:45:00Z",
+  "closed_at_capture": false,
+  "local_result_files_at_capture": 0,
+  "package_sha256": "f21ad4b62858887b3832b29bd471d1f04471c4d5c4a6408e3205504cf84c488c",
+  "before_source_archive_sha256": "29a7df31bf339fba4021e797b866a5d590fb781349f570590945400bf91fd19c",
+  "before_source_archive_files_compared": 322,
+  "requested_processes_per_frame_arm": 10,
+  "requested_passes_per_process": 8,
+  "before_source_archive_build_sources_compared": 495,
+  "candidate_package_build_sources_compared": 495
+}

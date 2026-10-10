@@ -1,0 +1,76 @@
+{
+  "applications": {
+    "81b0883d1": {
+      "after_sha256": {
+        "src/tower/pipeline.cpp": "4a54c796793e506d925263d1bdcac5389df7d8c38f23263cc1ccff15c7d3f127",
+        "src/tower/pipeline.hpp": "352f350dbee6872617e98db1bf3444bcc416375d78902b9274af184fbe06a920",
+        "tests/tower/pipeline_levers.cpp": "32703e70548bf31c3855140e0244ee94bea5681c38dc2b2fc44c66b6799cd763"
+      },
+      "all_unique": true,
+      "before_sha256": {
+        "src/tower/pipeline.cpp": "36d4361297d7c45aa58b11ba585c4be145ab82ac2de29ab31f76d99bf9b7134e",
+        "src/tower/pipeline.hpp": "806468f4ba0c7a99a9d6965bc6cfdde7a1ab3d6f759bfdcac47a563ddf0aa435",
+        "tests/tower/pipeline_levers.cpp": "67056dee09d3f39ce5913d6da8fefd22cb8687a0aa95b31f70ad0609995daec6"
+      },
+      "commit": "81b0883d11df14e4b63d82e85b6539d6abc7bf92",
+      "floor": 74,
+      "mutants": 74,
+      "substitutions": 78,
+      "supporting_sha256": {
+        "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+        "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02"
+      }
+    },
+    "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66": {
+      "after_sha256": {
+        "src/tower/pipeline.cpp": "4a54c796793e506d925263d1bdcac5389df7d8c38f23263cc1ccff15c7d3f127",
+        "src/tower/pipeline.hpp": "352f350dbee6872617e98db1bf3444bcc416375d78902b9274af184fbe06a920",
+        "tests/tower/pipeline_levers.cpp": "32703e70548bf31c3855140e0244ee94bea5681c38dc2b2fc44c66b6799cd763"
+      },
+      "all_unique": true,
+      "before_sha256": {
+        "src/tower/pipeline.cpp": "36d4361297d7c45aa58b11ba585c4be145ab82ac2de29ab31f76d99bf9b7134e",
+        "src/tower/pipeline.hpp": "806468f4ba0c7a99a9d6965bc6cfdde7a1ab3d6f759bfdcac47a563ddf0aa435",
+        "tests/tower/pipeline_levers.cpp": "67056dee09d3f39ce5913d6da8fefd22cb8687a0aa95b31f70ad0609995daec6"
+      },
+      "commit": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+      "floor": 72,
+      "mutants": 72,
+      "substitutions": 76,
+      "supporting_sha256": {
+        "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+        "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02"
+      }
+    }
+  },
+  "cloud_calls": 0,
+  "cst0245_closed": false,
+  "model": {
+    "bound_cases": 27990,
+    "changed_refused": 216,
+    "concurrent_allocations": 2544,
+    "native_qualified": false,
+    "numerical_counterexamples": {
+      "inactive_widest_included": [
+        144,
+        432
+      ],
+      "off_unconditional_reserve": [
+        0,
+        432
+      ],
+      "one_worker_only": [
+        432,
+        9
+      ],
+      "order_one_included": [
+        0,
+        4800
+      ]
+    },
+    "transition_cases": 525,
+    "unchanged_admitted": 309
+  },
+  "native_calls": 0,
+  "patch_sha256": "e2c844b77a0a283d98169292ab8d007049fa7782a7fb0d2b26f2536a98ced7b8"
+}

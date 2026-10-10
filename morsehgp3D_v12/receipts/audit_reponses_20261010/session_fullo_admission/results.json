@@ -1,0 +1,260 @@
+{
+  "archive": {
+    "bytes": 1916923,
+    "sha256": "b5736a3028cdf59a2868ae1936c279b00d29b0c13dcbeaa2199a567e4790b5dc"
+  },
+  "closure": {
+    "after": "TERMINATED",
+    "before": "RUNNING",
+    "closure": "stopped",
+    "done": 0,
+    "errors": 0,
+    "guest_guard_intact": true,
+    "oslogin_key_removed": true,
+    "private_key_deleted": true,
+    "reserve_released": true,
+    "results_verified": true,
+    "retrieval": "downloaded",
+    "status": "completed",
+    "stop_exit_code": 0,
+    "targeted_shutdown_certified": true,
+    "warnings": 0,
+    "worker_exit_code": 0,
+    "worker_outcome": "exited"
+  },
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "1063028",
+      "name": "socle_ctest",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "141.157"
+    },
+    {
+      "exit_code": "0",
+      "index": "1",
+      "max_rss_kb": "4083644",
+      "name": "mes_full",
+      "status": "ok",
+      "timeout_seconds": "1500",
+      "wall_seconds": "521.158"
+    },
+    {
+      "exit_code": "0",
+      "index": "2",
+      "max_rss_kb": "6873048",
+      "name": "mes_c",
+      "status": "ok",
+      "timeout_seconds": "2150",
+      "wall_seconds": "814.779"
+    }
+  ],
+  "elf": {
+    "full_pre_campaign": "edb6e66a3855683536e7eefca3c567ca462113c91cf0fc0e48c7cfa0bccb94fb",
+    "mes_c_pre_campaign": "662a5fdb5f1bcf3a5cffa4eee4e6102b19cde54d11f666de1e81755fe8048ff3"
+  },
+  "evidence_scope": "conditional replay: process codes inferred from pinned producers and reports; no raw native codes/stderr or final pilot ELF closure",
+  "final_pilot_elf_independently_closed": false,
+  "full": {
+    "contract": {
+      "ng00_02": {
+        "maximum_ns": 80947353,
+        "mediane_ns": 79335583,
+        "tenu": true,
+        "trames": 3
+      },
+      "v12set": {
+        "maximum_ns": 241892572,
+        "mediane_ns": 116592136,
+        "tenu": false,
+        "trames": 37
+      }
+    },
+    "identity_sha256": "73887756d59b0d0b25696b64177589a256a5c941649b9d46c12edabe76f7fac2",
+    "large_summary": {
+      "frames": 37,
+      "frames_all_warm_under_100ms": 15,
+      "frames_under_100ms": 15,
+      "max_frame_median_ns": 239771652,
+      "max_raw_ns": 241892572,
+      "median_frame_medians_ns": 116592136,
+      "warm": 185
+    },
+    "passes": 610,
+    "processes": 38,
+    "verdict": "non tenu",
+    "warm_passes": 392
+  },
+  "input_metadata_verified_remote": true,
+  "manifest_files": 156,
+  "mes_c": {
+    "codes": "inferes du rapport et du pilote epingle",
+    "cohort_metadata": {
+      "bytes": 13650,
+      "sha256": "affc23170740e06b099202a30646d7d250ff5b48bd1d3fb96e10efa697a01c42"
+    },
+    "cohort_reader": {
+      "bytes": 17093,
+      "sha256": "55ca24fe400954e24062fc8b9c0c0bf7968fc624f7a34104007600c9535c4dc2"
+    },
+    "criteria": {
+      "C1": "non tenu",
+      "C2": "non tenu",
+      "C3": "non tenu"
+    },
+    "full_passes": 3608,
+    "metadata_archive_link": "not independently read from data archive",
+    "processes": 56,
+    "refused_cases": [
+      {
+        "etat": "refus",
+        "k": 5,
+        "nom": "synth_sphere_n3000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 3000,
+        "voie": "cpu"
+      },
+      {
+        "etat": "refus",
+        "k": 5,
+        "nom": "synth_sphere_n10000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 10000,
+        "voie": "cpu"
+      },
+      {
+        "etat": "refus",
+        "k": 5,
+        "nom": "synth_sphere_n3000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 3000,
+        "voie": "appareil"
+      },
+      {
+        "etat": "refus",
+        "k": 5,
+        "nom": "synth_sphere_n10000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 10000,
+        "voie": "appareil"
+      },
+      {
+        "etat": "refus",
+        "k": 10,
+        "nom": "synth_sphere_n3000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 3000,
+        "voie": "cpu"
+      },
+      {
+        "etat": "refus",
+        "k": 10,
+        "nom": "synth_sphere_n10000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 10000,
+        "voie": "cpu"
+      },
+      {
+        "etat": "refus",
+        "k": 10,
+        "nom": "synth_sphere_n3000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 3000,
+        "voie": "appareil"
+      },
+      {
+        "etat": "refus",
+        "k": 10,
+        "nom": "synth_sphere_n10000",
+        "raison": "unsupported_degeneracy/wide_leaf",
+        "sites": 10000,
+        "voie": "appareil"
+      }
+    ],
+    "states": {
+      "ok": 48,
+      "refus": 8
+    },
+    "verdict": "non tenu",
+    "warm_passes": 2392
+  },
+  "native_executed": false,
+  "package": {
+    "bytes": 18116317,
+    "sha256": "48fec2df010abb7b7ae5e9bc55837d051979378625d0f43790ab06a0868a25dd"
+  },
+  "payload_read": false,
+  "plan": {
+    "bytes": 2028,
+    "sha256": "267d3e5956ebf698c2e045f297992f5a79844368626b127adfc14809ef50d9e1"
+  },
+  "process_codes_stderr_independently_archived": false,
+  "public_plan": [
+    {
+      "name": "socle_ctest",
+      "options": {},
+      "timeout_seconds": 600
+    },
+    {
+      "name": "mes_full",
+      "options": {
+        "--delai": "900",
+        "--fils": "48",
+        "--jobs": "44",
+        "--passes": "10",
+        "--processus": "5"
+      },
+      "timeout_seconds": 1500
+    },
+    {
+      "name": "mes_c",
+      "options": {
+        "--delai-cas": "120",
+        "--delai-global": "2050",
+        "--fils": "4,48",
+        "--fils-difficiles": "48",
+        "--jobs": "44",
+        "--k": "5,10",
+        "--tours": "3",
+        "--tours-difficiles": "2",
+        "--voies": "cpu,appareil"
+      },
+      "timeout_seconds": 2150
+    }
+  ],
+  "reader_adaptation": [
+    {
+      "count": 1,
+      "from": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+      "to": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66"
+    },
+    {
+      "count": 1,
+      "from": "a7044e68015f8c827d3f73a5d8feb6f562d56cbfbc9f4c96f3347516ecb0998c",
+      "to": "3f50106b6ac41da81d445032b5efce540e136614ba3d49693b2ed3a08be62b09"
+    },
+    {
+      "count": 2,
+      "from": 488,
+      "to": 496
+    },
+    {
+      "count": 1,
+      "from": 747,
+      "to": 755
+    },
+    {
+      "count": 1,
+      "from": "488 source files exact",
+      "to": "496 source files exact"
+    }
+  ],
+  "small_archive_payload_link_newly_verified": false,
+  "socle_passed": 755,
+  "socle_skipped_reported": 0,
+  "source_files": 496,
+  "source_git": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "source_inventory_sha256": "3f50106b6ac41da81d445032b5efce540e136614ba3d49693b2ed3a08be62b09"
+}
