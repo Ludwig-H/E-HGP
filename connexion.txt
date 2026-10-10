@@ -1,0 +1,114 @@
+CONNEXION À CLAUDE CODE ET CODEX SUR CETTE MACHINE
+Note du 10 octobre 2026 — commandes à lancer dans le terminal, hors des CLI.
+
+1. CLAUDE CODE : COMPTE INRIA
+
+Compte souhaité : louis.hauseux@inria.fr
+
+Message rencontré : la connexion aboutit dans le navigateur, mais Claude
+ne parvient pas à enregistrer les identifiants et reste déconnecté.
+
+Constats locaux lors du diagnostic :
+- Claude Code 2.1.296 ; utilisateur Linux codespace.
+- Permissions de ~/.claude et ~/.claude.json correctes.
+- Fichier ~/.claude/.credentials.json absent ; auth status indique déconnecté.
+- Disque principal à 100 %, avec 0 espace disponible ; inodes non épuisés.
+
+Le manque d'espace est la cause probable, sans preuve définitive : de petites
+écritures atomiques réussissaient déjà pendant le diagnostic.
+
+Action effectuée : déplacement des anciennes versions 2.1.293 et 2.1.294
+vers un autre disque, après vérification SHA-256 des copies. Environ 505 Mo
+ont été dégagés ; la version active 2.1.296 est conservée. Copies temporaires :
+  /tmp/claude-code-old-versions-a29hjcx4/
+Ce répertoire temporaire ne constitue pas une sauvegarde durable.
+Les données, builds épinglés et reçus du dépôt n'ont pas été modifiés.
+Après l'opération, écriture, fsync, renommage atomique et mode 0600 vérifiés.
+La reconnexion reste à confirmer par un nouvel essai.
+
+Quitter Claude Code, puis lancer :
+  claude auth login --claudeai --email louis.hauseux@inria.fr
+
+Dans le navigateur, sélectionner explicitement ce compte. Si le navigateur
+reprend un autre compte, utiliser une fenêtre privée et y ouvrir le lien.
+Si un code de connexion est affiché, le saisir dans le terminal prévu.
+Vérifier ensuite :
+  claude auth status
+
+Depuis une session Claude Code, /login permet aussi de retenter la connexion.
+Si l'organisation exige le SSO, relancer la commande de connexion avec --sso.
+
+Sous Linux, les identifiants sont normalement enregistrés dans
+~/.claude/.credentials.json, en mode 0600. Si CLAUDE_CONFIG_DIR est défini,
+le fichier se trouve dans ce répertoire. Ne pas créer un fichier vide pour
+simuler une connexion réussie.
+
+Alternative proposée par Claude : claude setup-token, puis configuration
+locale de CLAUDE_CODE_OAUTH_TOKEN. La commande affiche un secret ; sa valeur
+doit rester dans un stockage local de secrets et ne pas être copiée ici.
+
+2. CODEX : RECONNEXION OU CHANGEMENT DE COMPTE
+
+Comptes disponibles, à choisir dans le navigateur :
+- Personnel : louis.hauseux@gmail.com
+- Inria : louis.hauseux@inria.fr
+
+Commandes vérifiées avec le CLI installé : codex-cli 0.162.1.
+Consulter d'abord l'état de la connexion :
+  codex login status
+
+Pour se reconnecter ou passer à l'autre compte, terminer les sessions de
+travail concernées, puis exécuter :
+  codex logout
+  codex login
+
+Dans le navigateur, sélectionner le compte ChatGPT voulu et sa méthode de
+connexion habituelle. Une fenêtre privée aide à éviter la reprise automatique
+du mauvais compte. Codex ne propose pas d'option --email dans cette version.
+
+Sur cette machine distante, si le retour du navigateur vers le CLI échoue :
+  codex login --device-auth
+Ouvrir le lien affiché et saisir le code avec le compte voulu. Cette méthode
+doit être autorisée dans les réglages de sécurité ChatGPT ou par le workspace.
+
+Après la connexion :
+  codex login status
+  codex
+
+login status confirme la méthode active et retourne 0 si une connexion est
+enregistrée ; il ne garantit pas l'affichage de l'adresse du compte. Vérifier
+l'adresse dans le navigateur au moment de l'autorisation.
+
+Codex conserve les identifiants dans auth.json sous CODEX_HOME (~/.codex par
+défaut), ou dans le coffre du système selon cli_auth_credentials_store.
+Le CLI et l'extension IDE partagent le cache : logout affecte aussi l'extension.
+Ces commandes sont une procédure future ; aucune déconnexion Codex n'a été
+effectuée pour rédiger cette note.
+
+3. SI L'ENREGISTREMENT ÉCHOUE ENCORE
+
+Vérifier l'espace et les inodes, car une connexion dans le navigateur ne
+garantit pas que le CLI a pu enregistrer ses identifiants :
+  df -h "$HOME" /workspaces /tmp
+  df -i "$HOME"
+
+Examiner les permissions des répertoires réellement utilisés :
+  claude_cfg_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+  codex_cfg_dir="${CODEX_HOME:-$HOME/.codex}"
+  ls -ld "$claude_cfg_dir" "$codex_cfg_dir"
+
+Si le disque est plein, déplacer seulement des caches régénérables vers un
+disque disposant d'espace, après vérification du montage et des copies.
+Préserver les données, builds épinglés, reçus et historiques de travail.
+Si l'échec persiste, relever le message système exact avant toute correction
+de propriétaire ou réinitialisation des fichiers de configuration.
+
+Ne jamais versionner de mot de passe, jeton, clé API, fichier auth.json ou
+.credentials.json. Cette note contient uniquement les adresses demandées,
+les commandes et le diagnostic.
+
+Sources officielles consultées :
+Claude Code : https://code.claude.com/docs/en/authentication
+OpenAI Docs — authentification : https://learn.chatgpt.com/docs/auth
+OpenAI Docs — commandes CLI :
+  https://learn.chatgpt.com/docs/developer-commands?surface=cli#codex-login
