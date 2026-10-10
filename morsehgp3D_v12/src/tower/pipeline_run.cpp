@@ -12,10 +12,12 @@
 
 namespace mhgp12::tower::detail {
 
-// Points d'observation de la porte native de terminaison (CST-0241 ; tests/tower/region_unit.cpp) : annonce, retrait
-// sans travail (apres la capture de last), attente (avant la boucle d'attente). VIDES dans le produit : seule la cible
-// de test compile ce fichier avec MHGP12_REGION_HOOKS, fournit region_hook et lie ce corps-ci (marqueur
-// region_hooks_build, carte de lien controlee) ; aucun pointeur ni branche dynamique dans la construction produit.
+// Points d'observation des portes natives de la region (tests/tower/region_unit.cpp) : terminaison (CST-0241) : annonce,
+// retrait sans travail (apres la capture de last), attente (avant la boucle d'attente) ; fermeture du noyau face aux
+// taches d'indices (residu de CST-0242) : debut de la cloture, tours de l'attente, fin de l'attente, garde de run_hint
+// franchie. VIDES dans le produit : seule la cible de test compile ce fichier avec MHGP12_REGION_HOOKS, fournit
+// region_hook et lie ce corps-ci (marqueur region_hooks_build, carte de lien controlee) ; aucun pointeur ni branche
+// dynamique dans la construction produit.
 #ifdef MHGP12_REGION_HOOKS
 const int region_hooks_build = 1;
 #define MHGP12_REGION_HOOK(point, worker) region_hook(point, worker)
@@ -26,9 +28,14 @@ const int region_hooks_build = 1;
 StepDeps step_dependencies(Step s) noexcept {
   switch (s) {
     case kCheck: return {0, {}};
-    case kNumber: return {1, {{kCheck, false}}};
-    case kKernel: return {1, {{kNumber, false}}};
-    case kHistory: return {1, {{kKernel, false}}};
+    case kNumberOpen: return {1, {{kCheck, false}}};
+    case kNumber: return {1, {{kNumberOpen, false}}};
+    case kNumberClose: return {1, {{kNumber, false}}};
+    case kKernelOpen: return {1, {{kNumberClose, false}}};
+    case kKernel: return {1, {{kKernelOpen, false}}};
+    case kHistoryCheck: return {1, {{kKernel, false}}};
+    case kDepth: return {1, {{kKernel, false}}};
+    case kHistory: return {1, {{kHistoryCheck, false}}};
     case kSlices: return {1, {{kKernel, false}}};
     case kClasses: return {1, {{kSlices, false}}};
     case kNodes0: return {1, {{kClasses, false}}};
@@ -51,8 +58,8 @@ StepDeps step_dependencies(Step s) noexcept {
 
 u32 refusal_rank(Step s) noexcept {
   if (s == kCheck) return 0;
-  if (s == kNumber) return 1;
-  if (s == kKernel || s == kHistory) return 3;
+  if (s >= kNumberOpen && s <= kKernelOpen) return 1;  // kKernelOpen : 3 pour l'ouverture du noyau (step_body)
+  if (s >= kKernel && s <= kHistory) return 3;
   if (s >= kSlices && s <= kFinish) return 4;
   if (s == kLower || s == kBirths) return 5;
   if (s == kMerges) return 6;
@@ -69,6 +76,9 @@ void prepare_graph(Pipeline& p) noexcept {
     p.g_start[i] = start;
     start += p.g_items[i];
     p.kernel_slice[i].store(0, std::memory_order_relaxed);
+    p.hint_next[i].store(0, std::memory_order_relaxed);
+    p.hint_active[i].store(0, std::memory_order_relaxed);
+    p.hint_closed[i].store(false, std::memory_order_relaxed);
   }
   p.g_total = start;
   for (u32 i = 0; i < p.orders; ++i)
@@ -88,9 +98,7 @@ void prepare_graph(Pipeline& p) noexcept {
 
 namespace {
 
-using Clock = std::chrono::steady_clock;
-
-enum class JobKind : u8 { none, g, kernel, step };
+enum class JobKind : u8 { none, g, kernel, hint, step };
 struct Job {
   JobKind kind = JobKind::none;
   u32 order = 0;
@@ -98,16 +106,9 @@ struct Job {
   u64 item = 0;
 };
 
-u64 now_ns(const Pipeline& p) noexcept {
-  return static_cast<u64>(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - p.start).count());
-}
-
 u8 slice_flag(Pipeline& p, u32 i, u64 s) noexcept {
   return std::atomic_ref<u8>(p.g_flags[i][s]).load(std::memory_order_acquire);
 }
-
-ForestWork& work_of(Pipeline& p, u32 i, u32 w) noexcept { return p.f_counters[u64{i} * p.threads + w]; }
-ForestPhysical& physical_of(Pipeline& p, u32 i, u32 w) noexcept { return p.f_physical[u64{i} * p.threads + w]; }
 
 void record(Pipeline& p, u32 w, u32 rank, const Outcome& o) noexcept {
   p.totals[w].forest_outcome[rank] = merge(p.totals[w].forest_outcome[rank], o);
@@ -152,31 +153,60 @@ bool kernel_claimable(Pipeline& p, u32 i) noexcept {
   return s == p.g_items[i] || (slice_flag(p, i, s) & kSliceDone) != 0;
 }
 
-// Reclamation (claim) ou simple constat (dry) d'un travail, par ordre de preference.
-bool find_job(Pipeline& p, bool claim, Job& job) noexcept {
-  if (!p.g_failed.load(std::memory_order_relaxed)) {
-    for (u32 i = p.orders; i-- > 0;) {
-      if (!kernel_claimable(p, i)) continue;
-      u32 idle = 0;
-      if (!claim) return true;
-      if (p.steps[i][kKernel].flags.compare_exchange_strong(idle, kStepBusy, std::memory_order_acq_rel)) {
-        job = Job{JobKind::kernel, i, kKernel, 0};
-        return true;
-      }
+// Tranche a indicer de l'ordre i (levier I) : au plus kHintWindow tranches au-dela de la position du noyau, deja
+// resolue avec ses feuilles ; reclamee une seule fois (CAS sur hint_next). Chaine de l'ordre engagee (A6c),
+// union-find ouvert, noyau ni clos ni en echec. L'indice est valide a tout instant (pipeline.hpp) : la fenetre ne sert
+// qu'a l'efficacite.
+bool hint_slice(Pipeline& p, u32 i, bool claim, u64& slice) noexcept {
+  if (!p.chain[i]) return false;  // chemin de la base : aucune tache d'indices
+  if (!step_done(p, i, kKernelOpen) || p.hint_closed[i].load(std::memory_order_acquire) ||
+      (p.steps[i][kKernel].flags.load(std::memory_order_acquire) & kStepFailed))
+    return false;
+  const u64 kernel = p.kernel_slice[i].load(std::memory_order_acquire);
+  u64 next = p.hint_next[i].load(std::memory_order_relaxed);
+  for (;;) {
+    const u64 s = std::max(next, kernel + 1);
+    if (s >= p.g_items[i] || s > kernel + kHintWindow) return false;
+    if ((slice_flag(p, i, s) & (kSliceDone | kSliceFailed | kSliceLeaves)) != (kSliceDone | kSliceLeaves)) return false;
+    if (!claim) return true;
+    if (p.hint_next[i].compare_exchange_weak(next, s + 1, std::memory_order_acq_rel)) {
+      slice = s;
+      return true;
     }
-    for (u32 i = p.orders; i-- > 0;)
-      for (u32 s = 0; s < kStepCount; ++s) {
-        if (s == kKernel || !step_claimable(p, i, s)) continue;
-        if (!claim) return true;
-        StepState& st = p.steps[i][s];
-        u64 n = st.next.load(std::memory_order_relaxed);
-        while (n < st.items.load(std::memory_order_relaxed))
-          if (st.next.compare_exchange_weak(n, n + 1, std::memory_order_acq_rel)) {
-            job = Job{JobKind::step, i, static_cast<Step>(s), n};
-            return true;
-          }
-      }
   }
+}
+
+// Reclamation (claim) ou simple constat (dry) d'un travail. Noyau d'abord (proprietaire unique de son ordre).
+bool find_kernel(Pipeline& p, bool claim, Job& job) noexcept {
+  for (u32 i = p.orders; i-- > 0;) {
+    if (!kernel_claimable(p, i)) continue;
+    u32 idle = 0;
+    if (!claim) return true;
+    if (p.steps[i][kKernel].flags.compare_exchange_strong(idle, kStepBusy, std::memory_order_acq_rel)) {
+      job = Job{JobKind::kernel, i, kKernel, 0};
+      return true;
+    }
+  }
+  return false;
+}
+
+bool find_step(Pipeline& p, bool claim, Job& job) noexcept {
+  for (u32 i = p.orders; i-- > 0;)
+    for (u32 s = 0; s < kStepCount; ++s) {
+      if (s == kKernel || !step_claimable(p, i, s)) continue;
+      if (!claim) return true;
+      StepState& st = p.steps[i][s];
+      u64 n = st.next.load(std::memory_order_relaxed);
+      while (n < st.items.load(std::memory_order_relaxed))
+        if (st.next.compare_exchange_weak(n, n + 1, std::memory_order_acq_rel)) {
+          job = Job{JobKind::step, i, static_cast<Step>(s), n};
+          return true;
+        }
+    }
+  return false;
+}
+
+bool find_g(Pipeline& p, bool claim, Job& job) noexcept {
   if (p.g_next.load(std::memory_order_relaxed) >= p.g_total) return false;
   if (!claim) return true;
   const u64 j = p.g_next.fetch_add(1, std::memory_order_relaxed);
@@ -185,6 +215,28 @@ bool find_job(Pipeline& p, bool claim, Job& job) noexcept {
   while (j < p.g_start[i] || j >= p.g_start[i] + p.g_items[i]) ++i;
   job = Job{JobKind::g, i, kCheck, j - p.g_start[i]};
   return true;
+}
+
+bool find_hint(Pipeline& p, bool claim, Job& job) noexcept {
+  for (u32 i = p.orders; i-- > 0;) {
+    u64 slice = 0;
+    if (!hint_slice(p, i, claim, slice)) continue;
+    if (!claim) return true;
+    job = Job{JobKind::hint, i, kKernel, slice};
+    return true;
+  }
+  return false;
+}
+
+// Ordre de preference (A6b, apres le rejet d'A6 sur G4) : noyau, etapes, tranches de G, puis seulement taches
+// d'indices. La recherche d'une aide vient apres celles des etapes et de G : toutes les tranches de G sont alors
+// deja reclamees, mais certaines peuvent encore etre en cours. Cette priorite ne garantit donc pas l'absence de
+// contention avec G. Les sorties ne dependent pas de cet ordre (feuilles indicees : pont CST-0242).
+bool find_job(Pipeline& p, bool claim, Job& job) noexcept {
+  const bool live = !p.g_failed.load(std::memory_order_relaxed);
+  if (live && (find_kernel(p, claim, job) || find_step(p, claim, job))) return true;
+  if (find_g(p, claim, job)) return true;
+  return live && find_hint(p, claim, job);
 }
 
 struct LeafWindow {
@@ -257,7 +309,7 @@ void run_g(Pipeline& p, u32 w, u32 i, u64 slice) noexcept {
     p.totals[w].g_outcome = merge(p.totals[w].g_outcome, o);
     p.g_failed.store(true, std::memory_order_relaxed);
     flag = kSliceFailed;
-  } else if (!p.g_failed.load(std::memory_order_relaxed) && step_done(p, i, kNumber)) {
+  } else if (!p.g_failed.load(std::memory_order_relaxed) && step_done(p, i, kKernelOpen)) {
     u64 spent = 0;
     LeafWindow window;
     const Outcome leaves = slice_leaves(p, i, w, begin, end, spent, &window);
@@ -268,6 +320,8 @@ void run_g(Pipeline& p, u32 w, u32 i, u64 slice) noexcept {
   std::atomic_ref<u8>(p.g_flags[i][slice]).store(flag, std::memory_order_release);
   p.epoch.fetch_add(1, std::memory_order_release);
 }
+
+void relax(u32 round) noexcept;
 
 // Noyau de l'ordre i (drapeau kStepBusy tenu) : tranches terminees dans l'ordre des cellules, puis cloture.
 // Rend la duree des feuilles calculees par le noyau (comptee a part).
@@ -281,12 +335,28 @@ u64 run_kernel_job(Pipeline& p, u32 w, u32 i) noexcept {
   for (;;) {
     const u64 s = p.kernel_slice[i].load(std::memory_order_relaxed);
     if (s == p.g_items[i]) {
+      // plus aucune tache d'indices ne demarre ; celles en cours finissent avant que l'union-find soit rendu
+      MHGP12_REGION_HOOK(kHookCloseBegin, w);
+      p.hint_closed[i].store(true, std::memory_order_seq_cst);
+      for (u32 round = 0; p.hint_active[i].load(std::memory_order_seq_cst) != 0; ++round) {
+        MHGP12_REGION_HOOK(kHookCloseWait, w);
+        relax(round);
+      }
+      MHGP12_REGION_HOOK(kHookClosed, w);
       const Outcome closed = close_kernel(in, f, work, p.forest.counters[i]);
       work.leaves.reset();
       if (!closed.ok()) {
         record(p, w, 3, closed);
         st.flags.store(kStepFailed, std::memory_order_release);
         return leaves_ns;
+      }
+      if (p.chain[i]) {  // historique par morceaux (levier H)
+        set_items(p, i, kHistoryCheck, pieces(work.event_count, kHistoryItems));
+        set_items(p, i, kDepth, pieces(f.births, kHistoryItems));
+      } else {  // chemin de la base : build_history d'un seul tenant dans kHistoryCheck
+        set_items(p, i, kHistoryCheck, 1);
+        set_items(p, i, kDepth, 0);
+        set_items(p, i, kHistory, 0);
       }
       p.order_kernel_end[i].store(now_ns(p), std::memory_order_relaxed);
       complete_step(p, i, kKernel);
@@ -298,98 +368,20 @@ u64 run_kernel_job(Pipeline& p, u32 w, u32 i) noexcept {
     const u64 end = std::min<u64>(in.cell_ball.size(), begin + tower_detail::kCellGrain);
     Outcome o = (flag & kSliceLeaves) ? Outcome{} : slice_leaves(p, i, w, begin, end, leaves_ns);
     const u32 rank = o.ok() ? 3 : 2;
-    if (o.ok()) o = advance_kernel(in, work.leaves.span(), f, work, p.forest.counters[i], end);
+    if (o.ok()) o = advance_kernel(in, work.leaves.span(), f, work, p.forest.counters[i], end, p.chain[i]);
     if (!o.ok()) {
       record(p, w, rank, o);
       st.flags.store(kStepFailed, std::memory_order_release);
       return leaves_ns;
     }
     p.kernel_slice[i].store(s + 1, std::memory_order_release);
+    // la fenetre des indices avance avec le noyau : reveil des fils sans travail toutes les 8 tranches
+    if (((s + 1) & 7) == 0) p.epoch.fetch_add(1, std::memory_order_release);
   }
   ++p.totals[w].kernel_stops;
   st.flags.store(0, std::memory_order_release);  // rendu : un autre fil le reprendra quand la tranche sera publiee
   p.epoch.fetch_add(1, std::memory_order_release);
   return leaves_ns;
-}
-
-// Morceau [item * size, ...) borne par count.
-u64 piece_end(u64 item, u64 size, u64 count) noexcept { return std::min(count, (item + 1) * size); }
-u64 pieces(u64 count, u64 size) noexcept { return (count + size - 1) / size; }
-
-void set_items(Pipeline& p, u32 i, Step s, u64 items) noexcept {
-  p.steps[i][s].items.store(items, std::memory_order_relaxed);
-}
-
-// Corps d'un morceau d'une etape ; rang de refus de la voie sequentielle dans rank.
-Outcome step_body(Pipeline& p, u32 w, u32 i, Step s, u64 item, u32& rank) noexcept {
-  BuildState& b = p.forest;
-  const ForestInput& in = b.inputs[i];
-  OrderForest& f = b.forests.orders[i];
-  OrderWork& work = b.work[i];
-  rank = refusal_rank(s);
-  switch (s) {
-    case kCheck: return check_forest_input(in);
-    case kNumber: {  // numerotation (number_order chronometre births_ns), puis ouverture du noyau (kernel_ns)
-      MHGP12_TRY(number_order(b, i));
-      rank = 3;
-      const u64 t0 = now_ns(p);
-      const Outcome opened = open_kernel(in, f, work, b.budget);
-      physical_of(p, i, w).kernel_ns += now_ns(p) - t0;
-      return opened;
-    }
-    case kHistory: return build_history(f, work, b.counters[i], b.budget);
-    case kSlices:
-      MHGP12_TRY(open_contraction(b, i));
-      for (const Step phase : {kClasses, kNodes, kParents, kChildren}) set_items(p, i, phase, work.slices.size());
-      return {};
-    case kClasses: contract_classes(work, work.slices[item]); return {};
-    case kNodes0: return allocate_nodes(b, i);
-    case kNodes: contract_nodes(work, f, work.slices[item]); return {};
-    case kParents: contract_parents(work, f, work.slices[item]); return {};
-    case kPlace: return place_children(b, i);
-    case kChildren: contract_children(work, f, work.slices[item]); return {};
-    case kFinish: return finish_order(b, i);
-    case kLower:
-      MHGP12_TRY(open_verticals(b, i));
-      set_items(p, i, kBirths, pieces(f.births, kVerticalItems));
-      set_items(p, i, kMerges, pieces(f.nodes() - f.births, kVerticalItems));
-      return {};
-    case kBirths:
-      return birth_images(in, b.inputs[i - 1], b.forests.orders[i - 1], f, item * kVerticalItems,
-                          piece_end(item, kVerticalItems, f.births), work_of(p, i, w));
-    case kMerges:
-      return merge_images(b.forests.orders[i - 1], f, f.births + item * kVerticalItems,
-                          f.births + piece_end(item, kVerticalItems, f.nodes() - f.births), work_of(p, i, w));
-    case kRows: {
-      release_events(b, i);
-      u64 reads = 0;
-      MHGP12_TRY(prepare_rows(b, i, reads));
-      const u64 rows = f.retained_cell.size();
-      set_items(p, i, kCollect, pieces(rows, kRowItems));
-      set_items(p, i, kFill, pieces(rows, kRowItems));
-      return {};
-    }
-    case kCollect:
-      return collect_rows(b, i, item * kRowItems, piece_end(item, kRowItems, f.retained_cell.size()),
-                          work_of(p, i, w));
-    case kPlaceRows: return place_rows(b, i);
-    case kFill: fill_rows(b, i, item * kRowItems, piece_end(item, kRowItems, f.retained_cell.size())); return {};
-    case kKernel:
-    case kStepCount: break;
-  }
-  return fail(Reason::tower_invariant);
-}
-
-// Duree d'un morceau, imputee a l'etage de son etape (diagnostic physique par ordre et par fil) ; kNumber impute
-// lui-meme ses deux parties.
-void charge_stage(Pipeline& p, u32 w, u32 i, Step s, u64 ns) noexcept {
-  ForestPhysical& ph = physical_of(p, i, w);
-  if (s == kNumber) return;
-  if (s == kCheck) ph.births_ns += ns;
-  else if (s == kHistory) ph.history_ns += ns;
-  else if (s >= kSlices && s <= kFinish) ph.contraction_ns += ns;
-  else if (s >= kLower && s <= kMerges) ph.vertical_ns += ns;
-  else ph.registry_ns += ns;
 }
 
 void run_step(Pipeline& p, u32 w, const Job& job) noexcept {
@@ -398,6 +390,8 @@ void run_step(Pipeline& p, u32 w, const Job& job) noexcept {
   const u64 t0 = now_ns(p);
   u32 rank = 0;
   const Outcome o = step_body(p, w, i, job.step, job.item, rank);
+  if (job.step == kNumber || job.step == kNumberClose) ++p.totals[w].number_jobs;
+  if (job.step == kDepth || job.step == kHistory) ++p.totals[w].history_jobs;
   if (!o.ok()) {
     record(p, w, rank, o);
     st.flags.fetch_or(kStepFailed, std::memory_order_acq_rel);
@@ -415,6 +409,15 @@ void run_step(Pipeline& p, u32 w, const Job& job) noexcept {
 void run_job(Pipeline& p, u32 w, const Job& job) noexcept {
   if (job.kind == JobKind::g) {
     run_g(p, w, job.order, job.item);
+  } else if (job.kind == JobKind::hint) {
+    const u64 t0 = now_ns(p);
+    if (p.g_next.load(std::memory_order_relaxed) < p.g_total) ++p.totals[w].hints_during_g;  // 0 attendu (A6b)
+    const u64 hinted = run_hint(p, w, job.order, job.item);
+    const u64 t1 = now_ns(p);
+    physical_of(p, job.order, w).leaves_ns += t1 - t0;  // pre-passe de T
+    charge_forest(p, w, t0, t1);
+    ++p.totals[w].hint_jobs;
+    p.totals[w].hinted += hinted;
   } else if (job.kind == JobKind::kernel) {
     const u64 t0 = now_ns(p);
     const u64 leaves = run_kernel_job(p, w, job.order);
@@ -440,6 +443,26 @@ void relax(u32 round) noexcept {
 }
 
 }  // namespace
+
+// Tache d'indices (levier I) : tranche `slice` de l'ordre i. Garde : annoncee (hint_active) avant de lire hint_closed,
+// seq_cst des deux cotes ; la cloture du noyau (run_kernel_job) leve hint_closed puis attend hint_active nul avant de
+// rendre l'union-find, les elements et les feuilles. Une tache qui lit hint_closed faux travaille donc sur des tampons
+// vivants ; une tache reclamee avant la cloture mais jouee apres le lit vrai et ne les touche plus.
+u64 run_hint(Pipeline& p, [[maybe_unused]] u32 w, u32 i, u64 slice) noexcept {
+  p.hint_active[i].fetch_add(1, std::memory_order_seq_cst);
+  u64 hinted = 0;
+  if (!p.hint_closed[i].load(std::memory_order_seq_cst)) {
+    MHGP12_REGION_HOOK(kHookHintWork, w);
+    const ForestInput& in = p.forest.inputs[i];
+    const u64 nc = in.cell_ball.size();
+    const u64 processed =
+        std::min<u64>(nc, p.kernel_slice[i].load(std::memory_order_acquire) * tower_detail::kCellGrain);
+    const u64 begin = slice * tower_detail::kCellGrain;
+    hinted = hint_leaves(in, p.forest.work[i], begin, std::min<u64>(nc, begin + tower_detail::kCellGrain), processed);
+  }
+  p.hint_active[i].fetch_sub(1, std::memory_order_seq_cst);
+  return hinted;
+}
 
 Outcome run_region(void* raw, u64, u64, u32 w) noexcept {
   Pipeline& p = *static_cast<Pipeline*>(raw);
