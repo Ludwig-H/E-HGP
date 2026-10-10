@@ -36,6 +36,7 @@ choix A6c figé avant la borne, supplément N conditionnel, bascule tardive refu
 [Portes ON/OFF proposées](../receipts/audit_reponses_20261010/a6c_penurie_proposition/README.md) :
 budgets exact/moins un, injections et reprise FUL1, grille K2 à cohorte garantie.
 Non intégrés, ni compilés ni exécutés ; aucune clôture native.
+[Critères du repli mémoire annoncé](../receipts/audit_reponses_20261010/repli_memoire_prelecture.md) : état rendu, résolution complète, route et coût publiés.
 
 **B3-K :** [admission](../receipts/audit_reponses_20261010/session_b3b_admission/README.md),
 [statistiques](../receipts/audit_reponses_20261010/b3b_stats/README.md) : 300 processus/2 100 chaudes.
