@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "source_commit": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "status": "static_review_and_unapplied_proposal_only",
+  "source_sha256": {
+    "src/catalogue/catalogue.hpp": "b3dbc0ba16449dd660f296eb30cf99f9e4997d629aec3412b1e39b9701a61d1e",
+    "src/catalogue/assemble.cpp": "a74d9434b721a51db1eb1d1e878636fffb342a0147664f033ac67a88c2c18d02",
+    "src/catalogue/exec_host.hpp": "e84a22ad4fbce26c067735cfb3086565ad955e7f2b5e7258a2b5f07ac63d5f13",
+    "src/catalogue/finish_driver.hpp": "20e91d27704543c4fd0b92685e53e6badc90ad68a463a7bf1590078c76fc4fed",
+    "src/catalogue/finish_outputs.hpp": "df1db2b70d8014cff5e382d796ad6184935c2ed0ae1777f4f6662566f37752d3",
+    "src/catalogue/finish_slices.hpp": "e00e49075d7454cc98556cd82c9225a5d6fbbbd156dff31420d8c540d08cb273",
+    "src/catalogue/slices.cpp": "72cf315f6325e8873947131357691b9efacd9cdc085f64f9570bb635ef638eef",
+    "src/catalogue/slices.hpp": "4cc8b0c6e7e66f24602c0d55bdefac2bd506e976eda0b3da0b79960d2c2574fb",
+    "src/catalogue/device_cuda.cu": "c0e9db1178011940dc93db30b21656c39f91b2d495998a68c3edef1dfeb4b2df",
+    "src/catalogue/device_pipeline.hpp": "91c756a6b3c177c70d235d0a6f104ff9077ad56136bebb5ddd76907b92af94ac",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "src/sched/pool.cpp": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+    "src/tower/pipeline.cpp": "36d4361297d7c45aa58b11ba585c4be145ab82ac2de29ab31f76d99bf9b7134e",
+    "src/tower/pipeline.hpp": "806468f4ba0c7a99a9d6965bc6cfdde7a1ab3d6f759bfdcac47a563ddf0aa435",
+    "tests/tower/pipeline_levers.cpp": "67056dee09d3f39ce5913d6da8fefd22cb8687a0aa95b31f70ad0609995daec6",
+    "tests/catalogue/device_budget_test.cpp": "ab8bcf3120cd3af42879b8af629e2a5802f04c7d0cb6c7a225630b85e03331a5",
+    "tests/catalogue/device_finish_test.cpp": "26251fcbbf9a70b80c13db9129f3910925d3b0a392434841e040b5367b987e8c",
+    "tests/catalogue/device_support.hpp": "bdf181cd6e08216800e7ffe1e15ae671ee313edcce00ca87fc71e53cfda5bdcc",
+    "tests/catalogue/device_pipeline_test.cpp": "b2f3f815eaa8e72cacee5c6bb160763d74560e5c695f60dca6da582c99d368be",
+    "tests/mutants/catalogue.json": "9ce2e8686cc3376b9dff28768f06c8edf0254cfa288b895b3800564d7d9f01b5",
+    "bench/full_probe.cpp": "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+  },
+  "patched_sha256": "d0bbc379a46b0365f37e8193c798843d9a0eb787c3e0c258087a3b5c14992fd3",
+  "patch_sha256": "136ff025856bd83bc9accab968eda0bd13605aaf242c204331b7abba67f7bd08"
+}

@@ -98,3 +98,12 @@ Le préchargement de populations actuellement essayé dans `passes.cpp` peut
 être un autre bras ; l’associer d’emblée masquerait leurs effets respectifs.
 La réduction locale Q1 reste conditionnée au volume réel de représentants
 des coquilles étendues : leur faible nombre de cellules ne borne pas leur coût.
+
+## Mémoire B3-K, revue complémentaire
+
+[Aucune omission comptable démontrée](b3k_memoire/README.md) pour les clés,
+sur les voies complètes et découpées. Les compter à nouveau dans la tour
+ferait doublon. Le reçu propose seulement de libérer plus tôt un curseur
+devenu inutile : bénéfice local conditionnel sans cache, aucune promesse
+de baisse de RSS ni de pic avec cache. Cette piste secondaire ne remplace
+ni la réduction de G ni la qualification mémoire CST-0244/0245 en attente.

@@ -1,0 +1,10 @@
+--- a/morsehgp3D_v12/src/catalogue/slices.cpp
++++ b/morsehgp3D_v12/src/catalogue/slices.cpp
+@@ -398,6 +398,7 @@
+   MHGP12_TRY(cursor.allocate(sites, budget));
+   std::copy(offsets.begin(), offsets.begin() + sites, cursor.begin());
+   for (u64 i = 0; i < n; ++i) values[cursor[idx(balls[i].support[0])]++] = make_id<BallIdx>(static_cast<u32>(i));
++  cursor.reset();  // aucune utilisation apres la repartition ; peut rendre le bloc au cache
+   TableRows rows{balls.data(), sites, width_of(sites), offsets.data(), values.data()};
+   if (sites != 0) MHGP12_TRY(pool.parallel_for(sites, 4096, &rows, &TableRows::body));
+   MHGP12_TRY(keys.allocate(n, budget));
