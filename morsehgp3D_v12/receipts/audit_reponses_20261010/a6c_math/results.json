@@ -1,0 +1,60 @@
+{
+  "candidate_files_checked": 11,
+  "cohort_ownership": {
+    "exhaustive_partition_cases": 6138,
+    "grain_16384_interval_cases": 5
+  },
+  "hint_close_sc": {
+    "1": {
+      "product_guard_model": {
+        "states": 25,
+        "terminal_states": 2,
+        "unsafe_work_transitions": 0
+      },
+      "wait_removed_model": {
+        "states": 29,
+        "terminal_states": 2,
+        "unsafe_work_transitions": 1
+      }
+    },
+    "2": {
+      "product_guard_model": {
+        "states": 161,
+        "terminal_states": 4,
+        "unsafe_work_transitions": 0
+      },
+      "wait_removed_model": {
+        "states": 217,
+        "terminal_states": 4,
+        "unsafe_work_transitions": 16
+      }
+    }
+  },
+  "history_depth": {
+    "complete_size_union_histories_n1_to_5": 3039,
+    "node_depth_comparisons": 15017
+  },
+  "prefix_publication_fragment": {
+    "events": 47,
+    "geometric_reachability_proved": false,
+    "helper_parent_read_happens_before_future_kernel_write": true,
+    "independent_formal_cpp_tool": false,
+    "leaf_release_acquire_fragment_accepted": false,
+    "relaxed_fragment_accepted_by_checked_relations": true
+  },
+  "r1_files_checked": 10,
+  "scope": "source_and_bounded_python_models_only_no_native_or_performance_qualification",
+  "source_anchors": {
+    "admit_before_decision": true,
+    "element_acquire": true,
+    "element_release": true,
+    "hint_sc_guard": true,
+    "last_withdrawal_preserved": true,
+    "leaf_acquire": true,
+    "leaf_release": true,
+    "no_hint_when_off": true,
+    "slice_acquire": true,
+    "slice_release": true,
+    "unconditional_number_scratch": true
+  }
+}

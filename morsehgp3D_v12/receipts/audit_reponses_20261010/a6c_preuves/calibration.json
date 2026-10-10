@@ -1,0 +1,268 @@
+{
+  "schema": "ehgp.v12.audit.a6c_calibration.v1",
+  "archive_a6b_sha256": "9833e0539ec77cb3a078fbb9c059017ff697fcb91fe15bb818fde6dd577b1f4d",
+  "selected_logs": 44,
+  "selected_logs_manifest_sha256": "35e53ad0d8be937382726dfe4a1dce2df01fba6a0d17542c8a26fd6854a260b3",
+  "aggregation": "median(kernel5_ns) - median(g_ns), ng aliases grouped with v12set labels",
+  "groups": [
+    {
+      "trame": "kitti_ng_00_000648",
+      "sites": 77965,
+      "passes": 12,
+      "g_ns_median": 59819230.0,
+      "kernel5_ns_median": 89789087.5
+    },
+    {
+      "trame": "kitti_ng_00_000660",
+      "sites": 71483,
+      "passes": 14,
+      "g_ns_median": 60771868.0,
+      "kernel5_ns_median": 90512721.0
+    },
+    {
+      "trame": "kitti_ng_00_001464",
+      "sites": 74736,
+      "passes": 14,
+      "g_ns_median": 64140350.5,
+      "kernel5_ns_median": 94807550.5
+    },
+    {
+      "trame": "kitti_ng_00_001502",
+      "sites": 64995,
+      "passes": 14,
+      "g_ns_median": 53880541.5,
+      "kernel5_ns_median": 78784348.0
+    },
+    {
+      "trame": "kitti_ng_00_001880",
+      "sites": 80607,
+      "passes": 14,
+      "g_ns_median": 94654905.5,
+      "kernel5_ns_median": 128517825.5
+    },
+    {
+      "trame": "kitti_ng_00_001896",
+      "sites": 95586,
+      "passes": 14,
+      "g_ns_median": 145124109.0,
+      "kernel5_ns_median": 188659651.5
+    },
+    {
+      "trame": "kitti_ng_00_003612",
+      "sites": 70537,
+      "passes": 14,
+      "g_ns_median": 59195571.0,
+      "kernel5_ns_median": 86461538.5
+    },
+    {
+      "trame": "kitti_ng_00_003624",
+      "sites": 72836,
+      "passes": 14,
+      "g_ns_median": 59656038.5,
+      "kernel5_ns_median": 87541464.5
+    },
+    {
+      "trame": "kitti_ng_02_000620",
+      "sites": 52403,
+      "passes": 2,
+      "g_ns_median": 62135124.0,
+      "kernel5_ns_median": 75996412.5
+    },
+    {
+      "trame": "kitti_ng_02_001600",
+      "sites": 67585,
+      "passes": 14,
+      "g_ns_median": 67522563.0,
+      "kernel5_ns_median": 88875393.5
+    },
+    {
+      "trame": "kitti_ng_02_001604",
+      "sites": 67805,
+      "passes": 14,
+      "g_ns_median": 71123615.0,
+      "kernel5_ns_median": 93090985.5
+    },
+    {
+      "trame": "kitti_ng_02_001606",
+      "sites": 64740,
+      "passes": 14,
+      "g_ns_median": 66199830.5,
+      "kernel5_ns_median": 87624983.0
+    },
+    {
+      "trame": "kitti_ng_02_001610",
+      "sites": 67864,
+      "passes": 14,
+      "g_ns_median": 67467840.5,
+      "kernel5_ns_median": 90171892.5
+    },
+    {
+      "trame": "kitti_ng_05_002060",
+      "sites": 66456,
+      "passes": 14,
+      "g_ns_median": 87518635.0,
+      "kernel5_ns_median": 102746358.0
+    },
+    {
+      "trame": "kitti_ng_05_002064",
+      "sites": 62859,
+      "passes": 14,
+      "g_ns_median": 83672900.0,
+      "kernel5_ns_median": 97871176.5
+    },
+    {
+      "trame": "kitti_ng_05_002748",
+      "sites": 50136,
+      "passes": 2,
+      "g_ns_median": 43725406.0,
+      "kernel5_ns_median": 52616584.5
+    },
+    {
+      "trame": "kitti_ng_06_000770",
+      "sites": 46561,
+      "passes": 2,
+      "g_ns_median": 34389762.0,
+      "kernel5_ns_median": 42617211.0
+    },
+    {
+      "trame": "kitti_ng_06_000772",
+      "sites": 49668,
+      "passes": 2,
+      "g_ns_median": 37465576.0,
+      "kernel5_ns_median": 44730875.5
+    },
+    {
+      "trame": "kitti_ng_06_000774",
+      "sites": 53754,
+      "passes": 2,
+      "g_ns_median": 39905771.5,
+      "kernel5_ns_median": 49996840.0
+    },
+    {
+      "trame": "kitti_ng_06_000780",
+      "sites": 49628,
+      "passes": 2,
+      "g_ns_median": 36193711.0,
+      "kernel5_ns_median": 44694380.5
+    },
+    {
+      "trame": "kitti_ng_06_000798",
+      "sites": 37543,
+      "passes": 2,
+      "g_ns_median": 25160687.5,
+      "kernel5_ns_median": 25641112.5
+    },
+    {
+      "trame": "kitti_ng_06_000800",
+      "sites": 38341,
+      "passes": 2,
+      "g_ns_median": 26701082.0,
+      "kernel5_ns_median": 28078987.0
+    },
+    {
+      "trame": "kitti_ng_06_000804",
+      "sites": 47658,
+      "passes": 2,
+      "g_ns_median": 35274881.5,
+      "kernel5_ns_median": 41732711.0
+    },
+    {
+      "trame": "kitti_ng_06_000806",
+      "sites": 50884,
+      "passes": 2,
+      "g_ns_median": 39861736.5,
+      "kernel5_ns_median": 48625850.5
+    },
+    {
+      "trame": "kitti_ng_08_000000",
+      "sites": 39885,
+      "passes": 92,
+      "g_ns_median": 45577237.5,
+      "kernel5_ns_median": 38626008.0
+    },
+    {
+      "trame": "kitti_ng_08_000100",
+      "sites": 35551,
+      "passes": 92,
+      "g_ns_median": 35428873.5,
+      "kernel5_ns_median": 29542306.5
+    },
+    {
+      "trame": "kitti_ng_08_000200",
+      "sites": 45845,
+      "passes": 92,
+      "g_ns_median": 41786208.5,
+      "kernel5_ns_median": 45392567.5
+    },
+    {
+      "trame": "kitti_ng_08_000246",
+      "sites": 41691,
+      "passes": 2,
+      "g_ns_median": 43639465.5,
+      "kernel5_ns_median": 39054906.5
+    },
+    {
+      "trame": "kitti_ng_08_000691",
+      "sites": 61198,
+      "passes": 14,
+      "g_ns_median": 74983376.0,
+      "kernel5_ns_median": 88856451.0
+    },
+    {
+      "trame": "kitti_ng_08_001176",
+      "sites": 67114,
+      "passes": 14,
+      "g_ns_median": 80348530.0,
+      "kernel5_ns_median": 105402738.0
+    },
+    {
+      "trame": "kitti_ng_08_001193",
+      "sites": 80433,
+      "passes": 14,
+      "g_ns_median": 108427951.0,
+      "kernel5_ns_median": 139481513.5
+    },
+    {
+      "trame": "kitti_ng_08_001302",
+      "sites": 48925,
+      "passes": 2,
+      "g_ns_median": 50543528.5,
+      "kernel5_ns_median": 56590767.5
+    },
+    {
+      "trame": "kitti_ng_08_001847",
+      "sites": 33179,
+      "passes": 2,
+      "g_ns_median": 27626251.0,
+      "kernel5_ns_median": 22723952.0
+    },
+    {
+      "trame": "kitti_ng_08_002119",
+      "sites": 99099,
+      "passes": 14,
+      "g_ns_median": 138210527.0,
+      "kernel5_ns_median": 181371485.0
+    },
+    {
+      "trame": "kitti_ng_08_002554",
+      "sites": 72426,
+      "passes": 14,
+      "g_ns_median": 66734988.0,
+      "kernel5_ns_median": 93584107.5
+    },
+    {
+      "trame": "kitti_ng_10_000424",
+      "sites": 69106,
+      "passes": 14,
+      "g_ns_median": 70896269.5,
+      "kernel5_ns_median": 96451871.0
+    },
+    {
+      "trame": "kitti_ng_10_000430",
+      "sites": 73576,
+      "passes": 14,
+      "g_ns_median": 86869106.5,
+      "kernel5_ns_median": 113018315.5
+    }
+  ]
+}

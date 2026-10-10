@@ -1,0 +1,87 @@
+{
+  "cases": {
+    "aa_autre_binaire": {
+      "identite_ok": false,
+      "refus": [
+        "empreintes binaires ou identite A/A invalides"
+      ],
+      "verdict": "refuse"
+    },
+    "code_booleen": {
+      "identite_ok": false,
+      "refus": [
+        "identite hors cohorte commandee"
+      ],
+      "verdict": "refuse"
+    },
+    "identite_absente": {
+      "identite_ok": false,
+      "refus": [
+        "identite hors cohorte commandee"
+      ],
+      "verdict": "refuse"
+    },
+    "journal_identite_absent": {
+      "identite_ok": true,
+      "refus": [
+        "journal externe, reutilise ou absent : journal_011.jsonl"
+      ],
+      "verdict": "refuse"
+    },
+    "journal_identite_rehache_invalide": {
+      "identite_ok": true,
+      "refus": [
+        "resume different du brut : journal_011.jsonl"
+      ],
+      "verdict": "refuse"
+    },
+    "mauvais_w": {
+      "identite_ok": false,
+      "refus": [
+        "ng : bras ou configuration hors commande"
+      ],
+      "verdict": "refuse"
+    },
+    "nominal": {
+      "identite_ok": true,
+      "refus": [],
+      "verdict": "adopte"
+    },
+    "resume_identite_altere": {
+      "identite_ok": false,
+      "refus": [
+        "resume different du brut : journal_000.jsonl"
+      ],
+      "verdict": "refuse"
+    },
+    "tour_manquant": {
+      "identite_ok": false,
+      "refus": [
+        "grandes : trames ou nombre de tours hors commande"
+      ],
+      "verdict": "refuse"
+    }
+  },
+  "diagnostic_fields": [
+    "chaine",
+    "sites"
+  ],
+  "individual_stderr_required": false,
+  "journals": 85,
+  "missing_diagnostic_fields": [
+    "retard_predit",
+    "rapport_par_trame",
+    "proche_seuil"
+  ],
+  "native_executed": false,
+  "official_selftest_stdout": "pilote_t2d_a6c_auto_test_ok cas=8 verdicts=adopte,rejete,refuse\n",
+  "pin": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "qualified_performance": false,
+  "source_sha256": {
+    "morsehgp3D_v12/microbancs/mes_t2d_a6c/pilote_t2d_a6c.py": "19e6024239bfe301cbede5b3a073f80439c748f5190ae5630aeeb4c0a10fc964",
+    "morsehgp3D_v12/microbancs/outils/banc_full.py": "7d7f0661b49adf094df51d41268470571d47c51fc7795bb5b34c791a4a539904",
+    "morsehgp3D_v12/microbancs/outils/lecteur_full.py": "15437e5f09408d5fbdc6288e33a2452490489f13bf9a3b3a24c99f5d109b6554",
+    "morsehgp3D_v12/microbancs/outils/test_lecteur_full.py": "8eed4403670ced0640e43b1010e07422fef105fe6da242ba1db730643f7a371f"
+  },
+  "strict_replay": true
+}

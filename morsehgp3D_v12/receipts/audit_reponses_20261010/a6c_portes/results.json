@@ -1,0 +1,162 @@
+{
+  "schema": "audit_a6c_portes_static_v1",
+  "source": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "base": "8a0716e7470197c95953b38d79f26b8d8f2379fc",
+  "native_executed": false,
+  "compiler_executed": false,
+  "gcp_used": false,
+  "mutants": {
+    "baseline": 55,
+    "candidate": 72,
+    "floor": 72,
+    "substitutions_unique_sequential": 76,
+    "added": [
+      {
+        "id": "numerotation_cohorte_coupee",
+        "gate": "mhgp12_tower_levers_numerotation"
+      },
+      {
+        "id": "numerotation_sans_controle_de_rang",
+        "gate": "mhgp12_tower_levers_numerotation"
+      },
+      {
+        "id": "indice_sans_borne_du_noyau",
+        "gate": "mhgp12_tower_levers_indices"
+      },
+      {
+        "id": "indice_de_la_naissance_zero",
+        "gate": "mhgp12_tower_levers_indices"
+      },
+      {
+        "id": "profondeur_decalee",
+        "gate": "mhgp12_tower_levers_historique"
+      },
+      {
+        "id": "csr_sans_controle",
+        "gate": "mhgp12_tower_pipeline_graphe"
+      },
+      {
+        "id": "noyau_ouvert_avant_numerotation",
+        "gate": "mhgp12_tower_pipeline_graphe"
+      },
+      {
+        "id": "cloture_numerotation_partielle",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "aide_avant_g",
+        "gate": "mhgp12_tower_levers_priorite"
+      },
+      {
+        "id": "fermeture_sans_attente",
+        "gate": "mhgp12_tower_region_fermeture"
+      },
+      {
+        "id": "aide_sans_garde",
+        "gate": "mhgp12_tower_region_fermeture"
+      },
+      {
+        "id": "chaine_seuil_inverse",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "chaine_jamais_engagee",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "aides_hors_chaine",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "numerotation_hors_chaine",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "historique_hors_chaine",
+        "gate": "mhgp12_tower_levers_bascule"
+      },
+      {
+        "id": "historique_base_avec_csr",
+        "gate": "mhgp12_tower_levers_bascule"
+      }
+    ]
+  },
+  "coverage_from_source": {
+    "chain_sites": 43900,
+    "admission": {
+      "sites_min": 30,
+      "sites_max": 229,
+      "orders": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "mode": "default_off"
+    },
+    "refusal": {
+      "sites_min": 60,
+      "sites_max": 159,
+      "orders": [
+        4
+      ],
+      "mode": "default_off"
+    },
+    "fault_throwing": {
+      "sites": 70,
+      "orders": [
+        4
+      ],
+      "mode": "default_off"
+    },
+    "fault_nothrow": {
+      "sites": 60,
+      "orders": [
+        4
+      ],
+      "mode": "default_off"
+    },
+    "toggle": {
+      "forced_on_off": true,
+      "success_only_unlimited_budget": true,
+      "sessions_pairs": 9,
+      "sites": [
+        1000,
+        2000,
+        3000
+      ],
+      "orders": [
+        5
+      ],
+      "threads": [
+        1,
+        3,
+        8
+      ]
+    }
+  },
+  "source_sha256": {
+    "src/catalogue/table.cpp": "cb76b465e6453f09684efb747ca8bf2de55f3d1788a15df3181e6f38723f0396",
+    "src/tower/first_probes.cpp": "c683a6e27a41b83be63f97d036cc3eacb3cffc8dad8c34cbfcba5958b53cc379",
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_contract.cpp": "5dacf8cef8a7827ba50c01b3a4908e264b946b5caccc0dda0abf5ad83117870d",
+    "src/tower/forest_kernel.cpp": "debebf4b07a20efac28172e2b4b46369f4e37109a3a7ca1c296bc254a99b43d7",
+    "src/tower/passes.cpp": "d1f850445a0970628691e0812d1c8c630a0e19294c9b862d6bddef8ffc865ef1",
+    "src/tower/pipeline.cpp": "36d4361297d7c45aa58b11ba585c4be145ab82ac2de29ab31f76d99bf9b7134e",
+    "src/tower/pipeline.hpp": "806468f4ba0c7a99a9d6965bc6cfdde7a1ab3d6f759bfdcac47a563ddf0aa435",
+    "src/tower/pipeline_run.cpp": "37458b82a6f7aedf46ca199260592e89c194c2140b404d3c23ac40db5e1cb419",
+    "src/tower/pipeline_steps.cpp": "745f6fbb1ad05ff59fa6f48db7a7ff7453f9197314a02f741b6669215698eadd",
+    "src/tower/populations.cpp": "1cf73b2c32aeb7c7859d2a5484afbe0b91c5823a721d3f0cf1e68eb6798c98f5",
+    "src/tower/radix.cpp": "bdd602968c8b2e886e833686ae68edf74f35144389a59a306a361e0bf96d62dd",
+    "src/tower/registry_branches.cpp": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+    "src/tower/resolve.cpp": "7cf8c95bb67bea274098b2abd9ec653606cdd96ab313338e739c8f145f8e11c1",
+    "src/tower/vertical_images.cpp": "b0543caf0adb031cf58f59d7eb337aa79c41ad226f28da527456e22f6b0df8eb",
+    "tests/mutants/run_mutants.py": "5ffa023440ab8b47e98b1f31186d0ef8e4f3f1fcdcd6a77671fe3f5ba51b3bec",
+    "tests/mutants/tower.json": "a13804eae1df3b7c5f5a80ecc81b8bf1ae71509f769cae50628db5490a656a24",
+    "tests/tower/pipeline_fault.cpp": "4331a1d4d16317fa55ebfeaee899264826c2e4f7cfe80f0b6f2548af0e630199",
+    "tests/tower/pipeline_levers.cpp": "67056dee09d3f39ce5913d6da8fefd22cb8687a0aa95b31f70ad0609995daec6",
+    "tests/tower/pipeline_unit.cpp": "543adab184347a507c83003ea9ccf947b405fe3544c0812105d5525d188a829a",
+    "tests/tower/region_unit.cpp": "4962091891af42fb045e84126b4605a6f30c569b01ec7ad6d6a358607a83c966",
+    "tests/tower/tests.cmake": "ad12cd6666fb1a2ac31aaba9a6d11b8d4a38abfe1cd05be37dfd95e12a4a3c31"
+  }
+}
