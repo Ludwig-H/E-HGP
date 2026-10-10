@@ -1,0 +1,145 @@
+{
+  "native_runs": 0,
+  "source_git": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "parent_patch_unchanged": true,
+  "invalidated_before_companion": [
+    "recherche_sans_egalite_des_sites",
+    "recherche_premiere_place_du_seau"
+  ],
+  "mutants": 73,
+  "floor": 73,
+  "edits_checked": 77,
+  "secondary_edits_checked": 4,
+  "same_ids_and_gates": true,
+  "unchanged_manifest_entries": 71,
+  "official_check": "manifeste_ok module=tower mutants=73 plancher=73",
+  "causal_model": {
+    "mask": 0,
+    "rows": 3,
+    "queries": 5,
+    "wrong_responses": {
+      "hash_only": 4,
+      "first_only": 2
+    },
+    "first_only_no_loop": true,
+    "examples": [
+      {
+        "query": [
+          0,
+          1
+        ],
+        "expected": [
+          0,
+          2
+        ],
+        "exact": [
+          0,
+          2
+        ],
+        "hash_only": [
+          1,
+          0
+        ],
+        "first_only": [
+          0,
+          2
+        ]
+      },
+      {
+        "query": [
+          0,
+          2
+        ],
+        "expected": [
+          1,
+          0
+        ],
+        "exact": [
+          1,
+          0
+        ],
+        "hash_only": [
+          1,
+          0
+        ],
+        "first_only": null
+      },
+      {
+        "query": [
+          1,
+          2
+        ],
+        "expected": [
+          2,
+          1
+        ],
+        "exact": [
+          2,
+          1
+        ],
+        "hash_only": [
+          1,
+          0
+        ],
+        "first_only": null
+      },
+      {
+        "query": [
+          0,
+          3
+        ],
+        "expected": null,
+        "exact": null,
+        "hash_only": [
+          1,
+          0
+        ],
+        "first_only": null
+      },
+      {
+        "query": [
+          2,
+          3
+        ],
+        "expected": null,
+        "exact": null,
+        "hash_only": [
+          1,
+          0
+        ],
+        "first_only": null
+      }
+    ]
+  },
+  "composition": {
+    "source_git": "ae8f8107cc5a13356da89addf90808b5aaad9d67",
+    "applied_in_temporary_copy": true,
+    "source_files_pinned": 36,
+    "postimages_verified": true,
+    "patch_order": [
+      "g_population_egalite",
+      "g_population_mutants",
+      "t1_support_population"
+    ],
+    "manifests": {
+      "tower": {
+        "mutants": 73,
+        "floor": 73,
+        "edits": 77,
+        "secondary_edits": 4,
+        "every_sequential_anchor_once": true,
+        "official_check": "manifeste_ok module=tower mutants=73 plancher=73"
+      },
+      "catalogue": {
+        "mutants": 38,
+        "floor": 38,
+        "edits": 38,
+        "secondary_edits": 0,
+        "every_sequential_anchor_once": true,
+        "official_check": "manifeste_ok module=catalogue mutants=38 plancher=38"
+      }
+    },
+    "native_qualification": false
+  },
+  "native_mutants_executed": false
+}

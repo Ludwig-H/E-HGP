@@ -1,0 +1,30 @@
+--- a/morsehgp3D_v12/tests/mutants/tower.json
++++ b/morsehgp3D_v12/tests/mutants/tower.json
+@@ -68,10 +68,10 @@
+     {
+       "id": "recherche_sans_egalite_des_sites",
+       "fichier": "src/tower/populations.cpp",
+-      "cherche": "if (pos < hi && compare_at(pos, key, f) == 0) return hit_at(pos);  // egalite exacte des SiteIdx",
+-      "remplace": "if (pos < hi && key_at(pos) == key) return hit_at(pos);  // egalite exacte des SiteIdx",
++      "cherche": "if (comparison == 0) return hit_at(mid);",
++      "remplace": "if (key_at(mid) == key) return hit_at(mid);",
+       "porte": "mhgp12_tower_index_index_reference",
+-      "note": "LEM-POP decide sur l'empreinte seule (la recherche de l'index ne compare plus les SiteIdx) : sous collision d'empreintes (masque nul), une autre naissance du seau est rendue pour F ; la table ordonnee de reference la refuse"
++      "note": "Retour sur la seule empreinte du milieu de la dichotomie, sans exiger les SiteIdx egaux : sous collision (masque nul), une autre naissance est rendue pour F ; la reference exacte la refuse"
+     },
+     {
+       "id": "verification_sans_collisions",
+@@ -84,10 +84,10 @@
+     {
+       "id": "recherche_premiere_place_du_seau",
+       "fichier": "src/tower/populations.cpp",
+-      "cherche": "const u64 pos = lower_bound(directory_[bucket], hi, key, &f);",
+-      "remplace": "const u64 pos = directory_[bucket];",
++      "cherche": "  while (lo < hi) {\n    const u64 mid = lo + (hi - lo) / 2;\n    const int comparison = compare_at(mid, key, f);\n    if (comparison == 0) return hit_at(mid);\n    if (comparison < 0) lo = mid + 1;\n    else hi = mid;\n  }",
++      "remplace": "  if (lo < hi && compare_at(lo, key, f) == 0) return hit_at(lo);",
+       "porte": "mhgp12_tower_index_weak_key_resolution",
+-      "note": "recherche de la file G-L7 (voie produit) sans dichotomie : seule la premiere place du seau est comparee ; sous masque nul, les sondes echouent a tort et les compteurs de la resolution rejouee different de ceux de l'etage"
++      "note": "Boucle de recherche remplacee par une seule comparaison exacte de la premiere fiche du seau, sans boucle : sous masque nul, les autres populations presentes sont manquees et les compteurs de resolution different"
+     },
+     {
+       "id": "seau_non_trie",

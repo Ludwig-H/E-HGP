@@ -63,8 +63,9 @@ patches proposés, 53 560 et 24 300 cas de modèle ; mesurer séparément avant 
 [Profil B3b relu](../receipts/audit_reponses_20261010/b3b_profil/README.md) : 75–77 % de premiers hits ;
 profil du lot, pas du produit clés seules. Aucun gain nouveau mesuré.
 
-**G4 :** [contrôle réel19:47:39 UTC](../receipts/audit_reponses_20261010/g4_controle_b3b/README.md),
-même génération arrêtée avant/après, garde code0, zéro VM E-HGP active à cet instant.
+**G4 :** après l’[arrêt constaté à19:47:39 UTC](../receipts/audit_reponses_20261010/g4_controle_b3b/README.md),
+la session **`mesb1o` est en cours**, source `ae8f8107c` (B3-K), grandes scènes.
+Aucun nouveau résultat admis ; provenance, cohorte et arrêt final à vérifier.
 
 Massifs inchangés : [record R1 GPU](../receipts/audit_reponses_20261008/session_l2t_admission/README.md)
 Paris sans sol 9,111M, K5 **46,453 s froid**, sans qualification chaude transférée à A6c.

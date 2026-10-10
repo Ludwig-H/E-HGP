@@ -89,7 +89,10 @@ Deux propositions plus petites peuvent précéder la vue virtuelle :
   **Avant intégration :** réancrer les mutants existants
   `recherche_sans_egalite_des_sites` et `recherche_premiere_place_du_seau` :
   leurs deux motifs textuels disparaissent avec l’ancien corps de `find`.
-  Garder IDs, portes et plancher73 ; ne pas traiter leur absence comme un succès.
+  Le [patch compagnon est prêt](g_population_mutants/README.md) : IDs, portes
+  et plancher73 conservés, fautes causales modélisées. Composition avec T1
+  vérifiée statiquement :77 ancres tour et38 Catalogue, chacune unique.
+  Cela ne remplace pas l’exécution native des mutants.
 - [LEM-T1 : rechercher seulement F\S](t1_support_population/README.md).
   Après authentification de S⊆F et réponse exacte S=S*(b), le Catalogue
   garantit déjà S⊆U_b. Le helper peut omettre ces sites, aux deux appels,
