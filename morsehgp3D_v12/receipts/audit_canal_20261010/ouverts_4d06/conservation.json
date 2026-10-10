@@ -1,0 +1,80 @@
+{
+  "source_commit": "4d06b7584602fd9a8bcf96dcee6b100c757c0d55",
+  "source_path": "morsehgp3D_v12/audits/CONSTATS.md",
+  "source_sha256": "a1a7961bd9b1325f508c3a3c189d8e5857cf52bca01b1b9e4ffa9f1c4e7f55f4",
+  "proposed_sha256": "5962742b3aff07af9e15e74339565259eb03a4b1b2264cd6080d40ed94507f74",
+  "rows": [
+    {
+      "id": "CST-0018",
+      "source_line": 26,
+      "original_sha256": "6e9b50b95022511355c5b192a20c8e376d8ba378d4eb2bcad531872697e89e44",
+      "summary_sha256": "773a343c22ef66077dc48d94fe22e413d8743c70a70d64c1df164b53477e5fcb",
+      "archive_anchor": "README.md#cst-0018",
+      "preserved_links": 5
+    },
+    {
+      "id": "CST-0021",
+      "source_line": 29,
+      "original_sha256": "9712f546c7db9c14837988e5706b8f2e7ed44869969d438bfdd3da113c7e1903",
+      "summary_sha256": "ee91ab1fa57ec5e38876aa7a52f1076c9438bd8884616f1439dbc975c2769121",
+      "archive_anchor": "README.md#cst-0021",
+      "preserved_links": 4
+    },
+    {
+      "id": "CST-0022",
+      "source_line": 30,
+      "original_sha256": "0c4807f14928b1472050ba59028cbd090e7338f7a38b2afb05d4cec803830498",
+      "summary_sha256": "5feb311adf554e4a36a64405f534c42cd331cb2036431ae9bbb165eb13335892",
+      "archive_anchor": "README.md#cst-0022",
+      "preserved_links": 5
+    },
+    {
+      "id": "CST-0211",
+      "source_line": 56,
+      "original_sha256": "4af141b44595fbf9f33cfcdbdeb37a45a5880af529b0e896e4e96329fde059b9",
+      "summary_sha256": "d7f687bb8e2e1909da0ae83924af7b9497a182f24d3159d0de8c0d27e500b904",
+      "archive_anchor": "README.md#cst-0211",
+      "preserved_links": 5
+    },
+    {
+      "id": "CST-0233",
+      "source_line": 76,
+      "original_sha256": "20f0b1375b38db09fbf63f5623283866c24b91f5dbb94f744bc18d20c1d275de",
+      "summary_sha256": "222392cde2b34fbab63066b0b8bc2b5c1358c4b31f15ca54c2ef2fef46c78e02",
+      "archive_anchor": "README.md#cst-0233",
+      "preserved_links": 12
+    },
+    {
+      "id": "CST-0234",
+      "source_line": 77,
+      "original_sha256": "50405978a20cd432ed26aed6c882150d550f1fea1fc46bcfe2d304e9f98ada46",
+      "summary_sha256": "10388307595c015cd988a31dac2fa26e6ce2c50237d575505cc07a60b3716556",
+      "archive_anchor": "README.md#cst-0234",
+      "preserved_links": 4
+    },
+    {
+      "id": "CST-0237",
+      "source_line": 80,
+      "original_sha256": "00dc22ce988c0dabdaeda58f8ad94ccd4e2435ac43a7756db8cb255785f34fc1",
+      "summary_sha256": "4704eefa1368866f1ca7b56588fdb3805450387708423076b29244103b494c00",
+      "archive_anchor": "README.md#cst-0237",
+      "preserved_links": 6
+    },
+    {
+      "id": "CST-0243",
+      "source_line": 86,
+      "original_sha256": "44c9ef0d5cedd894c6b062ed9421d9613139e232fcb34300b52ddf701a717ed3",
+      "summary_sha256": "ad6df9a5a97f0e37bce13235303126cbdfd1647de5a53db516843972bfcd88b1",
+      "archive_anchor": "README.md#cst-0243",
+      "preserved_links": 4
+    }
+  ],
+  "original_rows_bytes": 9922,
+  "original_rows_sha256": "6109e3b71dcf242545cf8741800ba16fcd12a7aabb80142d1139890ef1574465",
+  "first_nine_columns_unchanged": true,
+  "state_changes": 0,
+  "preserved_links": 45,
+  "saved_bytes": 4038,
+  "archive_sha256": "03989df4c73897c11dff11a8b37bbd52587ed83b2409a111771546e1a118b8bd",
+  "scope": "Conservation documentaire seulement ; aucune preuve métier rejouée."
+}
