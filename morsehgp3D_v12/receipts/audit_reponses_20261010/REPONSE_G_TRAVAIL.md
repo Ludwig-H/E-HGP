@@ -73,3 +73,28 @@ collisions, census et recouvrement changent aussi. Une borne générale en n
 ne découle ni du profil d’une trame ni de deux temps voisins. Modifier le
 périmètre serait une nouvelle décision explicite, pas une lecture du contrat
 actuel. La prochaine priorité reste donc de réduire G, puis C, sur ce jeu.
+
+## Complément après lecture du profil B3b
+
+Le [profil relu](b3b_profil/README.md) porte sur le **lot complet**, pas sur
+les clés seules adoptées. Il confirme 75,23–77,12 % de succès à la première
+sonde. Sur 02/001606, traces 23,71 %, sondes 14,98 %, LEM-T1 20,93 % des cycles
+sommés. Ces parts ne prédisent pas directement une baisse de latence FULL.
+Deux propositions plus petites peuvent précéder la vue virtuelle :
+
+- [Retour immédiat à l’égalité exacte dans `find`](g_population_egalite/README.md).
+  L’ordre strict des fiches rend la réponse unique. La suite des comparaisons
+  devient un préfixe de celle d’aujourd’hui, collisions comprises ; 53 560
+  requêtes de modèle. Patch isolé, gardes/rangs/API inchangés.
+- [LEM-T1 : rechercher seulement F\S](t1_support_population/README.md).
+  Après authentification de S⊆F et réponse exacte S=S*(b), le Catalogue
+  garantit déjà S⊆U_b. Le helper peut omettre ces sites, aux deux appels,
+  en utilisant le support certifié à l’appel post-certificat. 24 300 cas,
+  mêmes décisions et premier rejet. Les sites hors support restent contrôlés.
+
+Les deux patches sont **proposés, non intégrés et non mesurés**. Ils touchent
+des unités distinctes et demandent des bras séparés pour attribuer les gains.
+Le préchargement de populations actuellement essayé dans `passes.cpp` peut
+être un autre bras ; l’associer d’emblée masquerait leurs effets respectifs.
+La réduction locale Q1 reste conditionnée au volume réel de représentants
+des coquilles étendues : leur faible nombre de cellules ne borne pas leur coût.

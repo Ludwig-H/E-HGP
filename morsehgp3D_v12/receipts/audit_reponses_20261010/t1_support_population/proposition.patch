@@ -1,0 +1,42 @@
+--- a/morsehgp3D_v12/src/tower/resolve.cpp
++++ b/morsehgp3D_v12/src/tower/resolve.cpp
+@@ -53,10 +53,18 @@
+   return true;
+ }
+ 
+-bool part_in_population(const Catalogue& cat, const Part& f, u32 b) noexcept {
++// Preconditions : known_support trie inclus dans F ; find_support(known_support) vient de rendre b.
++// Le Catalogue immuable garantit S*(b) dans U_b : seuls les sites de F hors de S* restent a chercher.
++bool part_in_population(const Catalogue& cat, const Part& f, u32 b,
++                        std::span<const u32> known_support) noexcept {
+   const auto inner = cat.interior(make_id<BallIdx>(b)), shell = cat.shell(make_id<BallIdx>(b));
+   auto less = [](SiteIdx a, SiteIdx c) noexcept { return idx(a) < idx(c); };
++  std::size_t next_support = 0;
+   for (u32 i = 0; i < f.k; ++i) {
++    if (next_support < known_support.size() && f.id[i] == known_support[next_support]) {
++      ++next_support;
++      continue;  // deja sur U_b par la table exacte, sans recherche de population
++    }
+     const SiteIdx s = make_id<SiteIdx>(f.id[i]);
+     if (!std::binary_search(inner.begin(), inner.end(), s, less) &&
+         !std::binary_search(shell.begin(), shell.end(), s, less))
+@@ -157,7 +165,9 @@
+                         std::equal(cert->support.begin(), cert->support.begin() + cert->arity, prop.s.begin());
+   const auto b =
+       same_key ? std::optional<BallIdx>{} : cat.find_support(std::span<const SiteIdx>(key.data(), cert->arity));
+-  if (b && !part_in_population(cat, f, idx(*b))) return fail(Reason::tower_invariant);  // meme sphere : F dans P_b
++  if (b && !part_in_population(cat, f, idx(*b),
++                               std::span<const u32>(cert->support.data(), cert->arity)))
++    return fail(Reason::tower_invariant);  // support CERTIFIE canonique, qui peut differer de prop.s
+   clock.lap(fallback ? kProfileFallback : kProfileCertificate);
+   if (b) {
+     ++(fallback ? n.route_fallback_table : n.route_cert_table);
+@@ -242,7 +252,7 @@
+   for (std::size_t i = 0; i < support.size(); ++i) key[i] = make_id<SiteIdx>(support[i]);
+   const auto b = d.catalogue.find_support(std::span<const SiteIdx>(key.data(), support.size()));
+   if (!b && table_miss != nullptr) *table_miss = true;
+-  if (!b || !part_in_population(d.catalogue, f, idx(*b))) return std::nullopt;  // S = S*(b) et F dans P_b
++  if (!b || !part_in_population(d.catalogue, f, idx(*b), support)) return std::nullopt;  // S = S*(b), F\S dans P_b
+   return idx(*b);
+ }
+ 

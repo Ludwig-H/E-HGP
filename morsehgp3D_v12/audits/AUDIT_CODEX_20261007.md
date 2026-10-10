@@ -7,12 +7,10 @@ Cadre : `exploration_v12_hors_registre`,
 
 **A6c : gain confirmé dans sa cohorte, réserves ouvertes.**
 [Admission indépendante](../receipts/audit_reponses_20261010/session_a6c_admission/README.md) :
-85 processus, identités FULL concordantes, règle reproduite exactement. Grandes : rapport
-**0,854248**, IC95 **[0,852200 ; 0,855716]** ; gardes ng00/01/02 et A/A respectées.
-Médiane des 21 grandes **152,44 → 132,33 ms** ; leurs 126 passes après restent >100 ms.
-Sources exactes, codes/stderr et hashes des sondes avant/après enregistrés ; 755 CTests,
-7 LiDAR passés. Les 72 mutants sont inférés de la campagne agrégée, sans rapports individuels.
-Le seuil 43 900 est calibré sur ces mêmes scènes ; aucune généralisation indépendante acquise.
+85 processus, identités FULL et règle concordantes. Grandes : rapport **0,854248**,
+IC95 **[0,852200 ; 0,855716]** ; gardes ng00/01/02 et A/A respectées.
+Médiane des 21 grandes **152,44 → 132,33 ms**, toutes >100 ms. Seuil 43 900 calibré
+sur ces mêmes scènes ; qualification native et limites de preuve dans le reçu.
 
 **Session O : derniers temps FULL chauds, u21/W48/cache 8 Gio.**
 [Admission](../receipts/audit_reponses_20261010/session_fullo_admission/README.md),
@@ -59,6 +57,11 @@ clôture ELF partielle restent des réserves. Sources495/CTests755 concordants.
 Composantes locales séparables pour coquilles étendues ; transfert entre ordres limité ;
 première sonde par vue triée sans copie proposée. Preuves/modèles, aucun gain natif acquis.
 D7 couvre toutes tailles : les 99 099 sites restent dans le contrat.
+Suite concrète : [arrêt à égalité exacte](../receipts/audit_reponses_20261010/g_population_egalite/README.md)
+et [LEM-T1 sur F\S seulement](../receipts/audit_reponses_20261010/t1_support_population/README.md),
+patches proposés, 53 560 et 24 300 cas de modèle ; mesurer séparément avant adoption.
+[Profil B3b relu](../receipts/audit_reponses_20261010/b3b_profil/README.md) : 75–77 % de premiers hits ;
+profil du lot, pas du produit clés seules. Aucun gain nouveau mesuré.
 
 **G4 :** [contrôle réel19:47:39 UTC](../receipts/audit_reponses_20261010/g4_controle_b3b/README.md),
 même génération arrêtée avant/après, garde code0, zéro VM E-HGP active à cet instant.

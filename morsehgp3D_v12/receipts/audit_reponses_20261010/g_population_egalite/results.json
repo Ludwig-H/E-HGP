@@ -1,0 +1,171 @@
+{
+  "native_runs": 0,
+  "source_git": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "checks": {
+    "queries": 53560,
+    "hits": 20615,
+    "misses": 32945,
+    "full_collision_queries": 13391,
+    "strict_hit_prefix": 20615,
+    "old_comparisons": 160212,
+    "early_comparisons": 106662,
+    "saved_final_checks_on_miss": 23109,
+    "old_row_comparisons": 111476,
+    "early_row_comparisons": 72816,
+    "candidate_row_comparisons": 109487,
+    "old_key_comparisons": 160212,
+    "early_key_comparisons": 106662,
+    "candidate_key_comparisons": 261150
+  },
+  "max_comparisons_removed": 3,
+  "examples": {
+    "forced_zero_last_hit": {
+      "old": {
+        "comparisons": [
+          [
+            5,
+            -1
+          ],
+          [
+            8,
+            -1
+          ],
+          [
+            9,
+            0
+          ],
+          [
+            9,
+            0
+          ]
+        ],
+        "row_comparisons": 4,
+        "key_comparisons": 4
+      },
+      "early": {
+        "comparisons": [
+          [
+            5,
+            -1
+          ],
+          [
+            8,
+            -1
+          ],
+          [
+            9,
+            0
+          ]
+        ],
+        "row_comparisons": 3,
+        "key_comparisons": 3
+      },
+      "candidate": {
+        "row_comparisons": 5,
+        "key_comparisons": 9
+      }
+    },
+    "forced_zero_missing_inside": {
+      "old": {
+        "comparisons": [
+          [
+            2,
+            1
+          ],
+          [
+            1,
+            -1
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "row_comparisons": 3,
+        "key_comparisons": 3
+      },
+      "early": {
+        "comparisons": [
+          [
+            2,
+            1
+          ],
+          [
+            1,
+            -1
+          ]
+        ],
+        "row_comparisons": 2,
+        "key_comparisons": 2
+      },
+      "candidate": {
+        "row_comparisons": 5,
+        "key_comparisons": 8
+      }
+    },
+    "unique_hash_hit": {
+      "old": {
+        "comparisons": [
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            0
+          ]
+        ],
+        "row_comparisons": 2,
+        "key_comparisons": 2
+      },
+      "early": {
+        "comparisons": [
+          [
+            6,
+            0
+          ]
+        ],
+        "row_comparisons": 1,
+        "key_comparisons": 1
+      },
+      "candidate": {
+        "row_comparisons": 1,
+        "key_comparisons": 2
+      }
+    },
+    "u32_extreme": {
+      "old": {
+        "comparisons": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "row_comparisons": 2,
+        "key_comparisons": 2
+      },
+      "early": {
+        "comparisons": [
+          [
+            0,
+            0
+          ]
+        ],
+        "row_comparisons": 1,
+        "key_comparisons": 1
+      },
+      "candidate": {
+        "row_comparisons": 1,
+        "key_comparisons": 2
+      }
+    }
+  },
+  "candidate_already_exists_for_G_L5": true,
+  "patch_integrated": false,
+  "native_equivalence_qualified": false,
+  "wall_time_gain_measured": false
+}

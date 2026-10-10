@@ -1,0 +1,23 @@
+--- a/morsehgp3D_v12/src/tower/populations.cpp
++++ b/morsehgp3D_v12/src/tower/populations.cpp
+@@ -320,9 +320,17 @@
+ 
+ std::optional<PopulationHit> PopulationTable::find(const Part& f, u64 key) const noexcept {
+   if (entries_ == 0 || f.k != k_) return std::nullopt;
+-  const u64 bucket = bucket_of(key), hi = directory_[bucket + 1];
+-  const u64 pos = lower_bound(directory_[bucket], hi, key, &f);
+-  if (pos < hi && compare_at(pos, key, f) == 0) return hit_at(pos);  // egalite exacte des SiteIdx
++  const u64 bucket = bucket_of(key);
++  u64 lo = directory_[bucket], hi = directory_[bucket + 1];
++  // Les fiches sont strictement ordonnees a la construction : une egalite exacte est l'unique reponse,
++  // meme en collision d'empreintes. Pas de seconde comparaison de cette fiche apres une lower_bound.
++  while (lo < hi) {
++    const u64 mid = lo + (hi - lo) / 2;
++    const int comparison = compare_at(mid, key, f);
++    if (comparison == 0) return hit_at(mid);
++    if (comparison < 0) lo = mid + 1;
++    else hi = mid;
++  }
+   return std::nullopt;
+ }
+ 

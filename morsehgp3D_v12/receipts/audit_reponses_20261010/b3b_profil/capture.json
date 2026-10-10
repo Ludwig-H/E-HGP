@@ -1,0 +1,451 @@
+{
+  "logs": {
+    "ng00/avant.jsonl": {
+      "bytes": 19696,
+      "sha256": "c6b26c49bed9ff309a021d2ed7d2c52a4ff96b888bafe537f5deceb631ae838a"
+    },
+    "ng00/apres.jsonl": {
+      "bytes": 19706,
+      "sha256": "12431c86d8c83ac281b852bb7f71ada1d0d93b48bcf074a3dcc39f43b5765999"
+    },
+    "kitti_ng_02_001606/avant.jsonl": {
+      "bytes": 19795,
+      "sha256": "26c4d792baa22a0f4040e47e994a2dc70056d13fece88685a7cab9e13e41ae5d"
+    },
+    "kitti_ng_02_001606/apres.jsonl": {
+      "bytes": 19810,
+      "sha256": "fe51cb73a5918094091a9616e50fdac77567c2496dfe5d33a06fedbff93ed353"
+    }
+  },
+  "processes": 4,
+  "passes": 16,
+  "hot_passes": 12,
+  "threads": 48,
+  "after_is_full_B3_lot_not_adopted_keys": true,
+  "summary": {
+    "ng00": {
+      "avant": {
+        "wall_ms": 53.412465,
+        "resolve_ms": 42.42446,
+        "sections": {
+          "trace": {
+            "thread_ms": 389.98711,
+            "share": 0.2010907596055587,
+            "occurrences": 3419932
+          },
+          "sonde": {
+            "thread_ms": 262.7723,
+            "share": 0.1354853444402159,
+            "occurrences": 3781161
+          },
+          "proposition": {
+            "thread_ms": 191.34243,
+            "share": 0.09876166608028376,
+            "occurrences": 1012161
+          },
+          "t1": {
+            "thread_ms": 489.8993,
+            "share": 0.2526523224934692,
+            "occurrences": 1012161
+          },
+          "certificat": {
+            "thread_ms": 68.78573,
+            "share": 0.03542521656494902,
+            "occurrences": 252152
+          },
+          "repli": {
+            "thread_ms": 0.0,
+            "share": 0.0,
+            "occurrences": 0
+          },
+          "census_sature": {
+            "thread_ms": 229.71913999999998,
+            "share": 0.11830724604672864,
+            "occurrences": 194136
+          },
+          "census_complet": {
+            "thread_ms": 123.30905999999999,
+            "share": 0.06352521882223007,
+            "occurrences": 58016
+          },
+          "pas": {
+            "thread_ms": 9.46058,
+            "share": 0.004872276492959011,
+            "occurrences": 109080
+          },
+          "arret": {
+            "thread_ms": 174.89765999999997,
+            "share": 0.09021988172334432,
+            "occurrences": 650932
+          }
+        },
+        "orders": {
+          "2": {
+            "thread_ms": 132.82219999999998,
+            "share": 0.06840452517743102
+          },
+          "3": {
+            "thread_ms": 286.27299,
+            "share": 0.14780369829315076
+          },
+          "4": {
+            "thread_ms": 526.63032,
+            "share": 0.27121894520372763
+          },
+          "5": {
+            "thread_ms": 992.8766199999999,
+            "share": 0.5123876348408757
+          }
+        },
+        "work_by_order": {
+          "2": {
+            "representatives": 410941,
+            "cells": 166266,
+            "extended_cells": 86,
+            "first_probe_hits": 354229,
+            "probes": 426787
+          },
+          "3": {
+            "representatives": 673325,
+            "cells": 249527,
+            "extended_cells": 72,
+            "first_probe_hits": 525776,
+            "probes": 724125
+          },
+          "4": {
+            "representatives": 985378,
+            "cells": 341136,
+            "extended_cells": 89,
+            "first_probe_hits": 729558,
+            "probes": 1093453
+          },
+          "5": {
+            "representatives": 1350288,
+            "cells": 448805,
+            "extended_cells": 107,
+            "first_probe_hits": 963244,
+            "probes": 1536796
+          }
+        },
+        "first_probe_hit_fraction": 0.7522977065041059
+      },
+      "apres": {
+        "wall_ms": 51.354006,
+        "resolve_ms": 40.180422,
+        "sections": {
+          "trace": {
+            "thread_ms": 384.73757,
+            "share": 0.20910554208301504,
+            "occurrences": 3419932
+          },
+          "sonde": {
+            "thread_ms": 263.16915,
+            "share": 0.14316649213499993,
+            "occurrences": 3781161
+          },
+          "proposition": {
+            "thread_ms": 197.89301999999998,
+            "share": 0.1075525314619818,
+            "occurrences": 1012161
+          },
+          "t1": {
+            "thread_ms": 368.20376,
+            "share": 0.20040918922734385,
+            "occurrences": 1012161
+          },
+          "certificat": {
+            "thread_ms": 69.01583,
+            "share": 0.037569168390487746,
+            "occurrences": 252152
+          },
+          "repli": {
+            "thread_ms": 0.0,
+            "share": 0.0,
+            "occurrences": 0
+          },
+          "census_sature": {
+            "thread_ms": 227.63935,
+            "share": 0.12402421299086949,
+            "occurrences": 194136
+          },
+          "census_complet": {
+            "thread_ms": 121.77901999999999,
+            "share": 0.06611321063654918,
+            "occurrences": 58016
+          },
+          "pas": {
+            "thread_ms": 20.715329999999998,
+            "share": 0.011279907962644699,
+            "occurrences": 109080
+          },
+          "arret": {
+            "thread_ms": 185.46593,
+            "share": 0.10092542410000646,
+            "occurrences": 650932
+          }
+        },
+        "orders": {
+          "2": {
+            "thread_ms": 122.90729999999998,
+            "share": 0.06696329590351006
+          },
+          "3": {
+            "thread_ms": 265.94644,
+            "share": 0.14471517831219338
+          },
+          "4": {
+            "thread_ms": 494.24170999999996,
+            "share": 0.2691244117327666
+          },
+          "5": {
+            "thread_ms": 955.4509299999999,
+            "share": 0.5203287380717165
+          }
+        },
+        "work_by_order": {
+          "2": {
+            "representatives": 410941,
+            "cells": 166266,
+            "extended_cells": 86,
+            "first_probe_hits": 354229,
+            "probes": 426787
+          },
+          "3": {
+            "representatives": 673325,
+            "cells": 249527,
+            "extended_cells": 72,
+            "first_probe_hits": 525776,
+            "probes": 724125
+          },
+          "4": {
+            "representatives": 985378,
+            "cells": 341136,
+            "extended_cells": 89,
+            "first_probe_hits": 729558,
+            "probes": 1093453
+          },
+          "5": {
+            "representatives": 1350288,
+            "cells": 448805,
+            "extended_cells": 107,
+            "first_probe_hits": 963244,
+            "probes": 1536796
+          }
+        },
+        "first_probe_hit_fraction": 0.7522977065041059
+      }
+    },
+    "kitti_ng_02_001606": {
+      "avant": {
+        "wall_ms": 83.676511,
+        "resolve_ms": 61.597832,
+        "sections": {
+          "trace": {
+            "thread_ms": 628.0291,
+            "share": 0.22020829889584737,
+            "occurrences": 5477969
+          },
+          "sonde": {
+            "thread_ms": 390.85475999999994,
+            "share": 0.13686385559096012,
+            "occurrences": 5909108
+          },
+          "proposition": {
+            "thread_ms": 274.55583,
+            "share": 0.09613998168725436,
+            "occurrences": 1434270
+          },
+          "t1": {
+            "thread_ms": 784.57311,
+            "share": 0.2745331834655964,
+            "occurrences": 1434270
+          },
+          "certificat": {
+            "thread_ms": 80.04572999999999,
+            "share": 0.028029253708955686,
+            "occurrences": 290357
+          },
+          "repli": {
+            "thread_ms": 0.0,
+            "share": 0.0,
+            "occurrences": 0
+          },
+          "census_sature": {
+            "thread_ms": 253.57942,
+            "share": 0.08879476642351605,
+            "occurrences": 212553
+          },
+          "census_complet": {
+            "thread_ms": 157.02593000000002,
+            "share": 0.055152716639463244,
+            "occurrences": 77804
+          },
+          "pas": {
+            "thread_ms": 11.38189,
+            "share": 0.003989639918155676,
+            "occurrences": 140786
+          },
+          "arret": {
+            "thread_ms": 273.07187999999996,
+            "share": 0.09557384713560818,
+            "occurrences": 1003131
+          }
+        },
+        "orders": {
+          "2": {
+            "thread_ms": 214.48235,
+            "share": 0.07512092879742976
+          },
+          "3": {
+            "thread_ms": 452.04529,
+            "share": 0.15817701493023223
+          },
+          "4": {
+            "thread_ms": 775.59275,
+            "share": 0.27225041134978195
+          },
+          "5": {
+            "thread_ms": 1409.47969,
+            "share": 0.49437474264693687
+          }
+        },
+        "work_by_order": {
+          "2": {
+            "representatives": 672850,
+            "cells": 272594,
+            "extended_cells": 409,
+            "first_probe_hits": 587676,
+            "probes": 692195
+          },
+          "3": {
+            "representatives": 1094177,
+            "cells": 407068,
+            "extended_cells": 434,
+            "first_probe_hits": 872667,
+            "probes": 1154661
+          },
+          "4": {
+            "representatives": 1577813,
+            "cells": 548487,
+            "extended_cells": 461,
+            "first_probe_hits": 1201031,
+            "probes": 1706912
+          },
+          "5": {
+            "representatives": 2133129,
+            "cells": 713533,
+            "extended_cells": 440,
+            "first_probe_hits": 1562994,
+            "probes": 2355340
+          }
+        },
+        "first_probe_hit_fraction": 0.7711558791223535
+      },
+      "apres": {
+        "wall_ms": 80.667223,
+        "resolve_ms": 58.819062,
+        "sections": {
+          "trace": {
+            "thread_ms": 644.9609399999999,
+            "share": 0.23712664515423953,
+            "occurrences": 5477969
+          },
+          "sonde": {
+            "thread_ms": 407.12531,
+            "share": 0.14978496917580542,
+            "occurrences": 5909108
+          },
+          "proposition": {
+            "thread_ms": 283.97652999999997,
+            "share": 0.10444584420957272,
+            "occurrences": 1434270
+          },
+          "t1": {
+            "thread_ms": 569.4164,
+            "share": 0.2092546806596992,
+            "occurrences": 1434270
+          },
+          "certificat": {
+            "thread_ms": 80.9825,
+            "share": 0.029836586142338663,
+            "occurrences": 290357
+          },
+          "repli": {
+            "thread_ms": 0.0,
+            "share": 0.0,
+            "occurrences": 0
+          },
+          "census_sature": {
+            "thread_ms": 251.46604,
+            "share": 0.09264826554296027,
+            "occurrences": 212553
+          },
+          "census_complet": {
+            "thread_ms": 155.26431,
+            "share": 0.05720442021604389,
+            "occurrences": 77804
+          },
+          "pas": {
+            "thread_ms": 28.112969999999997,
+            "share": 0.010326530267717222,
+            "occurrences": 140786
+          },
+          "arret": {
+            "thread_ms": 295.32177,
+            "share": 0.1088061424420452,
+            "occurrences": 1003131
+          }
+        },
+        "orders": {
+          "2": {
+            "thread_ms": 200.83282,
+            "share": 0.07370884029499973
+          },
+          "3": {
+            "thread_ms": 422.90556,
+            "share": 0.1558121590592285
+          },
+          "4": {
+            "thread_ms": 736.51552,
+            "share": 0.2710952787963289
+          },
+          "5": {
+            "thread_ms": 1357.9658,
+            "share": 0.49909922118634925
+          }
+        },
+        "work_by_order": {
+          "2": {
+            "representatives": 672850,
+            "cells": 272594,
+            "extended_cells": 409,
+            "first_probe_hits": 587676,
+            "probes": 692195
+          },
+          "3": {
+            "representatives": 1094177,
+            "cells": 407068,
+            "extended_cells": 434,
+            "first_probe_hits": 872667,
+            "probes": 1154661
+          },
+          "4": {
+            "representatives": 1577813,
+            "cells": 548487,
+            "extended_cells": 461,
+            "first_probe_hits": 1201031,
+            "probes": 1706912
+          },
+          "5": {
+            "representatives": 2133129,
+            "cells": 713533,
+            "extended_cells": 440,
+            "first_probe_hits": 1562994,
+            "probes": 2355340
+          }
+        },
+        "first_probe_hit_fraction": 0.7711558791223535
+      }
+    }
+  }
+}

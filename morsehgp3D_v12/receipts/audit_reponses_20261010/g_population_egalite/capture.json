@@ -1,0 +1,10 @@
+{
+  "source_git": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "sources": {
+    "morsehgp3D_v12/src/tower/populations.cpp": "1cf73b2c32aeb7c7859d2a5484afbe0b91c5823a721d3f0cf1e68eb6798c98f5",
+    "morsehgp3D_v12/src/tower/internal.hpp": "797e278211ee0af09c650840c11b12e08930ed4f9310dbdd675bda5c6119f3c7",
+    "morsehgp3D_v12/src/tower/first_probes.cpp": "c683a6e27a41b83be63f97d036cc3eacb3cffc8dad8c34cbfcba5958b53cc379"
+  },
+  "patch_sha256": "6d7925e113dc00ee0afe16980bc2e304b7afa530d4919faee95620f16340b365",
+  "proposed_source_sha256": "7553ac7699598c30729221542cc3ef540b4a446c8b6c896a2395ac74c2b076da"
+}
