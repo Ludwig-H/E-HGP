@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 38,
+  "plancher": 34,
   "mutants": [
     {
       "id": "temoin_perdu_du_reservoir",
@@ -276,38 +276,6 @@
       "remplace": "    if (true || refusal.reason != Reason::memory_budget || chunks.size() != lots ||",
       "porte": "mhgp12_catalogue_device_unit_slices_cpu_budget",
       "note": "voie CPU sans repli sur la voie complete quand la voie par tranches refuse avant de rendre l'arene : au pic exact de la voie complete, un petit nuage refuse la ou il tenait"
-    },
-    {
-      "id": "cles_case_absente_nulle",
-      "fichier": "src/catalogue/table.cpp",
-      "cherche": "parts[k] = k < support.size() ? idx(support[k]) : static_cast<u32>(sites);",
-      "remplace": "parts[k] = k < support.size() ? idx(support[k]) : 0u;",
-      "porte": "mhgp12_catalogue_unit_witness_square",
-      "note": "T2-d-B3 : la case absente d'un support de 2 ou 3 sites n'est plus le nombre de sites de TableKeyKernel : la cle de la recherche ne retrouve plus la boule"
-    },
-    {
-      "id": "cles_bits_decales",
-      "fichier": "src/catalogue/assemble.cpp",
-      "cherche": "result.table_bits_ = fin::width_of(result.table_.off.size() - 1);",
-      "remplace": "result.table_bits_ = fin::width_of(result.table_.off.size() - 1) + 1;",
-      "porte": "mhgp12_catalogue_unit_witness_square",
-      "note": "T2-d-B3 : largeur des composantes de la cle de recherche autre que celle de la fin d'etage"
-    },
-    {
-      "id": "cles_non_transmises",
-      "fichier": "src/catalogue/finish_driver.hpp",
-      "cherche": "  MHGP12_TRY(take_segment(b, a.table.keys[ct], out.table_keys, in.balls, budget, pool, copies[5], segments, k));\n",
-      "remplace": "",
-      "porte": "mhgp12_catalogue_unit_witness_square",
-      "note": "T2-d-B3 : la fin d'etage ne rend plus les cles de la table : la publication l'exige (catalogue_invariant), rien n'est publie"
-    },
-    {
-      "id": "cles_tranches_case_fausse",
-      "fichier": "src/catalogue/slices.cpp",
-      "cherche": "const Key2 key = table_key(t.balls[idx(t.values[i])], t.sites, t.bits);",
-      "remplace": "const Key2 key = table_key(t.balls[i], t.sites, t.bits);",
-      "porte": "mhgp12_catalogue_device_unit_slices_identity",
-      "note": "T2-d-B3 : voie par tranches (T1-d), cle prise a la boule d'indice i au lieu de la boule de la case : la table des tranches ne retrouve plus les S* (identite contre la voie complete par recherche de chaque S*)"
     }
   ]
 }

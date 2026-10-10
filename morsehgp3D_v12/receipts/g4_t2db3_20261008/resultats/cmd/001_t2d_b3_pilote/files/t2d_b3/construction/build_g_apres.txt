@@ -1,0 +1,6 @@
+$ cmake --build $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/build/t2d_b3/apres/build -j 8 --target mhgp12_tower_probe
+Consolidate compiler generated dependencies of target mhgp12
+[ 96%] Built target mhgp12
+[ 96%] Building CXX object CMakeFiles/mhgp12_tower_probe.dir/bench/tower_probe.cpp.o
+[100%] Linking CXX executable mhgp12_tower_probe
+[100%] Built target mhgp12_tower_probe

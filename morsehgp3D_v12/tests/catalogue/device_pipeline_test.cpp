@@ -64,10 +64,10 @@ u64 parts_of(const CatalogueDiagnostics& d) {
          d.transfer_ns + d.publish_ns + d.outputs_ns;
 }
 
-// Octets des sorties hote d'un catalogue (boules, decalages, populations, table et ses cles, niveaux) : ceux que la
-// voie appareil reserve a l'avance (sorties anticipees), a la taille exacte.
+// Octets des sorties hote d'un catalogue (boules, decalages, populations, table, niveaux) : ceux que la voie appareil
+// reserve a l'avance (sorties anticipees), a la taille exacte.
 u64 output_bytes(const Cloud& cloud, const Catalogue& c) {
-  return u64{c.balls()} * (sizeof(CatalogueBall) + sizeof(u64) + sizeof(BallIdx) + sizeof(TableKey)) + sizeof(u64) +
+  return u64{c.balls()} * (sizeof(CatalogueBall) + sizeof(u64) + sizeof(BallIdx)) + sizeof(u64) +
          c.population().size() * sizeof(SiteIdx) + (u64{cloud.sites()} + 1) * sizeof(u64) +
          c.levels().size() * sizeof(num::Level);
 }

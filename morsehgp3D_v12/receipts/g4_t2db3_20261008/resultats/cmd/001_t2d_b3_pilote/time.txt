@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1800s python3 $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/src/morsehgp3D_v12/microbancs/mes_t2d_b3/pilote_t2d_b3.py tout --src $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/src --travail $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/build/t2d_b3 --donnees $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/data --sortie $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/results/cmd/001_t2d_b3_pilote/files/t2d_b3 --avant-archive $HOME/ehgp-v12/ehgp-v12.CfqluTSB79/data/v12_src_8a0716e74.tar.gz --avant-sha256 34c1ea7ccc378389ad9e568bd60e2c48492bbac10e8f71354408acce9013b5b2 --fils 48 --jobs 44 --processus 10 --passes 8"
+	User time (seconds): 9757.61
+	System time (seconds): 479.72
+	Percent of CPU this job got: 1469%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 11:36.81
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2666964
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 2295
+	Minor (reclaiming a frame) page faults: 97679370
+	Voluntary context switches: 34898376
+	Involuntary context switches: 1294517
+	Swaps: 0
+	File system inputs: 231488
+	File system outputs: 1965328
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

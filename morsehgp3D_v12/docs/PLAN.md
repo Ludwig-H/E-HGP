@@ -171,7 +171,9 @@ information. **A6b (aides après G) rejeté sur G4 le 8 octobre**
 ([sessions A6b](../receipts/g4_a6b_20261008/README.md)) : grandes trames 0,849 (médiane 144 → 125 ms, maximum 281 → 239 ms),
 mais ng00 1,009 et ng01 1,013 au-dessus du seuil de 1,01 ; retiré de `main`, A6c à concevoir sans cette perte. **Contrat mesuré sur le produit adopté le 8 octobre au soir**
 ([session N](../receipts/g4_fulln_20261008/README.md), B2 + T1-d + R1) : **non tenu** ; ng00–02 80,3 / 66,6 / 83,3 ms ;
-37 trames `v12set` : médiane 142,4 ms, maximum 288,2 ms (contre 160,6 et 358,9 le matin) ; 14 trames sur 37 sous 100 ms. Suites déclarées (T2-c) : classification des cellules et table de populations
+37 trames `v12set` : médiane 142,4 ms, maximum 288,2 ms (contre 160,6 et 358,9 le matin) ; 14 trames sur 37 sous 100 ms. **B3 (LEM-T1 sans dichotomie indirecte) rejeté sur G4**
+([session B3](../receipts/g4_t2db3_20261008/README.md)) : G finit 6 à 9 % plus tôt, mais le mur ne bouge pas (queue de l'ordre 5
+critique, transfert des clés +0,4 à 1,1 ms sur C) et ng02 s'allonge ; retiré de `main`, à rejuger après A6c. Suites déclarées (T2-c) : classification des cellules et table de populations
 reconstruites à chaque appel (37 ms à K5, 385 ms à K10 à 3 fils) à rendre résidentes ou parallèles ; coût par unité
 de travail au-dessus de la réplique de `MES-M7` (2,67 s contre 2,34 s à un fil sur ng00 K5), sonde de table d'abord ;
 leviers `G-L4` à `G-L7` non implantés. **Premiers temps G4** ([session H](../receipts/g4_t2h_20261007/README.md), 48 fils) : étage G 80 / 63 / 76 ms à K5 sur ng00–02 (tables 15 à 19 ms, à peine parallèles ; résolution 37 à 49 ms, ×30 de 1 à 48 fils), 450 à 634 ms à K10 : 2,5 à 3 fois le budget à K5 ; chantier T2-c en cours (tables, `G-L5`, recherche des supports). **T2-c adopté sur G4 le 8 octobre** ([session J](../receipts/g4_t2cj_20261008/README.md)) : index des naissances parallèle et file de sondes `G-L7`, étage G **53,1 / 42,1 / 48,2 ms à K5** (rapport 0,63 à 0,67, IC 95 % serré, A/A ≈ 1), 443 ms à K10 sur ng00 ; `G-L5` rejeté. Reste 1,6 à 1,8 fois le budget : census gardé, puis `LEM-T1` et proposition.

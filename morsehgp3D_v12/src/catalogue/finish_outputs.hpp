@@ -36,7 +36,6 @@ struct FinishOutput {
   Buffer<num::Level> levels;
   Buffer<u64> table_offsets;
   Buffer<BallIdx> table_values;
-  Buffer<TableKey> table_keys;  // cles S* triees de la table (T2-d-B3), une par case de table_values
 };
 
 // Copie parallele de `bytes` octets (blocs de 256 Kio repartis sur le Pool).
@@ -133,8 +132,7 @@ inline Outcome prepare_outputs(FinishOutput& out, u64 balls, u64 incidences, u32
   MHGP12_TRY(prepare_one(out.offsets, balls + 1, budget, pool, meter));
   MHGP12_TRY(prepare_one(out.values, incidences, budget, pool, meter));
   MHGP12_TRY(prepare_one(out.table_offsets, u64{sites} + 1, budget, pool, meter));
-  MHGP12_TRY(prepare_one(out.table_values, balls, budget, pool, meter));
-  return prepare_one(out.table_keys, balls, budget, pool, meter);
+  return prepare_one(out.table_values, balls, budget, pool, meter);
 }
 
 }  // namespace mhgp12::catalogue_detail::fin

@@ -4,7 +4,6 @@
 // d'empreintes (masque nul : une seule empreinte, un seul seau) ; candidats de la jointure triee egaux a ceux d'une
 // sonde par representant ; resolution complete rejouee avec un index a collisions : memes cibles et memes compteurs
 // que l'etage. Index de plusieurs ordres construits ensemble (T2-d-B2) egaux a ceux construits seuls.
-#include <bit>
 #include <map>
 #include <random>
 
@@ -192,7 +191,7 @@ MHGP12_TEST(weak_key_resolution, 40) {
 
 // Table S* -> boule du catalogue (LEM-T1) contre une table ordonnee independante : chaque S* est retrouve ; des supports
 // voisins (dernier site remplace) sont retrouves ou absents comme dans la reference.
-MHGP12_TEST(support_table, 6) {
+MHGP12_TEST(support_table, 3) {
   auto c = build(random_cloud(420, 20261008, 12), 5, 2);
   REQUIRE(c->outcome.ok());
   const Catalogue& cat = *c->catalogue;
@@ -223,22 +222,6 @@ MHGP12_TEST(support_table, 6) {
   CHECK(all);
   CHECK(neighbours);
   CHECK(absent > 1000 && present > 10);
-  // Cles packees (T2-d-B3) : un support dont le dernier site est hors du nuage n'est jamais une boule, meme quand son
-  // packing deborderait sur la cle d'une boule de la ligne : S*[3] + 2^bits pose le bit bas du champ de S*[2], et
-  // S*[2] - 1 pair redevient S*[2] (bits = width_of(sites)).
-  const u32 sites = c->cloud().sites();
-  const u32 bits = static_cast<u32>(std::bit_width(sites));
-  u64 overflow = 0;
-  bool overflow_none = true;
-  for (const auto& [key, b] : ref) {
-    if (cat.balls_data()[b].qmin != 4 || key[2] % 2 == 0 || key[2] < key[1] + 2) continue;
-    const std::array<SiteIdx, 4> probe{make_id<SiteIdx>(key[0]), make_id<SiteIdx>(key[1]), make_id<SiteIdx>(key[2] - 1),
-                                       make_id<SiteIdx>(key[3] + (u32{1} << bits))};
-    overflow_none = overflow_none && !cat.find_support(std::span<const SiteIdx>(probe.data(), 4)).has_value();
-    ++overflow;
-  }
-  CHECK(overflow_none);
-  CHECK(overflow > 10);
 }
 
 // Population repetee : deux naissances de meme population ne peuvent exister (unicite de la plus petite boule) ; une

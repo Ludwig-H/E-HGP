@@ -1,0 +1,5 @@
+pilote_t2d_b3_auto_test_ok cas=10 verdicts=adopte,rejete,refuse
+pilote_t2d_b3_auto_test_ok cas=10 verdicts=adopte,rejete,refuse
+pilote_t2d_b3_verdicts lot_b3=rejete cles=rejete balayage=rejete
+pilote_t2d_b3_auto_test_ok cas=10 verdicts=adopte,rejete,refuse
+pilote_t2d_b3_verdicts lot_b3=rejete cles=rejete balayage=rejete

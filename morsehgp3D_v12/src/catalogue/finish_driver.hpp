@@ -235,8 +235,8 @@ Outcome finish_take(B& b, FinishArrays<B>& a, const FinishInput& in, u64 distinc
   if (out.levels.empty()) MHGP12_TRY(out.levels.allocate(distinct + 1, budget));
   if (out.levels.size() != distinct + 1) return fail(Reason::catalogue_invariant);
   out.levels[0] = num::Level{};
-  CopyChunk copies[6] = {};
-  StreamSegment segments[7] = {};
+  CopyChunk copies[5] = {};
+  StreamSegment segments[6] = {};
   u64 k = 0;
   MHGP12_TRY(take_segment(b, a.balls, out.balls, in.balls, budget, pool, copies[0], segments, k));
   MHGP12_TRY(take_segment(b, a.offset, out.offsets, in.balls + 1, budget, pool, copies[1], segments, k));
@@ -244,8 +244,6 @@ Outcome finish_take(B& b, FinishArrays<B>& a, const FinishInput& in, u64 distinc
   const u64 rows = u64{in.sites} + 1;
   MHGP12_TRY(take_segment(b, a.table_offset, out.table_offsets, rows, budget, pool, copies[3], segments, k));
   MHGP12_TRY(take_segment(b, a.table.vals[ct], out.table_values, in.balls, budget, pool, copies[4], segments, k));
-  // Cles triees de la table (T2-d-B3) : deja calculees par l'etape 6, gardees hors export pour find_support.
-  MHGP12_TRY(take_segment(b, a.table.keys[ct], out.table_keys, in.balls, budget, pool, copies[5], segments, k));
   LevelChunk levels{out.levels.data() + 1, &pool};
   segments[k++] = StreamSegment{a.level_of_rank.data(), sizeof(LevelWords), distinct, &LevelChunk::consume, &levels,
                                 true};

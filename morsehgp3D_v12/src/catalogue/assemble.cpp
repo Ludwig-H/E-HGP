@@ -67,11 +67,6 @@ Result<Catalogue> Assembly::adopt(fin::FinishOutput& out, Order kmax, const Cata
   result.population_.val.swap(out.values);
   result.table_.off.swap(out.table_offsets);
   result.table_.val.swap(out.table_values);
-  result.table_keys_.swap(out.table_keys);
-  // Une cle par case de la table, toutes voies (complete, par tranches, appareil) ; sinon rien n'est publie.
-  if (result.table_keys_.size() != result.table_.val.size() || result.table_.off.empty())
-    return fail(Reason::catalogue_invariant);
-  result.table_bits_ = fin::width_of(result.table_.off.size() - 1);
   result.kmax_ = kmax;
   result.ledger_ = ledger;
   return result;
