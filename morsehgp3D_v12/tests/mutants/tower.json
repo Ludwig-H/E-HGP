@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 72,
+  "plancher": 74,
   "mutants": [
     {
       "id": "t1_sans_s_dans_f",
@@ -140,10 +140,10 @@
     {
       "id": "table_s_etoile_queue_partielle",
       "fichier": "src/catalogue/table.cpp",
-      "cherche": "if (found == end || balls_[idx(*found)].support != probe.support) return std::nullopt;",
-      "remplace": "if (found == end || balls_[idx(*found)].support[0] != probe.support[0]) return std::nullopt;",
+      "cherche": "if (found == end || found->hi != probe.hi || found->lo != probe.lo) return std::nullopt;",
+      "remplace": "if (found == end || found->hi != probe.hi) return std::nullopt;",
       "porte": "mhgp12_tower_index_support_table",
-      "note": "table S* -> boule du catalogue (fin d'etage partagee de T1-b) qui ne compare que le premier site de S* : un support voisin absent du catalogue rend la boule suivante de la ligne ; la table ordonnee de reference le refuse (LEM-T1 trouverait une fausse boule)"
+      "note": "table S* -> boule du catalogue qui ne compare que le mot haut de la cle packee (T2-d-B3 : dichotomie directe sur les cles) : un support voisin absent du catalogue rend la case suivante de la ligne ; la table ordonnee de reference le refuse (LEM-T1 trouverait une fausse boule)"
     },
     {
       "id": "empreinte_de_file_sans_interieur",
@@ -605,6 +605,22 @@
       "remplace": "",
       "porte": "mhgp12_tower_levers_bascule",
       "note": "A6c : au chemin de la base, kHistory rejoue la CSR deja construite par build_history : etape d'historique comptee chaine non engagee"
+    },
+    {
+      "id": "cles_garde_hors_nuage",
+      "fichier": "src/catalogue/table.cpp",
+      "cherche": "if (idx(support.back()) >= sites) return std::nullopt;",
+      "remplace": "if (idx(support[0]) >= sites) return std::nullopt;",
+      "porte": "mhgp12_tower_index_support_table",
+      "note": "T2-d-B3 : sans la borne du dernier site, un site hors du nuage deborde du packing (S*[3] + 2^bits pose le bit bas du champ de S*[2]) et la recherche rend une boule voisine"
+    },
+    {
+      "id": "balayage_dernier_oublie",
+      "fichier": "src/tower/resolve.cpp",
+      "cherche": "for (u64 j = 0; j < n && !found; ++j) found = idx(row[j]) == f.id[i];",
+      "remplace": "for (u64 j = 0; j + 1 < n && !found; ++j) found = idx(row[j]) == f.id[i];",
+      "porte": "mhgp12_tower_unit_lem_t1_table",
+      "note": "T2-d-B3 : le balayage de la population oublie le dernier site de U : LEM-T1 refuse des boules qui contiennent F (routes changees)"
     }
   ]
 }

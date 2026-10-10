@@ -50,7 +50,7 @@ inline u64 sliced_host_bytes(u64 balls, u64 incidences) noexcept {
 // verdicts, niveaux, cles, drapeaux, debuts, decalages, cles des positions, boules ; populations ; sites). Sous le
 // minimum, la voie complete ne peut pas tenir.
 inline u64 full_finish_upper(u64 balls, u64 incidences, u64 sites) noexcept {
-  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx));
+  return full_finish_bytes(balls, incidences, sites) + balls * (sizeof(num::Level) + sizeof(BallIdx) + sizeof(TableKey));
 }
 inline u64 full_finish_floor(u64 balls, u64 incidences, u64 sites) noexcept {
   const u64 sorts = 2 * (sizeof(Key2) + sizeof(u32)) + 2 * (sizeof(u64) + sizeof(u32)) + 2 * (sizeof(Key2) + sizeof(u32));
@@ -104,9 +104,11 @@ inline u64 slice_of(const SlicePlan& plan, u64 key) noexcept {
                                    Buffer<SiteIdx>& population, MemoryBudget& budget, sched::Pool& pool) noexcept;
 
 // Table S* -> boule depuis les boules finales : offsets (sites + 1), values (une par boule), meme ordre que le tri par
-// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites).
+// base de TableKeyKernel (S*[0], S*[1], S*[2], S*[3], case absente = nombre de sites) ; keys : la cle de chaque case
+// (T2-d-B3).
 [[nodiscard]] Outcome host_table(std::span<const CatalogueBall> balls, u32 sites, Buffer<u64>& offsets,
-                                 Buffer<BallIdx>& values, MemoryBudget& budget, sched::Pool& pool) noexcept;
+                                 Buffer<BallIdx>& values, Buffer<TableKey>& keys, MemoryBudget& budget,
+                                 sched::Pool& pool) noexcept;
 
 // Niveaux finaux : case 0 nulle, puis les mots des tranches dans l'ordre (rangs 1..L-1) ; chaque lot de mots est rendu
 // des qu'il est materialise.

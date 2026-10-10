@@ -266,7 +266,8 @@ inline Outcome slices_close(const SliceInput& in, FinishOutput& out, SliceWords&
                             sched::Pool& pool, FinishStats& stats) noexcept {
   MHGP12_TRY(materialize_levels(w.words, w.ranks, out.levels, budget, pool));
   const Stopwatch table_watch;
-  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, budget, pool));
+  MHGP12_TRY(host_table(out.balls.span(), in.sites, out.table_offsets, out.table_values, out.table_keys, budget,
+                        pool));
   stats.table_ns += table_watch.nanoseconds();
   return {};
 }

@@ -6,7 +6,7 @@ constructions par microbancs/outils/banc_full.py, profil de G par microbancs/mes
 
 Bras (sondes mhgp12_full_probe construites ici avec CUDA, profil 21, voie par defaut = Session recouverte ; plus la
 sonde de G mhgp12_tower_probe dans le meme arbre de construction, pour l'identite de la resolution) :
-  avant      archive epinglee des sources de main 8a0716e74 (sha256 verifie avant deballage)
+  avant      archive epinglee des sources de main aa6338ee8 (sha256 verifie avant deballage)
   avant_bis  le MEME binaire que avant, joue comme un bras distinct (A/A : bruit de la session ; veto)
   cles       avant + B3-K : la fin d'etage du catalogue garde les cles S* packees triees de sa table (deja calculees par
              son tri par base, hors export MHGP12DP), transmises par la voie appareil ; find_support en dichotomie
@@ -50,7 +50,11 @@ REGLE_T2D_B3 (ecrite le 8 octobre 2026 a 15:09 UTC sur la base 47feedc96 ; revis
 mesure de ces bras sur G4, sur la consigne du coordinateur apres le redemarrage du codespace : base d4d68acac, la tete
 de main a la livraison ; revisee a 17:55 UTC, toujours avant toute mesure G4 de ces bras, par le coordinateur apres le
 rejet et le retrait d'A6b : base 8a0716e74, la tete de main sans A6b (src/ identique a 47feedc96) ; memes bras par
-les memes substitutions, aucune empreinte de fichier ne change ; rien d'autre ne change) : par processus, mur FULL =
+les memes substitutions, aucune empreinte de fichier ne change ; revisee le 10 octobre 2026 a 18:45 UTC, avant toute
+mesure G4 de ces bras sur cette base, par le coordinateur : NOUVELLE MESURE du meme levier sur la base aa6338ee8 (A6c
+adopte, queue de l'ordre 5 reduite), la mesure precedente (session t2db3, base 8a0716e74) restant rejetee et publiee ;
+memes bras par les memes substitutions, aucune empreinte de fichier ne change ; seuils, statistiques et trames
+inchanges ; rien d'autre ne change) : par processus, mur FULL =
 mediane des passes 2 a P de wall_ns (Session recouverte, catalogue sur l'appareil) ; par tour, rapport bras / avant ;
 moyenne geometrique des rapports des tours et IC 95 % par bootstrap sur les tours (10 000 tirages, graine 20261008),
 par trame. Un levier est ADOPTE si l'identite est etablie (une seule empreinte FUL1 par trame decisive dans tous les
@@ -67,7 +71,7 @@ cles), cles_apres_transfert (transfert -> cles : la recherche directe seule), ba
 
 Exemple (G4, commande d'un plan de session) :
   python3 pilote_t2d_b3.py tout --src <racine du paquet> --travail <dossier> --donnees <donnees> --sortie <sortie> \\
-      --avant-archive <donnees>/v12_src_8a0716e74.tar.gz --avant-sha256 <hex> --fils 48 --jobs 44
+      --avant-archive <donnees>/v12_src_aa6338ee8.tar.gz --avant-sha256 <hex> --fils 48 --jobs 44
 
 Codes : 0 campagne complete et jugee (le verdict est dans le rapport) ; 1 auto-test en echec ; 2 usage ; 3 refus
 (preuve absente, bras non reconstruit, binaire change, construction en echec, prise manquante).
@@ -110,10 +114,11 @@ SEQ_BRAS = ("avant", "cles", "balayage", "apres")
 TRAMES = ("ng00", "ng01", "ng02") + MOYENNES
 FUL1_NG00_K5 = "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"  # MESURE.md, paragraphe 4
 REGLE_T2D_B3 = {"trames_decisives": TRAMES, "k": 5, "processus_min": 10, "passes_min": 6, "bootstrap": 10000,
-                "graine": 20261008, "seuil_borne_haute": 1.0, "fenetre_aa": 0.015, "base": "8a0716e74",
+                "graine": 20261008, "seuil_borne_haute": 1.0, "fenetre_aa": 0.015, "base": "aa6338ee8",
                 "information": GRANDE, "ecrite": "8 octobre 2026, 15:09 UTC, avant toute mesure G4 de ces bras",
                 "revision": "17:32 UTC : base d4d68acac (tete de main a la livraison, apres le redemarrage du codespace) ; 17:55 UTC : "
-                            "base 8a0716e74 (A6b rejete et retire)",
+                            "base 8a0716e74 (A6b rejete et retire) ; 10 octobre 18:45 UTC : nouvelle mesure sur la base "
+                            "aa6338ee8 (A6c adopte)",
                 "mesure": "mur FULL de la Session recouverte (wall_ns), catalogue sur l'appareil, sans --digest",
                 "statistique": "par processus : mediane des passes 2..P du mur FULL ; par tour : rapport bras / "
                                "avant ; moyenne geometrique et IC 95 % par bootstrap sur les tours",

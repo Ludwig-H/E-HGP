@@ -103,6 +103,13 @@ struct CatalogueDiagnostics {
   u64 finish_slices = 0, arena_streamed = 0;
 };
 
+// Cle S* d'une case de la table (tranche T2-d-B3) : les quatre SiteIdx de S* (case absente = nombre de sites) packes sur
+// width_of(sites) bits chacun, le premier en poids fort (catalogue_detail::fin::pack4) ; mot bas puis mot haut. L'ordre
+// (hi, lo) est celui des lignes de la table. Hors de l'export MHGP12DP.
+struct TableKey {
+  u64 lo = 0, hi = 0;
+};
+
 // Proprietaire immuable des tableaux du catalogue ; ses SiteIdx se rapportent au Cloud source. Construction
 // deplacement seulement ; le budget doit survivre au resultat.
 class Catalogue {
@@ -112,7 +119,8 @@ class Catalogue {
   Catalogue& operator=(Catalogue&&) = delete;
   Catalogue(Catalogue&& other) noexcept
       : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),
-        table_(std::move(other.table_)), kmax_(std::exchange(other.kmax_, 0)),
+        table_(std::move(other.table_)), table_keys_(std::move(other.table_keys_)),
+        table_bits_(std::exchange(other.table_bits_, 0)), kmax_(std::exchange(other.kmax_, 0)),
         ledger_(std::exchange(other.ledger_, {})) {}
 
   Order kmax() const noexcept { return kmax_; }
@@ -129,6 +137,7 @@ class Catalogue {
   std::span<const SiteIdx> shell(BallIdx b) const noexcept { return population_.row(idx(b)).subspan(balls_[idx(b)].p); }
   // Table S* -> boule (certificats LEM-T1 de la tranche T2) : la boule dont S* est EXACTEMENT ce support (2 a 4
   // SiteIdx croissants), sinon rien. Un support minimal non canonique d'une boule n'y est pas (WIT-T1-CARRE).
+  // Dichotomie DIRECTE sur les cles packees de la ligne du premier site (T2-d-B3), sans relire les boules.
   std::optional<BallIdx> find_support(std::span<const SiteIdx> support) const noexcept;
 
  private:
@@ -138,6 +147,8 @@ class Catalogue {
   Buffer<num::Level> levels_;
   Csr<SiteIdx> population_;
   Csr<BallIdx> table_;  // ligne s : boules dont S* commence par le site s, rangees par (S*[1], S*[2], S*[3])
+  Buffer<TableKey> table_keys_;  // cle S* de chaque case de table_.val, dans le meme ordre (T2-d-B3)
+  u32 table_bits_ = 0;           // bits par composante des cles : width_of(sites)
   Order kmax_ = 0;
   CatalogueLedger ledger_;
 };
