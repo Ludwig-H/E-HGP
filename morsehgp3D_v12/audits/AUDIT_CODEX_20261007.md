@@ -28,7 +28,7 @@ Lecture, masque, ouverture, validation, empreinte et libération hors mur ; CPU 
 **Priorités performance.** Dans O, annuler la queue seule laisse seulement **16/37** médianes
 sous 100 ms, pire 219,23 ms. Réduire G/C ; G inclut la forêt concurrente, donc mesurer
 préfixes/contention par ordre et mur FULL avant de changer les priorités.
-CPU : C dépasse 100 ms sur 36/36 chaudes ; [piste census proposée](../receipts/audit_reponses_20261008/cpu_census_reduction/README.md).
+CPU : [comparaison v11](../receipts/audit_reponses_20261010/v11_v12_cpu_gpu/README.md), O reste **+13,1–17,0 %** sur ng00–02, **+12,5–16,2 %** même sans P. [Piste census](../receipts/audit_reponses_20261008/cpu_census_reduction/README.md).
 Petits : C1/C2/C3 non tenus ; W48 plus lent que W4 sur 20 très petits, signal à confirmer.
 
 **CST-0244/0245 ouverts.** [Patch d’admission proposé](../receipts/audit_reponses_20261010/a6c_admission_proposition/README.md) :
