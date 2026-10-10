@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 600s ctest --no-tests=error -LE long --output-on-failure -j 40"
+	User time (seconds): 602.53
+	System time (seconds): 29.07
+	Percent of CPU this job got: 449%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:20.46
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1102740
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 227
+	Minor (reclaiming a frame) page faults: 15552350
+	Voluntary context switches: 328098
+	Involuntary context switches: 241661
+	Swaps: 0
+	File system inputs: 8440
+	File system outputs: 898648
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

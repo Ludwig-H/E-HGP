@@ -1,0 +1,1 @@
+ctest --no-tests=error -R \^mhgp12_mutants_\(catalogue\|tower\)\$ --output-on-failure 

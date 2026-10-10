@@ -1,0 +1,80 @@
+$ cmake -S $HOME/ehgp-v12/ehgp-v12.pVcKxWYckV/build/t2d_b3/avant/src/morsehgp3D_v12 -B $HOME/ehgp-v12/ehgp-v12.pVcKxWYckV/build/t2d_b3/avant/build_profil -DCMAKE_BUILD_TYPE=Release -DMHGP12_COORD_BITS=21 -DMHGP12_ENABLE_CUDA=OFF -DCMAKE_CXX_FLAGS=-DMHGP12_TOWER_PROFILE
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for C++ include pthread.h
+-- Looking for C++ include pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- mhgp12 : unites testees = core;num;sched;cloud;io;index;catalogue;tower;reference ; modules de la bibliotheque = core;num;sched;cloud;io;index;catalogue;tower ; bits = 21
+-- Found Python3: /usr/bin/python3.10 (found suitable version "3.10.12", minimum required is "3.10") found components: Interpreter 
+-- mhgp12 : portes diff_v11 du catalogue absentes (MHGP12_V11_CATALOGUE_DIR='')
+-- mhgp12 : portes diff_v11 de la tour absentes (MHGP12_V11_TOWER_DIR='')
+-- mhgp12 : portes diff_v10 de la reference absentes (MHGP12_V10_FROZEN_DIR='' sans mhgp10_catalogue ni mhgp10_tower)
+-- mhgp12 : 788 portes enregistrees
+-- Configuring done
+-- Generating done
+-- Build files have been written to: $HOME/ehgp-v12/ehgp-v12.pVcKxWYckV/build/t2d_b3/avant/build_profil
+$ cmake --build $HOME/ehgp-v12/ehgp-v12.pVcKxWYckV/build/t2d_b3/avant/build_profil -j 8 --target mhgp12_tower_probe
+[  0%] Building CXX object CMakeFiles/mhgp12.dir/src/core/buffer.cpp.o
+[  0%] Building CXX object CMakeFiles/mhgp12.dir/src/num/sphere.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp12.dir/src/num/centers.cpp.o
+[  7%] Building CXX object CMakeFiles/mhgp12.dir/src/core/ledger.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp12.dir/src/num/center_region.cpp.o
+[ 10%] Building CXX object CMakeFiles/mhgp12.dir/src/num/predicates.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp12.dir/src/num/guard.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp12.dir/src/num/lattice.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp12.dir/src/num/local.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp12.dir/src/num/big.cpp.o
+[ 17%] Building CXX object CMakeFiles/mhgp12.dir/src/num/rational.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp12.dir/src/num/roots.cpp.o
+[ 21%] Building CXX object CMakeFiles/mhgp12.dir/src/num/radical.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp12.dir/src/sched/pool.cpp.o
+[ 25%] Building CXX object CMakeFiles/mhgp12.dir/src/cloud/cloud.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp12.dir/src/io/sha256.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp12.dir/src/io/input.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp12.dir/src/io/writer.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp12.dir/src/io/directory.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp12.dir/src/index/build.cpp.o
+[ 35%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census.cpp.o
+[ 39%] Building CXX object CMakeFiles/mhgp12.dir/src/index/census_workspace.cpp.o
+[ 39%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/traversal.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/leaves.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/assemble.cpp.o
+[ 46%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/table.cpp.o
+[ 46%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/catalogue.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/export.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/outputs.cpp.o
+[ 53%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/slices.cpp.o
+[ 53%] Building CXX object CMakeFiles/mhgp12.dir/src/catalogue/device_stub.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/supports.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells.cpp.o
+[ 60%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/cells_stage.cpp.o
+[ 60%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/populations.cpp.o
+[ 64%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/radix.cpp.o
+[ 64%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/first_probes.cpp.o
+[ 67%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/resolve.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/passes.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/stage.cpp.o
+[ 75%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_births.cpp.o
+[ 75%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_kernel.cpp.o
+[ 78%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_contract.cpp.o
+[ 78%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_build.cpp.o
+[ 82%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_stages.cpp.o
+[ 82%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_validate.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/forest_sources.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/vertical_images.cpp.o
+[ 89%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/registry_branches.cpp.o
+[ 89%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/export_full.cpp.o
+[ 92%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/pipeline.cpp.o
+[ 92%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/pipeline_run.cpp.o
+[ 96%] Building CXX object CMakeFiles/mhgp12.dir/src/tower/pipeline_steps.cpp.o
+[ 96%] Linking CXX static library libmhgp12.a
+[ 96%] Built target mhgp12
+[ 96%] Building CXX object CMakeFiles/mhgp12_tower_probe.dir/bench/tower_probe.cpp.o
+[100%] Linking CXX executable mhgp12_tower_probe
+[100%] Built target mhgp12_tower_probe
