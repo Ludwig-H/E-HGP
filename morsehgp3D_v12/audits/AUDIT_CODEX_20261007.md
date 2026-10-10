@@ -1,6 +1,6 @@
 # Audit Codex — état courant v12
 
-10 octobre 2026. **A6c `aa6338ee8` adopté ; B3b relu, clés seules recommandées.**
+10 octobre 2026. **A6c adopté ; B3-K, clés seules, adopté en `2aaed1847`.**
 Cadre : `exploration_v12_hors_registre`,
 `cpu_reference ; cuda_g4 pour le catalogue`, `full_pi0`, `quantized_u21_input_only`,
 `not_claimed`. Autorité : [registre](CONSTATS.md).
@@ -51,7 +51,7 @@ couvre le succès sans limite. Aucun défaut géométrique nouveau démontré, a
 [statistiques](../receipts/audit_reponses_20261010/b3b_stats/README.md) :300 processus/2 100 chaudes,
 clés et lot passent, balayage seul rejeté. Clés seules : gainGM **1,44–2,85 %** sur cinq trames ;
 ng00/01/02 **78,63/64,90/78,12 ms** (médianes de médianes, différentes de celles de O).
-Aucun bénéfice ajouté du balayage établi : **préférer clés seules**. Aucun nouveau jugement
+Aucun bénéfice ajouté du balayage établi. [Produit B3-K vérifié](../receipts/audit_reponses_20261010/b3k_produit/README.md) :138 fichiers src identiques au bras clés mesuré. Aucun nouveau jugement
 des 37 trames/CPU/massifs. Le juge v1 reste incomplet ; bruts relus ici, codes G/stderr et
 clôture ELF partielle restent des réserves. Sources495/CTests755 concordants.
 

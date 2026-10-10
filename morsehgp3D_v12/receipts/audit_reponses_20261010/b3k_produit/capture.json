@@ -1,0 +1,21 @@
+{
+  "product": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "base": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "measured": "81b0883d11df14e4b63d82e85b6539d6abc7bf92",
+  "source_files": 138,
+  "changed_source_files": [
+    "src/catalogue/assemble.cpp",
+    "src/catalogue/catalogue.hpp",
+    "src/catalogue/finish_driver.hpp",
+    "src/catalogue/finish_outputs.hpp",
+    "src/catalogue/finish_slices.hpp",
+    "src/catalogue/slices.cpp",
+    "src/catalogue/slices.hpp",
+    "src/catalogue/table.cpp"
+  ],
+  "substitutions": 15,
+  "product_inventory_sha256": "9196e02be83e22f8adefdd9fb20bea412e4c1cb9943ba527ef5d9c1765e1f924",
+  "arm_specification_sha256": "c0bf73312210b3e6685f69cef3c131feccfb8bd42aabcea8cc86ea896900a289",
+  "tower_mutant_floor": 73,
+  "native_runs": 0
+}

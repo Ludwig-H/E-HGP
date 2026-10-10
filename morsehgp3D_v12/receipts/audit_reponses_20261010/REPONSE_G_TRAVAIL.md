@@ -12,7 +12,9 @@ Les [300 processus et 2 100 passes chaudes relus](b3b_stats/README.md) soutienne
 la trame. Le lot passe également, mais ajouter le balayage aux clés n’apporte
 aucun bénéfice supplémentaire établi ; le balayage seul échoue sur deux trames.
 L’[admission](session_b3b_admission/README.md) garde les réserves sur codes G,
-stderr et clôture des exécutables. Ce banc ne remplace pas MES-FULL sur 37 trames.
+stderr et clôture des exécutables. Ce banc ne remplace pas MES-FULL sur 37 trames. Depuis `2aaed1847`, les clés
+seules sont adoptées : [138 fichiers produit vérifiés](b3k_produit/README.md)
+identiques au bras mesuré.
 
 ## Q1 — Réduire les représentants à résoudre
 
