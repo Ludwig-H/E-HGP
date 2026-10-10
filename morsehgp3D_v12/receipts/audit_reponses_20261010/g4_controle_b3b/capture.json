@@ -1,0 +1,23 @@
+{
+  "schema": "audit-g4-final-check-v1",
+  "observed_utc": "2026-10-10T19:47:39.599191+00:00",
+  "source_session": "v12.20261010.t2db3b",
+  "before": "TERMINATED",
+  "after": "TERMINATED",
+  "same_generation": true,
+  "stop_requested": false,
+  "guard_exit_code": 0,
+  "active_ehgp_instances": 0,
+  "target_sha256": "015481e451dd2ca91fb5a8b91216be5686ac6ab1beb18954bf443e1585c4e06c",
+  "generation_sha256": "d0f54ce171c1156ac6f897f15cb90df34a91308bbc74c3b2af1238495b1584b7",
+  "raw_files": {
+    "after.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "after.stdout": "e475b8af5374fb37fae5dc951fc4b9050619687869cd6c6f05430608008267ad",
+    "before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before.stdout": "e475b8af5374fb37fae5dc951fc4b9050619687869cd6c6f05430608008267ad",
+    "guard.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard.stdout": "5b33041244ff369315fb529f1c3321ee83b3a7accce183797ee30c1d07f3b662",
+    "inventory.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "inventory.stdout": "58897e4c3ace61b8cd6e213b2b4afd8a2679eeaf71a292687a3932ac763da885"
+  }
+}

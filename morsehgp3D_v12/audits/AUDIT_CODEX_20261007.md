@@ -1,7 +1,7 @@
 # Audit Codex — état courant v12
 
-10 octobre 2026. **A6c `aa6338ee8` adopté selon le banc relu** ; B3b `81b0883d1`
-est en mesure sur ce socle. Cadre : `exploration_v12_hors_registre`,
+10 octobre 2026. **A6c `aa6338ee8` adopté ; B3b relu, clés seules recommandées.**
+Cadre : `exploration_v12_hors_registre`,
 `cpu_reference ; cuda_g4 pour le catalogue`, `full_pi0`, `quantized_u21_input_only`,
 `not_claimed`. Autorité : [registre](CONSTATS.md).
 
@@ -47,10 +47,21 @@ choix figé avant la borne, bascule tardive refusée ;27 990 cas de modèle, san
 de budget/pénurie restent OFF ; forcer ON/OFF et tester allocations/refus. La bascule actuelle
 couvre le succès sans limite. Aucun défaut géométrique nouveau démontré, aucun natif exécuté ici.
 
-**B3b :** [composition et juge relus](../receipts/audit_reponses_20261010/b3b_prelecture/README.md).
-Les neuf corps B3 sont inchangés ; clés toujours transférées en GPU complet, reconstruites en
-tranches. Le juge v1 admet encore les identités via résumés ; le correctif v2 reste proposé.
-L'admission de la nouvelle campagne doit relire les bruts sans inventer les codes absents.
+**B3b clos :** [admission](../receipts/audit_reponses_20261010/session_b3b_admission/README.md),
+[statistiques](../receipts/audit_reponses_20261010/b3b_stats/README.md) :300 processus/2 100 chaudes,
+clés et lot passent, balayage seul rejeté. Clés seules : gainGM **1,44–2,85 %** sur cinq trames ;
+ng00/01/02 **78,63/64,90/78,12 ms** (médianes de médianes, différentes de celles de O).
+Aucun bénéfice ajouté du balayage établi : **préférer clés seules**. Aucun nouveau jugement
+des 37 trames/CPU/massifs. Le juge v1 reste incomplet ; bruts relus ici, codes G/stderr et
+clôture ELF partielle restent des réserves. Sources495/CTests755 concordants.
+
+**Aide mathématique G :** [réponse aux quatre questions](../receipts/audit_reponses_20261010/REPONSE_G_TRAVAIL.md).
+Composantes locales séparables pour coquilles étendues ; transfert entre ordres limité ;
+première sonde par vue triée sans copie proposée. Preuves/modèles, aucun gain natif acquis.
+D7 couvre toutes tailles : les 99 099 sites restent dans le contrat.
+
+**G4 :** [contrôle réel19:47:39 UTC](../receipts/audit_reponses_20261010/g4_controle_b3b/README.md),
+même génération arrêtée avant/après, garde code0, zéro VM E-HGP active à cet instant.
 
 Massifs inchangés : [record R1 GPU](../receipts/audit_reponses_20261008/session_l2t_admission/README.md)
 Paris sans sol 9,111M, K5 **46,453 s froid**, sans qualification chaude transférée à A6c.

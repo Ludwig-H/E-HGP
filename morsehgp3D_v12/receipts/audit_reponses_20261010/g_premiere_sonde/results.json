@@ -1,0 +1,42 @@
+{
+  "native_runs": 0,
+  "source_git": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "exhaustive": {
+    "views": 3584,
+    "lookups": 14336,
+    "hits": 7424,
+    "misses": 6912,
+    "comparisons": 50880,
+    "forced_zero": 3584
+  },
+  "directed_views": 3,
+  "invalid_preconditions_refused": 10,
+  "rank_counter_cases": 16,
+  "queue_cases": 36,
+  "model_materializations_skipped": 412,
+  "triangle": {
+    "center": [
+      "2",
+      "5/6",
+      "0"
+    ],
+    "level": "169/36",
+    "pair_levels": [
+      "4",
+      "13/4",
+      "13/4"
+    ],
+    "distinct_births": 3,
+    "inner": [],
+    "shell_size": 3,
+    "order": 2
+  },
+  "guarantees": [
+    "same sorted stream",
+    "same lower-bound comparisons including hash collisions",
+    "same first-probe counters and strict rank",
+    "same 16-slot/8-stage event order",
+    "Part formed only on miss in model"
+  ],
+  "gain_measured": false
+}

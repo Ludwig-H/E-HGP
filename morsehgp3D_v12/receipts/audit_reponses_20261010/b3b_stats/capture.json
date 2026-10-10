@@ -1,0 +1,28 @@
+{
+  "base_git": "81b0883d11df14e4b63d82e85b6539d6abc7bf92",
+  "files": 300,
+  "raw_bytes": 3281920,
+  "journal_manifest_sha256": "6db0b6dea645449e2beb75ff3a0fd784c27866518e6cf9cca66d2698d6ff3d87",
+  "sources": [
+    [
+      "morsehgp3D_v12/microbancs/mes_t2d_b3/pilote_t2d_b3.py",
+      "5e9d920ef51cb634902633f01686b7cd090417084acecb6e2667900ebf868213"
+    ],
+    [
+      "morsehgp3D_v12/microbancs/mes_t2d_b3/bras_t2d_b3.json",
+      "c0bf73312210b3e6685f69cef3c131feccfb8bd42aabcea8cc86ea896900a289"
+    ],
+    [
+      "morsehgp3D_v12/bench/full_probe.cpp",
+      "1068940a06e386cb80a4802b3dd61e2df87eed69574f08c821c34dabb017179b"
+    ]
+  ],
+  "source_git": "81b0883d11df14e4b63d82e85b6539d6abc7bf92",
+  "before_git": "aa6338ee8b3d5daf6a821043c3bdd9d63ce85c66",
+  "session": "v12.20261010.t2db3b",
+  "archive_sha256": "3e447ced79576fc3167cf7f9da5e912343abd4b8c23f53160c1cdb9277f93a42",
+  "archive_bytes": 1027723,
+  "closure_observed": true,
+  "reader_path": "morsehgp3D_v12/receipts/audit_reponses_20261008/t2db3_stats/check.py",
+  "reader_sha256": "61317eeacfb439cfedc425fa5c678779a3bc7ef2d7660fa80bb41e6386533062"
+}
