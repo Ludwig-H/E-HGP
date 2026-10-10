@@ -1,0 +1,493 @@
+{
+ "cas": [
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "1358_f4500_n10_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n10_sans_sol",
+   "open_ns": 359169678,
+   "passes": [
+    {
+     "appareil_octets": 18165892,
+     "c_ns": {
+      "emission": 193726742,
+      "feuilles": 569471104,
+      "fin_etage": 1039656588,
+      "parcours": 117018514,
+      "publication": 5920,
+      "transferts": 565394235
+     },
+     "coord_bits": 21,
+     "cpu_ns": 199439642000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 2812099823,
+      "G": 2697893379,
+      "P": 93022643,
+      "TMVR": 801103992,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 94490755684,
+      "M": 5922600698,
+      "R": 2731930350,
+      "T": 21185809852,
+      "V": 6951337405,
+      "foret": 36791678305,
+      "foret_apres_g": 21611971210
+     },
+     "fins_par_ordre_ns": [
+      [
+       2697893379,
+       2812695404,
+       2835858815,
+       0,
+       2849888999
+      ],
+      [
+       2686594894,
+       2941824493,
+       2993559772,
+       3008676626,
+       3126934649
+      ],
+      [
+       2542914801,
+       3054902588,
+       3220513782,
+       3367629643,
+       3394313403
+      ],
+      [
+       2222512178,
+       3042755052,
+       3223491471,
+       3346223512,
+       3439394835
+      ],
+      [
+       1656168283,
+       2902569368,
+       3116352603,
+       3316545704,
+       3387545646
+      ]
+     ],
+     "full_sha256": "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72",
+     "g_ns": {
+      "ouverture": 409583508,
+      "tables": 253009820
+     },
+     "hors_mur_ns": {
+      "empreinte": 17822741027,
+      "validation": 3222114757
+     },
+     "kmax": 5,
+     "liberation_ns": 394505101,
+     "memoire_octets": {
+      "C": [
+       8265773056,
+       11457179848
+      ],
+      "P": [
+       97013760,
+       97013760
+      ],
+      "tour": [
+       18046709760,
+       23043499259
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 6203669056,
+     "pic_octets": 23043499259,
+     "recouvrement": {
+      "admis_octets": 17281391879,
+      "fin_g_ns": 2697893379,
+      "fin_ns": 3498997371,
+      "noyau_arrets": 12,
+      "noyau_reprises": 17,
+      "ouverture_ns": 409583508,
+      "queue_ns": 801103992,
+      "tour_ns": 3556508129
+     },
+     "rss_max_octets": 28293136384,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1358_f4500_n10_sans_sol",
+     "voie": "device",
+     "wall_ns": 6461631125
+    },
+    {
+     "appareil_octets": 18165892,
+     "c_ns": {
+      "emission": 192550179,
+      "feuilles": 566393006,
+      "fin_etage": 1033461175,
+      "parcours": 114611680,
+      "publication": 1770,
+      "transferts": 543392952
+     },
+     "coord_bits": 21,
+     "cpu_ns": 194428105000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 2734397504,
+      "G": 2656242034,
+      "P": 82123511,
+      "TMVR": 768509348,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 93550152947,
+      "M": 5938025165,
+      "R": 2583326097,
+      "T": 21317222438,
+      "V": 6852615826,
+      "foret": 36691189526,
+      "foret_apres_g": 21405580665
+     },
+     "fins_par_ordre_ns": [
+      [
+       2656242034,
+       2765694112,
+       2790030238,
+       0,
+       2804329922
+      ],
+      [
+       2645910041,
+       2871894139,
+       2947728239,
+       2963371393,
+       2991816230
+      ],
+      [
+       2502813184,
+       2993060801,
+       3158759293,
+       3296871699,
+       3320812655
+      ],
+      [
+       2186645103,
+       3009646975,
+       3147733460,
+       3270907092,
+       3364784016
+      ],
+      [
+       1626037839,
+       2910128489,
+       3152990412,
+       3264638011,
+       3351437193
+      ]
+     ],
+     "full_sha256": "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72",
+     "g_ns": {
+      "ouverture": 385332759,
+      "tables": 236753851
+     },
+     "hors_mur_ns": {
+      "empreinte": 18012003589,
+      "validation": 3215525607
+     },
+     "kmax": 5,
+     "liberation_ns": 392573596,
+     "memoire_octets": {
+      "C": [
+       8265773056,
+       11457179848
+      ],
+      "P": [
+       164122624,
+       164122624
+      ],
+      "tour": [
+       18046709760,
+       23256384763
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 6203669056,
+     "pic_octets": 23256384763,
+     "recouvrement": {
+      "admis_octets": 17281391879,
+      "fin_g_ns": 2656242034,
+      "fin_ns": 3424751382,
+      "noyau_arrets": 8,
+      "noyau_reprises": 13,
+      "ouverture_ns": 385332759,
+      "queue_ns": 768509348,
+      "tour_ns": 3463151932
+     },
+     "rss_max_octets": 28293136384,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1358_f4500_n10_sans_sol",
+     "voie": "device",
+     "wall_ns": 6279673447
+    }
+   ],
+   "pic_nvidia_smi_mio": 5151,
+   "prevision_s": 79.0,
+   "raison": "",
+   "secondes": 56.5,
+   "sites": 1513483,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "1_58_f4500_n10_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n10_sans_sol",
+   "passes": [
+    {
+     "appareil_octets": 0,
+     "c_ns": {
+      "emission": 1058234104,
+      "feuilles": 7318248136,
+      "fin_etage": 1706613296,
+      "parcours": 3459977647,
+      "publication": 0,
+      "transferts": 0
+     },
+     "coord_bits": 21,
+     "cpu_ns": 776344054000,
+     "epinglee_octets": 0,
+     "etapes_ns": {
+      "C": 13870655481,
+      "G": 2690984615,
+      "P": 93909742,
+      "TMVR": 861148092,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 94794378990,
+      "M": 5881999392,
+      "R": 2659016580,
+      "T": 21470797153,
+      "V": 6914473341,
+      "foret": 36926286466,
+      "foret_apres_g": 21659085109
+     },
+     "fins_par_ordre_ns": [
+      [
+       2690984615,
+       2800749371,
+       2815688751,
+       0,
+       2846039520
+      ],
+      [
+       2679468515,
+       2923585567,
+       2984228615,
+       2999562745,
+       3061836253
+      ],
+      [
+       2535583009,
+       3034290584,
+       3189656179,
+       3222185868,
+       3416845721
+      ],
+      [
+       2216746750,
+       3095721702,
+       3282164316,
+       3411152092,
+       3492120249
+      ],
+      [
+       1650655858,
+       2939051997,
+       3170362179,
+       3359313623,
+       3408413872
+      ]
+     ],
+     "full_sha256": "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72",
+     "g_ns": {
+      "ouverture": 394600518,
+      "tables": 246908692
+     },
+     "hors_mur_ns": {
+      "empreinte": 18119693190,
+      "validation": 3232661056
+     },
+     "kmax": 5,
+     "liberation_ns": 459428846,
+     "memoire_octets": {
+      "C": [
+       8198664192,
+       27019520660
+      ],
+      "P": [
+       97013760,
+       97013760
+      ],
+      "tour": [
+       17979600896,
+       23034053883
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 0,
+     "pic_octets": 27019520660,
+     "recouvrement": {
+      "admis_octets": 17281391879,
+      "fin_g_ns": 2690984615,
+      "fin_ns": 3552132707,
+      "noyau_arrets": 9,
+      "noyau_reprises": 14,
+      "ouverture_ns": 394600518,
+      "queue_ns": 861148092,
+      "tour_ns": 3662874534
+     },
+     "rss_max_octets": 29754347520,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1_58_f4500_n10_sans_sol",
+     "voie": "cpu",
+     "wall_ns": 17627440217
+    }
+   ],
+   "pic_nvidia_smi_mio": null,
+   "prevision_s": 98.7,
+   "raison": "",
+   "secondes": 39.7,
+   "sites": 1513483,
+   "voie": "cpu"
+  }
+ ],
+ "controles": [],
+ "criteres": {
+  "B1": {
+   "detail": [
+    "boreas_202011261358_f4500_n10_sans_sol : 4.149 s par million"
+   ],
+   "etat": "non tenu"
+  },
+  "B2": {
+   "detail": [
+    "1 scenes jouees sous 10 millions de sites"
+   ],
+   "etat": "tenu"
+  },
+  "B3": {
+   "detail": [],
+   "etat": "non evalue"
+  },
+  "B4": {
+   "detail": [],
+   "etat": "non evalue"
+  }
+ },
+ "duree_s": 107.6,
+ "empreintes": {
+  "boreas_202011261358_f4500_n10_sans_sol:K5": [
+   "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72"
+  ]
+ },
+ "environnement": {
+  "apres": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463736 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  },
+  "avant": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463736 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  }
+ },
+ "mesure": "MES-B",
+ "parametres": {
+  "argv": [
+   "--src",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/src",
+   "--travail",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/build/b",
+   "--donnees",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/data",
+   "--sortie",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/results/cmd/000_mes_b_flux_identite/files/b_identite",
+   "--cas",
+   "boreas_202011261358_f4500_n10_sans_sol:5:appareil:2,boreas_202011261358_f4500_n10_sans_sol:5:cpu:1",
+   "--fils",
+   "48",
+   "--budget-gio",
+   "160",
+   "--budget-appareil-gio",
+   "8",
+   "--delai-global",
+   "840",
+   "--empreinte-max-sites",
+   "1600000",
+   "--jobs",
+   "44"
+  ],
+  "budget_appareil_octets": 8589934592,
+  "budget_octets": 171798691840,
+  "delai_global_s": 840.0,
+  "fils": 48,
+  "schema": "recouvert",
+  "series": []
+ },
+ "provenance": {
+  "cmake": [
+   "CMAKE_BUILD_TYPE:STRING=Release",
+   "CMAKE_CUDA_COMPILER:STRING=/usr/local/cuda/bin/nvcc",
+   "CMAKE_CUDA_FLAGS:STRING=",
+   "CMAKE_CUDA_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+   "CMAKE_CXX_FLAGS:STRING=",
+   "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "MHGP12_COORD_BITS:STRING=21",
+   "MHGP12_ENABLE_CUDA:BOOL=ON",
+   "MHGP12_JUG_EMST:FILEPATH=",
+   "MHGP12_MARCH:STRING=",
+   "MHGP12_MODULES:STRING=",
+   "MHGP12_MUTANT_JOBS:STRING=0",
+   "MHGP12_POISON:BOOL=OFF",
+   "MHGP12_REFERENCE_SHARDS:STRING=16",
+   "MHGP12_SANITIZE:BOOL=OFF",
+   "MHGP12_TOWER_DUMPS:PATH=",
+   "MHGP12_TSAN:BOOL=OFF",
+   "MHGP12_V10_FROZEN_DIR:PATH=",
+   "MHGP12_V11_CATALOGUE_DIR:PATH=",
+   "MHGP12_V11_TOWER_DIR:PATH="
+  ],
+  "manifeste_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+  "pilote_sha256": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+  "sonde_sha256": "d35a809d9e2fbb31bfb6ee66589dd554900128ce1319b0dd54e3de662374b9db"
+ },
+ "regime": "b",
+ "verdict": "non tenu"
+}

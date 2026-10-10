@@ -1,0 +1,2795 @@
+{
+ "cas": [
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "61358_f4500_n1_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n1_sans_sol",
+   "open_ns": 160242534,
+   "passes": [
+    {
+     "appareil_octets": 1909509220,
+     "c_ns": {
+      "emission": 17155100,
+      "feuilles": 43879718,
+      "fin_etage": 10377130,
+      "parcours": 17539250,
+      "publication": 4627999,
+      "transferts": 9413970
+     },
+     "coord_bits": 21,
+     "cpu_ns": 8155798000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 114841786,
+      "G": 137598046,
+      "P": 6977390,
+      "TMVR": 39653129,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 4279206362,
+      "M": 349621499,
+      "R": 136801970,
+      "T": 849916648,
+      "V": 325102930,
+      "foret": 1661443047,
+      "foret_apres_g": 1062288434
+     },
+     "fins_par_ordre_ns": [
+      [
+       137598046,
+       148375976,
+       152379226,
+       0,
+       153875266
+      ],
+      [
+       137022546,
+       158167875,
+       167057735,
+       172900665,
+       173160335
+      ],
+      [
+       130056886,
+       156603765,
+       166450115,
+       171680565,
+       172441385
+      ],
+      [
+       115601217,
+       150846086,
+       160303185,
+       170271505,
+       171628325
+      ],
+      [
+       90671838,
+       138334966,
+       150623086,
+       164391915,
+       167816835
+      ]
+     ],
+     "full_sha256": "f2ec1106e2745d2361a89e21a7ee4a283c2bb0fbed3fe7058c9b2dc6d27ecf3d",
+     "g_ns": {
+      "ouverture": 35696829,
+      "tables": 22377759
+     },
+     "hors_mur_ns": {
+      "empreinte": 1215984081,
+      "validation": 145815585
+     },
+     "kmax": 5,
+     "liberation_ns": 17220,
+     "memoire_octets": {
+      "C": [
+       565854208,
+       565854208
+      ],
+      "P": [
+       9383936,
+       9383936
+      ],
+      "tour": [
+       1229021184,
+       1553376415
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 1909509220,
+     "pic_octets": 1553376415,
+     "recouvrement": {
+      "admis_octets": 1194064611,
+      "fin_g_ns": 137598046,
+      "fin_ns": 177251175,
+      "noyau_arrets": 2,
+      "noyau_reprises": 7,
+      "ouverture_ns": 35696829,
+      "queue_ns": 39653129,
+      "tour_ns": 177294675
+     },
+     "rss_max_octets": 1740988416,
+     "sites": 146316,
+     "status": "ok",
+     "threads": 48,
+     "trame": "61358_f4500_n1_sans_sol",
+     "voie": "device",
+     "wall_ns": 299114141
+    },
+    {
+     "appareil_octets": 1909509220,
+     "c_ns": {
+      "emission": 15384909,
+      "feuilles": 43310579,
+      "fin_etage": 7933549,
+      "parcours": 11799820,
+      "publication": 4942230,
+      "transferts": 10330980
+     },
+     "coord_bits": 21,
+     "cpu_ns": 7419154000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 95166627,
+      "G": 133116166,
+      "P": 6439840,
+      "TMVR": 29421729,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 4327651152,
+      "M": 242527632,
+      "R": 87810040,
+      "T": 721287814,
+      "V": 314769250,
+      "foret": 1366394736,
+      "foret_apres_g": 685798811
+     },
+     "fins_par_ordre_ns": [
+      [
+       133116166,
+       143319315,
+       146846025,
+       0,
+       150030665
+      ],
+      [
+       132773256,
+       147492035,
+       150404215,
+       152298385,
+       156566795
+      ],
+      [
+       125189116,
+       146792575,
+       150291985,
+       153823645,
+       158376925
+      ],
+      [
+       110233096,
+       135963106,
+       139979265,
+       155796935,
+       151851875
+      ],
+      [
+       82866987,
+       104642147,
+       111726046,
+       146168205,
+       127720716
+      ]
+     ],
+     "full_sha256": "f2ec1106e2745d2361a89e21a7ee4a283c2bb0fbed3fe7058c9b2dc6d27ecf3d",
+     "g_ns": {
+      "ouverture": 28459339,
+      "tables": 17504309
+     },
+     "hors_mur_ns": {
+      "empreinte": 1211380281,
+      "validation": 146416395
+     },
+     "kmax": 5,
+     "liberation_ns": 16280,
+     "memoire_octets": {
+      "C": [
+       565854208,
+       565854208
+      ],
+      "P": [
+       26161152,
+       26161152
+      ],
+      "tour": [
+       1229021184,
+       1542767775
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 1909509220,
+     "pic_octets": 1542767775,
+     "recouvrement": {
+      "admis_octets": 1194064611,
+      "fin_g_ns": 133116166,
+      "fin_ns": 162537895,
+      "noyau_arrets": 5,
+      "noyau_reprises": 10,
+      "ouverture_ns": 28459339,
+      "queue_ns": 29421729,
+      "tour_ns": 162571785
+     },
+     "rss_max_octets": 1785421824,
+     "sites": 146316,
+     "status": "ok",
+     "threads": 48,
+     "trame": "61358_f4500_n1_sans_sol",
+     "voie": "device",
+     "wall_ns": 264178522
+    }
+   ],
+   "pic_nvidia_smi_mio": 2415,
+   "prevision_s": 25.7,
+   "raison": "",
+   "secondes": 3.6,
+   "sites": 146316,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "s_202011261358_f4500_n1",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n1",
+   "open_ns": 116152696,
+   "passes": [
+    {
+     "appareil_octets": 2397435600,
+     "c_ns": {
+      "emission": 20750840,
+      "feuilles": 56955628,
+      "fin_etage": 15466220,
+      "parcours": 21994370,
+      "publication": 5454890,
+      "transferts": 12000349
+     },
+     "coord_bits": 21,
+     "cpu_ns": 11107051000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 147898976,
+      "G": 180791434,
+      "P": 13509780,
+      "TMVR": 60360598,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 5665102654,
+      "M": 512871708,
+      "R": 242055759,
+      "T": 1239337015,
+      "V": 443537170,
+      "foret": 2437801652,
+      "foret_apres_g": 1593100736
+     },
+     "fins_par_ordre_ns": [
+      [
+       180791434,
+       196155264,
+       199371584,
+       0,
+       201433294
+      ],
+      [
+       179907354,
+       205196474,
+       211859733,
+       213492403,
+       221133183
+      ],
+      [
+       169891905,
+       208353803,
+       220244893,
+       229656073,
+       231954303
+      ],
+      [
+       150097545,
+       206549013,
+       219925543,
+       228506903,
+       235411823
+      ],
+      [
+       116712196,
+       190310664,
+       206836233,
+       227009133,
+       230870663
+      ]
+     ],
+     "full_sha256": "52c5cf71ee01007d52e40178704b2a0daea6d1ba120114b7e0e006adaefa0a0f",
+     "g_ns": {
+      "ouverture": 44797569,
+      "tables": 27282559
+     },
+     "hors_mur_ns": {
+      "empreinte": 1655103217,
+      "validation": 221795993
+     },
+     "kmax": 5,
+     "liberation_ns": 16460,
+     "memoire_octets": {
+      "C": [
+       759574528,
+       759574528
+      ],
+      "P": [
+       13254656,
+       13254656
+      ],
+      "tour": [
+       1653039104,
+       2101478139
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 2397435600,
+     "pic_octets": 2101478139,
+     "recouvrement": {
+      "admis_octets": 1617395437,
+      "fin_g_ns": 180791434,
+      "fin_ns": 241152032,
+      "noyau_arrets": 4,
+      "noyau_reprises": 9,
+      "ouverture_ns": 44797569,
+      "queue_ns": 60360598,
+      "tour_ns": 241208572
+     },
+     "rss_max_octets": 2309120000,
+     "sites": 215665,
+     "status": "ok",
+     "threads": 48,
+     "trame": "s_202011261358_f4500_n1",
+     "voie": "device",
+     "wall_ns": 402617518
+    },
+    {
+     "appareil_octets": 2397435600,
+     "c_ns": {
+      "emission": 19280679,
+      "feuilles": 56386458,
+      "fin_etage": 13451809,
+      "parcours": 15430390,
+      "publication": 5442180,
+      "transferts": 12129690
+     },
+     "coord_bits": 21,
+     "cpu_ns": 9778470000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 123815276,
+      "G": 173522854,
+      "P": 12484350,
+      "TMVR": 44091589,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 5662794999,
+      "M": 363501360,
+      "R": 124941239,
+      "T": 1083250529,
+      "V": 441660533,
+      "foret": 2013353661,
+      "foret_apres_g": 1066421562
+     },
+     "fins_par_ordre_ns": [
+      [
+       173522854,
+       187556034,
+       190625784,
+       0,
+       193243854
+      ],
+      [
+       172870194,
+       193843044,
+       198654614,
+       208072383,
+       210170703
+      ],
+      [
+       162990415,
+       193814884,
+       198694274,
+       207233463,
+       211927373
+      ],
+      [
+       139328176,
+       185175974,
+       191180944,
+       206838053,
+       210882413
+      ],
+      [
+       106173787,
+       148190545,
+       156532955,
+       202473373,
+       177848774
+      ]
+     ],
+     "full_sha256": "52c5cf71ee01007d52e40178704b2a0daea6d1ba120114b7e0e006adaefa0a0f",
+     "g_ns": {
+      "ouverture": 35449519,
+      "tables": 22120169
+     },
+     "hors_mur_ns": {
+      "empreinte": 1653630397,
+      "validation": 217347093
+     },
+     "kmax": 5,
+     "liberation_ns": 15040,
+     "memoire_octets": {
+      "C": [
+       759574528,
+       759574528
+      ],
+      "P": [
+       30031872,
+       30031872
+      ],
+      "tour": [
+       1653039104,
+       2097210107
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 2397435600,
+     "pic_octets": 2097210107,
+     "recouvrement": {
+      "admis_octets": 1617395437,
+      "fin_g_ns": 173522854,
+      "fin_ns": 217614443,
+      "noyau_arrets": 3,
+      "noyau_reprises": 8,
+      "ouverture_ns": 35449519,
+      "queue_ns": 44091589,
+      "tour_ns": 217650663
+     },
+     "rss_max_octets": 2367315968,
+     "sites": 215665,
+     "status": "ok",
+     "threads": 48,
+     "trame": "s_202011261358_f4500_n1",
+     "voie": "device",
+     "wall_ns": 353950569
+    }
+   ],
+   "pic_nvidia_smi_mio": 2883,
+   "prevision_s": 28.4,
+   "raison": "",
+   "secondes": 4.8,
+   "sites": 215665,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "1358_f4500_n10_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n10_sans_sol",
+   "open_ns": 115021573,
+   "passes": [
+    {
+     "appareil_octets": 23036138508,
+     "c_ns": {
+      "emission": 193404472,
+      "feuilles": 569194883,
+      "fin_etage": 227983643,
+      "parcours": 116672877,
+      "publication": 55940349,
+      "transferts": 119508446
+     },
+     "coord_bits": 21,
+     "cpu_ns": 165343653000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1426801134,
+      "G": 2743621972,
+      "P": 91024238,
+      "TMVR": 840495712,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 95741818097,
+      "M": 5967098868,
+      "R": 2644674987,
+      "T": 21788561693,
+      "V": 6939247398,
+      "foret": 37339582946,
+      "foret_apres_g": 21932919005
+     },
+     "fins_par_ordre_ns": [
+      [
+       2743621972,
+       2859067678,
+       2883166568,
+       0,
+       2899732697
+      ],
+      [
+       2732285063,
+       2971944685,
+       3053589472,
+       3068908712,
+       3120914040
+      ],
+      [
+       2585661617,
+       3105865880,
+       3250416156,
+       3309205854,
+       3444900680
+      ],
+      [
+       2265488637,
+       3152222939,
+       3313442364,
+       3373234432,
+       3523778836
+      ],
+      [
+       1691468746,
+       3011132164,
+       3259546546,
+       3431283020,
+       3477733618
+      ]
+     ],
+     "full_sha256": "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72",
+     "g_ns": {
+      "ouverture": 424665876,
+      "tables": 252307482
+     },
+     "hors_mur_ns": {
+      "empreinte": 18036915175,
+      "validation": 3215362422
+     },
+     "kmax": 5,
+     "liberation_ns": 421836031,
+     "memoire_octets": {
+      "C": [
+       8215441408,
+       8215441408
+      ],
+      "P": [
+       97013760,
+       97013760
+      ],
+      "tour": [
+       17996378112,
+       23138944251
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 23036138508,
+     "pic_octets": 23138944251,
+     "recouvrement": {
+      "admis_octets": 17281391879,
+      "fin_g_ns": 2743621972,
+      "fin_ns": 3584117684,
+      "noyau_arrets": 5,
+      "noyau_reprises": 10,
+      "ouverture_ns": 424665876,
+      "queue_ns": 840495712,
+      "tour_ns": 3584424454
+     },
+     "rss_max_octets": 24012214272,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1358_f4500_n10_sans_sol",
+     "voie": "device",
+     "wall_ns": 5102250296
+    },
+    {
+     "appareil_octets": 23036138508,
+     "c_ns": {
+      "emission": 171082223,
+      "feuilles": 560338777,
+      "fin_etage": 224266840,
+      "parcours": 102828685,
+      "publication": 55848968,
+      "transferts": 114647884
+     },
+     "coord_bits": 21,
+     "cpu_ns": 160819220000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1374578331,
+      "G": 2645724916,
+      "P": 86452847,
+      "TMVR": 785156086,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 93967165276,
+      "M": 5874640542,
+      "R": 2662893563,
+      "T": 20908209218,
+      "V": 6858641922,
+      "foret": 36304385245,
+      "foret_apres_g": 21256237690
+     },
+     "fins_par_ordre_ns": [
+      [
+       2645724916,
+       2755418801,
+       2774876840,
+       0,
+       2792055060
+      ],
+      [
+       2635433716,
+       2871066766,
+       2924667394,
+       2940038283,
+       3016035480
+      ],
+      [
+       2491831523,
+       2968809212,
+       3104265196,
+       3163509624,
+       3298327028
+      ],
+      [
+       2173740936,
+       3023352440,
+       3161117154,
+       3285783198,
+       3371241935
+      ],
+      [
+       1612910120,
+       2846253137,
+       3038962129,
+       3252820420,
+       3265792409
+      ]
+     ],
+     "full_sha256": "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72",
+     "g_ns": {
+      "ouverture": 370632144,
+      "tables": 217176001
+     },
+     "hors_mur_ns": {
+      "empreinte": 17791931856,
+      "validation": 3163194054
+     },
+     "kmax": 5,
+     "liberation_ns": 373565484,
+     "memoire_octets": {
+      "C": [
+       8215441408,
+       8215441408
+      ],
+      "P": [
+       113790976,
+       113790976
+      ],
+      "tour": [
+       17996378112,
+       22582510843
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 23036138508,
+     "pic_octets": 22582510843,
+     "recouvrement": {
+      "admis_octets": 17281391879,
+      "fin_g_ns": 2645724916,
+      "fin_ns": 3430881002,
+      "noyau_arrets": 10,
+      "noyau_reprises": 15,
+      "ouverture_ns": 370632144,
+      "queue_ns": 785156086,
+      "tour_ns": 3431083162
+     },
+     "rss_max_octets": 24201953280,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1358_f4500_n10_sans_sol",
+     "voie": "device",
+     "wall_ns": 4892114750
+    }
+   ],
+   "pic_nvidia_smi_mio": 22571,
+   "prevision_s": 79.0,
+   "raison": "",
+   "secondes": 53.5,
+   "sites": 1513483,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "_202011261358_f4500_n10",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n10",
+   "open_ns": 116511466,
+   "passes": [
+    {
+     "appareil_octets": 30550678740,
+     "c_ns": {
+      "emission": 242162572,
+      "feuilles": 664828185,
+      "fin_etage": 296138698,
+      "parcours": 146221108,
+      "publication": 65993478,
+      "transferts": 138230482
+     },
+     "coord_bits": 21,
+     "cpu_ns": 207154882000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1737729955,
+      "G": 3379045245,
+      "P": 136897834,
+      "TMVR": 1184356159,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 115604253223,
+      "M": 7809793362,
+      "R": 3291387795,
+      "T": 28982247016,
+      "V": 9637865482,
+      "foret": 49721293655,
+      "foret_apres_g": 29440085078
+     },
+     "fins_par_ordre_ns": [
+      [
+       3379045245,
+       3543776038,
+       3576821536,
+       0,
+       3597442615
+      ],
+      [
+       3363967385,
+       3773021248,
+       3870493944,
+       3895240023,
+       3940112571
+      ],
+      [
+       3175058054,
+       3845012355,
+       4006125498,
+       4096400044,
+       4201817959
+      ],
+      [
+       2775898351,
+       4009370378,
+       4215651689,
+       4388535922,
+       4487262027
+      ],
+      [
+       2074306641,
+       3750726699,
+       4064096955,
+       4350136303,
+       4366711362
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 543755547,
+      "tables": 325459766
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 4407527091
+     },
+     "kmax": 5,
+     "liberation_ns": 606829034,
+     "memoire_octets": {
+      "C": [
+       10091339776,
+       10091339776
+      ],
+      "P": [
+       137256960,
+       137256960
+      ],
+      "tour": [
+       22630313984,
+       29005949802
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 30550678740,
+     "pic_octets": 29005949802,
+     "recouvrement": {
+      "admis_octets": 22303379169,
+      "fin_g_ns": 3379045245,
+      "fin_ns": 4563401404,
+      "noyau_arrets": 7,
+      "noyau_reprises": 12,
+      "ouverture_ns": 543755547,
+      "queue_ns": 1184356159,
+      "tour_ns": 4575615313
+     },
+     "rss_max_octets": 30594478080,
+     "sites": 2153342,
+     "status": "ok",
+     "threads": 48,
+     "trame": "_202011261358_f4500_n10",
+     "voie": "device",
+     "wall_ns": 6450243712
+    },
+    {
+     "appareil_octets": 30550678740,
+     "c_ns": {
+      "emission": 210183465,
+      "feuilles": 651763717,
+      "fin_etage": 292077628,
+      "parcours": 128825265,
+      "publication": 64163586,
+      "transferts": 142687945
+     },
+     "coord_bits": 21,
+     "cpu_ns": 204792247000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1670884138,
+      "G": 3326943273,
+      "P": 117552935,
+      "TMVR": 1100661844,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 115827043176,
+      "M": 7660713596,
+      "R": 3304474500,
+      "T": 28983313358,
+      "V": 9618076108,
+      "foret": 49566577562,
+      "foret_apres_g": 29190622399
+     },
+     "fins_par_ordre_ns": [
+      [
+       3326943273,
+       3491562141,
+       3521252601,
+       0,
+       3547106260
+      ],
+      [
+       3312676794,
+       3622750969,
+       3700462948,
+       3736045827,
+       3796915517
+      ],
+      [
+       3123650276,
+       3824815756,
+       3988500644,
+       4034336233,
+       4271477720
+      ],
+      [
+       2727026402,
+       3890878665,
+       4088414102,
+       4245478240,
+       4351331388
+      ],
+      [
+       2023354243,
+       3678888038,
+       3944910374,
+       4205919881,
+       4267450900
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 484917069,
+      "tables": 292147327
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 4414248016
+     },
+     "kmax": 5,
+     "liberation_ns": 539768842,
+     "memoire_octets": {
+      "C": [
+       10091339776,
+       10091339776
+      ],
+      "P": [
+       154034176,
+       154034176
+      ],
+      "tour": [
+       22630313984,
+       29267045226
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 30550678740,
+     "pic_octets": 29267045226,
+     "recouvrement": {
+      "admis_octets": 22303379169,
+      "fin_g_ns": 3326943273,
+      "fin_ns": 4427605117,
+      "noyau_arrets": 7,
+      "noyau_reprises": 12,
+      "ouverture_ns": 484917069,
+      "queue_ns": 1100661844,
+      "tour_ns": 4441584637
+     },
+     "rss_max_octets": 30777012224,
+     "sites": 2153342,
+     "status": "ok",
+     "threads": 48,
+     "trame": "_202011261358_f4500_n10",
+     "voie": "device",
+     "wall_ns": 6230021980
+    }
+   ],
+   "pic_nvidia_smi_mio": 29769,
+   "prevision_s": 104.0,
+   "raison": "",
+   "secondes": 23.1,
+   "sites": 2153342,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "ille_0891_6248_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_marseille_0891_6248_sans_sol",
+   "open_ns": 116084705,
+   "passes": [
+    {
+     "appareil_octets": 24721923728,
+     "c_ns": {
+      "emission": 176629045,
+      "feuilles": 555373694,
+      "fin_etage": 278304295,
+      "parcours": 144673908,
+      "publication": 45188289,
+      "transferts": 124201259
+     },
+     "coord_bits": 21,
+     "cpu_ns": 167389239000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1460172828,
+      "G": 2682593431,
+      "P": 154667118,
+      "TMVR": 989333176,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 87856575300,
+      "M": 6557794867,
+      "R": 3095993606,
+      "T": 28068612318,
+      "V": 9787424729,
+      "foret": 47509825520,
+      "foret_apres_g": 27622121527
+     },
+     "fins_par_ordre_ns": [
+      [
+       2682593431,
+       2839251379,
+       2874811798,
+       0,
+       2900136618
+      ],
+      [
+       2667708331,
+       2964488777,
+       3034892696,
+       3059143815,
+       3136327064
+      ],
+      [
+       2517735723,
+       3100017295,
+       3272579622,
+       3347154211,
+       3533784889
+      ],
+      [
+       2213240948,
+       3180184054,
+       3374417171,
+       3532359299,
+       3606927687
+      ],
+      [
+       1686449186,
+       3068979855,
+       3324388852,
+       3511845199,
+       3560026668
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 434439574,
+      "tables": 255553717
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 3727638435
+     },
+     "kmax": 5,
+     "liberation_ns": 438468954,
+     "memoire_octets": {
+      "C": [
+       7832616960,
+       7832616960
+      ],
+      "P": [
+       149667840,
+       149667840
+      ],
+      "tour": [
+       17910726656,
+       23438202883
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 24721923728,
+     "pic_octets": 23438202883,
+     "recouvrement": {
+      "admis_octets": 18353671642,
+      "fin_g_ns": 2682593431,
+      "fin_ns": 3671926607,
+      "noyau_arrets": 5,
+      "noyau_reprises": 10,
+      "ouverture_ns": 434439574,
+      "queue_ns": 989333176,
+      "tour_ns": 3672280057
+     },
+     "rss_max_octets": 24149950464,
+     "sites": 2465285,
+     "status": "ok",
+     "threads": 48,
+     "trame": "ille_0891_6248_sans_sol",
+     "voie": "device",
+     "wall_ns": 5287120413
+    },
+    {
+     "appareil_octets": 24721923728,
+     "c_ns": {
+      "emission": 155007937,
+      "feuilles": 555957402,
+      "fin_etage": 273946036,
+      "parcours": 125984740,
+      "publication": 45074539,
+      "transferts": 120359448
+     },
+     "coord_bits": 21,
+     "cpu_ns": 166241672000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 1413582530,
+      "G": 2625373342,
+      "P": 144666947,
+      "TMVR": 985932665,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 87969121033,
+      "M": 6675448053,
+      "R": 2643731086,
+      "T": 27767581911,
+      "V": 9786057703,
+      "foret": 46872818753,
+      "foret_apres_g": 27181948461
+     },
+     "fins_par_ordre_ns": [
+      [
+       2625373342,
+       2793134949,
+       2830405129,
+       0,
+       2857150838
+      ],
+      [
+       2611757712,
+       2886586758,
+       2963879427,
+       3001316116,
+       3041812545
+      ],
+      [
+       2461653634,
+       3058396345,
+       3197538123,
+       3245262212,
+       3477940209
+      ],
+      [
+       2157804508,
+       3129600164,
+       3304144912,
+       3462180709,
+       3546212148
+      ],
+      [
+       1631371786,
+       2947167247,
+       3168186724,
+       3406768130,
+       3449847500
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 378980364,
+      "tables": 218336296
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 3747021185
+     },
+     "kmax": 5,
+     "liberation_ns": 433582054,
+     "memoire_octets": {
+      "C": [
+       7832616960,
+       7832616960
+      ],
+      "P": [
+       166445056,
+       166445056
+      ],
+      "tour": [
+       17910726656,
+       23386462211
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 24721923728,
+     "pic_octets": 23386462211,
+     "recouvrement": {
+      "admis_octets": 18353671642,
+      "fin_g_ns": 2625373342,
+      "fin_ns": 3611306007,
+      "noyau_arrets": 6,
+      "noyau_reprises": 11,
+      "ouverture_ns": 378980364,
+      "queue_ns": 985932665,
+      "tour_ns": 3611472637
+     },
+     "rss_max_octets": 24368685056,
+     "sites": 2465285,
+     "status": "ok",
+     "threads": 48,
+     "trame": "ille_0891_6248_sans_sol",
+     "voie": "device",
+     "wall_ns": 5169722524
+    }
+   ],
+   "pic_nvidia_smi_mio": 24167,
+   "prevision_s": 54.4,
+   "raison": "",
+   "secondes": 19.3,
+   "sites": 2465285,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "t_scion_plot61_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_scion_plot61_sans_sol",
+   "open_ns": 115454311,
+   "passes": [
+    {
+     "appareil_octets": 86693905144,
+     "c_ns": {
+      "emission": 425005399,
+      "feuilles": 1712659721,
+      "fin_etage": 892698747,
+      "parcours": 233787515,
+      "publication": 209180428,
+      "transferts": 414636713
+     },
+     "coord_bits": 21,
+     "cpu_ns": 756802208000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 4456268815,
+      "G": 13090093219,
+      "P": 229921196,
+      "TMVR": 3386359141,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 493410208407,
+      "M": 20913095665,
+      "R": 9789620675,
+      "T": 83262919431,
+      "V": 27703335324,
+      "foret": 141668971095,
+      "foret_apres_g": 81002089545
+     },
+     "fins_par_ordre_ns": [
+      [
+       13090093219,
+       13395487745,
+       13454786084,
+       0,
+       13497116143
+      ],
+      [
+       13057552900,
+       13851084748,
+       14083324985,
+       14136763994,
+       14244922352
+      ],
+      [
+       12502123878,
+       14386256550,
+       14813144704,
+       14963457142,
+       15139990419
+      ],
+      [
+       11100827268,
+       14768741695,
+       15325695346,
+       15859268149,
+       16256105073
+      ],
+      [
+       8282221609,
+       13901121707,
+       14746418375,
+       15721768981,
+       15818002469
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1534261568,
+      "tables": 902802457
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 15346885166
+     },
+     "kmax": 5,
+     "liberation_ns": 1808562433,
+     "memoire_octets": {
+      "C": [
+       30850891776,
+       30850891776
+      ],
+      "P": [
+       211599360,
+       211599360
+      ],
+      "tour": [
+       66017140736,
+       81757392111
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 86693905144,
+     "pic_octets": 81757392111,
+     "recouvrement": {
+      "admis_octets": 60014818134,
+      "fin_g_ns": 13090093219,
+      "fin_ns": 16476452360,
+      "noyau_arrets": 13,
+      "noyau_reprises": 18,
+      "ouverture_ns": 1534261568,
+      "queue_ns": 3386359141,
+      "tour_ns": 16742063176
+     },
+     "rss_max_octets": 83798478848,
+     "sites": 3439371,
+     "status": "ok",
+     "threads": 48,
+     "trame": "t_scion_plot61_sans_sol",
+     "voie": "device",
+     "wall_ns": 21428253627
+    },
+    {
+     "appareil_octets": 41276548,
+     "c_ns": {
+      "emission": 363687847,
+      "feuilles": 1710739200,
+      "fin_etage": 4675390882,
+      "parcours": 206322290,
+      "publication": 1680,
+      "transferts": 2349234434
+     },
+     "coord_bits": 21,
+     "cpu_ns": 899343308000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 11810230773,
+      "G": 12942183909,
+      "P": 217278088,
+      "TMVR": 3326144100,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 489088324984,
+      "M": 20536827058,
+      "R": 10110953676,
+      "T": 82863274905,
+      "V": 27699892832,
+      "foret": 141210948471,
+      "foret_apres_g": 80363374794
+     },
+     "fins_par_ordre_ns": [
+      [
+       12942183909,
+       13247723117,
+       13309817398,
+       0,
+       13347459217
+      ],
+      [
+       12911914679,
+       13751933374,
+       13945258913,
+       13998991452,
+       14082094242
+      ],
+      [
+       12359693503,
+       14235066251,
+       14729910188,
+       14878154528,
+       15141102756
+      ],
+      [
+       10971503071,
+       14522607899,
+       15141093496,
+       15676954912,
+       16052224490
+      ],
+      [
+       8181838159,
+       13627906925,
+       14523992549,
+       15518867033,
+       15615375213
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1470773511,
+      "tables": 876397095
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 15196609224
+     },
+     "kmax": 5,
+     "liberation_ns": 1861723429,
+     "memoire_octets": {
+      "C": [
+       30901223424,
+       44014714984
+      ],
+      "P": [
+       228376576,
+       228376576
+      ],
+      "tour": [
+       66067472384,
+       81727163631
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 86693905144,
+     "pic_octets": 81727163631,
+     "recouvrement": {
+      "admis_octets": 60014818134,
+      "fin_g_ns": 12942183909,
+      "fin_ns": 16268328009,
+      "noyau_arrets": 12,
+      "noyau_reprises": 17,
+      "ouverture_ns": 1470773511,
+      "queue_ns": 3326144100,
+      "tour_ns": 16527385826
+     },
+     "rss_max_octets": 83940335616,
+     "sites": 3439371,
+     "status": "ok",
+     "threads": 48,
+     "trame": "t_scion_plot61_sans_sol",
+     "voie": "device",
+     "wall_ns": 28554895227
+    }
+   ],
+   "pic_nvidia_smi_mio": 83295,
+   "prevision_s": 55.0,
+   "raison": "",
+   "secondes": 84.7,
+   "sites": 3439371,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "t_tuwien_train_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_tuwien_train_sans_sol",
+   "open_ns": 117494964,
+   "passes": [
+    {
+     "appareil_octets": 85886193388,
+     "c_ns": {
+      "emission": 622175843,
+      "feuilles": 2287242150,
+      "fin_etage": 952470834,
+      "parcours": 417148808,
+      "publication": 215654749,
+      "transferts": 444153606
+     },
+     "coord_bits": 21,
+     "cpu_ns": 859809440000,
+     "epinglee_octets": 20799032,
+     "etapes_ns": {
+      "C": 5544124166,
+      "G": 14884786650,
+      "P": 349701028,
+      "TMVR": 3750416096,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 565711615989,
+      "M": 23120694564,
+      "R": 9251417109,
+      "T": 93371023811,
+      "V": 38872168927,
+      "foret": 164615304411,
+      "foret_apres_g": 95170283350
+     },
+     "fins_par_ordre_ns": [
+      [
+       14884786650,
+       15373752574,
+       15463155991,
+       0,
+       15517687735
+      ],
+      [
+       14844808347,
+       15974610527,
+       16208884864,
+       16292356180,
+       16462396642
+      ],
+      [
+       14187627150,
+       16407972798,
+       16901192743,
+       17127750769,
+       17372778356
+      ],
+      [
+       12551892004,
+       16755687083,
+       17372770896,
+       17980331689,
+       18402410039
+      ],
+      [
+       9259665172,
+       15224658424,
+       16044506932,
+       17815048728,
+       16996360880
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1639159730,
+      "tables": 965419964
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 15846540706
+     },
+     "kmax": 5,
+     "liberation_ns": 1877791703,
+     "memoire_octets": {
+      "C": [
+       30984986168,
+       30984986168
+      ],
+      "P": [
+       326369280,
+       326369280
+      ],
+      "tour": [
+       67968540216,
+       84448763345
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 85886193388,
+     "pic_octets": 84448763345,
+     "recouvrement": {
+      "admis_octets": 63744948197,
+      "fin_g_ns": 14884786650,
+      "fin_ns": 18635202746,
+      "noyau_arrets": 13,
+      "noyau_reprises": 18,
+      "ouverture_ns": 1639159730,
+      "queue_ns": 3750416096,
+      "tour_ns": 18924405776
+     },
+     "rss_max_octets": 87128387584,
+     "sites": 5199758,
+     "status": "ok",
+     "threads": 48,
+     "trame": "t_tuwien_train_sans_sol",
+     "voie": "device",
+     "wall_ns": 24818231500
+    }
+   ],
+   "pic_nvidia_smi_mio": 89663,
+   "prevision_s": 186.4,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 44.7,
+   "sites": 5199758,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "eth3d_meadow_scan1",
+   "fils": 48,
+   "k": 5,
+   "nom": "eth3d_meadow_scan1",
+   "open_ns": 116183917,
+   "passes": [
+    {
+     "appareil_octets": 50974383516,
+     "c_ns": {
+      "emission": 445661485,
+      "feuilles": 1025249231,
+      "fin_etage": 558416780,
+      "parcours": 377979596,
+      "publication": 10162580,
+      "transferts": 266908149
+     },
+     "coord_bits": 21,
+     "cpu_ns": 484576767000,
+     "epinglee_octets": 24724364,
+     "etapes_ns": {
+      "C": 2914926047,
+      "G": 8350049373,
+      "P": 410071589,
+      "TMVR": 2076087207,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 216030218615,
+      "M": 13141001576,
+      "R": 21073774673,
+      "T": 109124876178,
+      "V": 11499370275,
+      "foret": 154839022702,
+      "foret_apres_g": 60679520934
+     },
+     "fins_par_ordre_ns": [
+      [
+       8350049373,
+       8710265708,
+       8905823282,
+       0,
+       8983015688
+      ],
+      [
+       8299838629,
+       9010336340,
+       9295416040,
+       9324809702,
+       9614133273
+      ],
+      [
+       7924962833,
+       9095789946,
+       9480490163,
+       9583874490,
+       10057689734
+      ],
+      [
+       6911245641,
+       9140186309,
+       9632836474,
+       9956560407,
+       10303299222
+      ],
+      [
+       5661998392,
+       8811356516,
+       9327992432,
+       9762427253,
+       9978383538
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1878630653,
+      "tables": 544716638
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 5156526466
+     },
+     "kmax": 5,
+     "liberation_ns": 1115316290,
+     "memoire_octets": {
+      "C": [
+       12611027852,
+       12611027852
+      ],
+      "P": [
+       379469824,
+       388055040
+      ],
+      "tour": [
+       36344071052,
+       49033131137
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 50974383516,
+     "pic_octets": 49033131137,
+     "recouvrement": {
+      "admis_octets": 52392630985,
+      "fin_g_ns": 8350049373,
+      "fin_ns": 10426136580,
+      "noyau_arrets": 40,
+      "noyau_reprises": 45,
+      "ouverture_ns": 1878630653,
+      "queue_ns": 2076087207,
+      "tour_ns": 10596833842
+     },
+     "rss_max_octets": 51770945536,
+     "sites": 6181091,
+     "status": "ok",
+     "threads": 48,
+     "trame": "eth3d_meadow_scan1",
+     "voie": "device",
+     "wall_ns": 13921832138
+    },
+    {
+     "appareil_octets": 46861307316,
+     "c_ns": {
+      "emission": 401164948,
+      "feuilles": 1024400384,
+      "fin_etage": 558867869,
+      "parcours": 348710564,
+      "publication": 11250971,
+      "transferts": 236512077
+     },
+     "coord_bits": 21,
+     "cpu_ns": 478287392000,
+     "epinglee_octets": 24724364,
+     "etapes_ns": {
+      "C": 2812459680,
+      "G": 8237287245,
+      "P": 357903675,
+      "TMVR": 1929321287,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 213290622957,
+      "M": 12888321507,
+      "R": 21006482635,
+      "T": 108142076995,
+      "V": 11514934133,
+      "foret": 153551815270,
+      "foret_apres_g": 60230436587
+     },
+     "fins_par_ordre_ns": [
+      [
+       8237287245,
+       8591259910,
+       8760602322,
+       0,
+       8844652578
+      ],
+      [
+       8187325382,
+       8890841592,
+       9167757341,
+       9203177824,
+       9472771833
+      ],
+      [
+       7815587935,
+       8972243737,
+       9314208272,
+       9366754275,
+       9899207883
+      ],
+      [
+       6815483324,
+       9048335043,
+       9486080534,
+       9672497637,
+       10045628014
+      ],
+      [
+       5574965206,
+       8712599609,
+       9206817454,
+       9665740327,
+       9892864653
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1840478431,
+      "tables": 532003698
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 5191959981
+     },
+     "kmax": 5,
+     "liberation_ns": 1091152833,
+     "memoire_octets": {
+      "C": [
+       12611027852,
+       12611027852
+      ],
+      "P": [
+       404194188,
+       412779404
+      ],
+      "tour": [
+       36344071052,
+       48475747457
+      ]
+     },
+     "pass": 1,
+     "phase": "full",
+     "pic_appareil_octets": 50974383516,
+     "pic_octets": 48475747457,
+     "recouvrement": {
+      "admis_octets": 52392630985,
+      "fin_g_ns": 8237287245,
+      "fin_ns": 10166608532,
+      "noyau_arrets": 35,
+      "noyau_reprises": 40,
+      "ouverture_ns": 1840478431,
+      "queue_ns": 1929321287,
+      "tour_ns": 10329196944
+     },
+     "rss_max_octets": 51770945536,
+     "sites": 6181091,
+     "status": "ok",
+     "threads": 48,
+     "trame": "eth3d_meadow_scan1",
+     "voie": "device",
+     "wall_ns": 13499560949
+    }
+   ],
+   "pic_nvidia_smi_mio": 49229,
+   "prevision_s": 158.0,
+   "raison": "",
+   "secondes": 40.5,
+   "sites": 6181091,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "t_nibio_plot12_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_nibio_plot12_sans_sol",
+   "open_ns": 116342343,
+   "passes": [],
+   "pic_nvidia_smi_mio": 47407,
+   "prevision_s": 86.4,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 29.5,
+   "sites": 7793680,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "1358_f4500_n50_sans_sol",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n50_sans_sol",
+   "open_ns": 116554323,
+   "passes": [],
+   "pic_nvidia_smi_mio": 47135,
+   "prevision_s": 87.0,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 25.9,
+   "sites": 7857268,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "_202011261358_f4500_n50",
+   "fils": 48,
+   "k": 5,
+   "nom": "boreas_202011261358_f4500_n50",
+   "open_ns": 117758223,
+   "passes": [],
+   "pic_nvidia_smi_mio": 47331,
+   "prevision_s": 111.8,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 32.6,
+   "sites": 10766998,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": true,
+   "etat": "ok",
+   "etiquette": "1_58_f4500_n10_sans_sol",
+   "fils": 48,
+   "k": 10,
+   "nom": "boreas_202011261358_f4500_n10_sans_sol",
+   "open_ns": 118724278,
+   "passes": [
+    {
+     "appareil_octets": 18165892,
+     "c_ns": {
+      "emission": 643476396,
+      "feuilles": 1700266236,
+      "fin_etage": 4895631760,
+      "parcours": 332731059,
+      "publication": 1430,
+      "transferts": 3013910871
+     },
+     "coord_bits": 21,
+     "cpu_ns": 1299044968000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 13132921888,
+      "G": 21544225281,
+      "P": 92245447,
+      "TMVR": 993829617,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 786127132614,
+      "M": 28114598692,
+      "R": 12135944539,
+      "T": 82825126640,
+      "V": 36561951973,
+      "foret": 159637621844,
+      "foret_apres_g": 25896730177
+     },
+     "fins_par_ordre_ns": [
+      [
+       21544225281,
+       21674675486,
+       21722803895,
+       0,
+       21738626014
+      ],
+      [
+       21532530911,
+       21764351623,
+       21840618401,
+       21877839210,
+       21931973208
+      ],
+      [
+       21265141210,
+       21838040401,
+       22087218863,
+       22265333667,
+       22278083826
+      ],
+      [
+       20778535956,
+       21887715209,
+       22067211474,
+       22208753769,
+       22264007297
+      ],
+      [
+       20125709307,
+       21670255767,
+       21855249600,
+       22158717811,
+       22254605437
+      ],
+      [
+       18903101298,
+       20887463272,
+       21169557183,
+       22013294885,
+       21620256288
+      ],
+      [
+       17152484415,
+       19420726681,
+       19721965771,
+       21382437456,
+       20350769910
+      ],
+      [
+       14878861600,
+       17675516608,
+       18138610473,
+       20003348321,
+       18856776769
+      ],
+      [
+       12214430558,
+       14714633625,
+       15248686918,
+       18411671264,
+       16131447809
+      ],
+      [
+       8418698763,
+       9913047973,
+       10504196584,
+       15616699056,
+       11248790189
+      ]
+     ],
+     "full_sha256": "04061b6d755790066e94f5766146c644f19d868fa4dc4d0a8ea52e62a8e218b0",
+     "g_ns": {
+      "ouverture": 2360295502,
+      "tables": 1653747216
+     },
+     "hors_mur_ns": {
+      "empreinte": 107500055989,
+      "validation": 16933956733
+     },
+     "kmax": 10,
+     "liberation_ns": 2244228629,
+     "memoire_octets": {
+      "C": [
+       39318302720,
+       57914798184
+      ],
+      "P": [
+       97013760,
+       97013760
+      ],
+      "tour": [
+       84302163968,
+       110221568994
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 48536322996,
+     "pic_octets": 110221568994,
+     "recouvrement": {
+      "admis_octets": 90331138275,
+      "fin_g_ns": 21544225281,
+      "fin_ns": 22538054898,
+      "noyau_arrets": 29,
+      "noyau_reprises": 39,
+      "ouverture_ns": 2360295502,
+      "queue_ns": 993829617,
+      "tour_ns": 23027621432
+     },
+     "rss_max_octets": 112891346944,
+     "sites": 1513483,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1_58_f4500_n10_sans_sol",
+     "voie": "device",
+     "wall_ns": 36252789157
+    }
+   ],
+   "pic_nvidia_smi_mio": 46879,
+   "prevision_s": 177.4,
+   "raison": "",
+   "secondes": 163.4,
+   "sites": 1513483,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "1_le_0891_6248_sans_sol",
+   "fils": 48,
+   "k": 10,
+   "nom": "ign_marseille_0891_6248_sans_sol",
+   "open_ns": 117141136,
+   "passes": [
+    {
+     "appareil_octets": 29587516,
+     "c_ns": {
+      "emission": 651515946,
+      "feuilles": 1818726939,
+      "fin_etage": 5028531065,
+      "parcours": 443140240,
+      "publication": 2120,
+      "transferts": 2938260889
+     },
+     "coord_bits": 21,
+     "cpu_ns": 1274208720000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 13397157274,
+      "G": 20897180766,
+      "P": 158878063,
+      "TMVR": 1415579451,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 752911799899,
+      "M": 29114380014,
+      "R": 12245151544,
+      "T": 95985441815,
+      "V": 47769307134,
+      "foret": 185114280507,
+      "foret_apres_g": 42743723539
+     },
+     "fins_par_ordre_ns": [
+      [
+       20897180766,
+       21107719762,
+       21153571271,
+       0,
+       21185028060
+      ],
+      [
+       20882512026,
+       21265268748,
+       21535335733,
+       21664356050,
+       22044265592
+      ],
+      [
+       20669529231,
+       21478805114,
+       21689666760,
+       22027910053,
+       22044286722
+      ],
+      [
+       20321804848,
+       21333333367,
+       21618924131,
+       21958508604,
+       21997467853
+      ],
+      [
+       19544036534,
+       21300132718,
+       21721215219,
+       21925797155,
+       21979249934
+      ],
+      [
+       18497792086,
+       20780500499,
+       21036955533,
+       21872941156,
+       21635346221
+      ],
+      [
+       16878486670,
+       19264137170,
+       19537880024,
+       21396754376,
+       20212127300
+      ],
+      [
+       14681026255,
+       17473081247,
+       17929893508,
+       19884669477,
+       18669161512
+      ],
+      [
+       12113870768,
+       14551589558,
+       15080947287,
+       18290189610,
+       15924512309
+      ],
+      [
+       8360999686,
+       9839448976,
+       10402106764,
+       15491080298,
+       11126446029
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 2226407534,
+      "tables": 1554796378
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 18375571489
+     },
+     "kmax": 10,
+     "liberation_ns": 2248745363,
+     "memoire_octets": {
+      "C": [
+       37079498752,
+       56290459752
+      ],
+      "P": [
+       149667840,
+       149667840
+      ],
+      "tour": [
+       80831791104,
+       106993164452
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 48563692316,
+     "pic_octets": 106993164452,
+     "recouvrement": {
+      "admis_octets": 88136492733,
+      "fin_g_ns": 20897180766,
+      "fin_ns": 22312760217,
+      "noyau_arrets": 33,
+      "noyau_reprises": 43,
+      "ouverture_ns": 2226407534,
+      "queue_ns": 1415579451,
+      "tour_ns": 22785365737
+     },
+     "rss_max_octets": 109402406912,
+     "sites": 2465285,
+     "status": "ok",
+     "threads": 48,
+     "trame": "1_le_0891_6248_sans_sol",
+     "voie": "device",
+     "wall_ns": 36341401544
+    }
+   ],
+   "pic_nvidia_smi_mio": 46905,
+   "prevision_s": 276.4,
+   "raison": "",
+   "secondes": 57.4,
+   "sites": 2465285,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "forinst_scion_plot61",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_scion_plot61",
+   "open_ns": 116827708,
+   "passes": [
+    {
+     "appareil_octets": 87152692652,
+     "c_ns": {
+      "emission": 430142141,
+      "feuilles": 1736619393,
+      "fin_etage": 908166632,
+      "parcours": 237943297,
+      "publication": 206938685,
+      "transferts": 462074100
+     },
+     "coord_bits": 21,
+     "cpu_ns": 771975666000,
+     "epinglee_octets": 16777216,
+     "etapes_ns": {
+      "C": 4594651815,
+      "G": 13297887710,
+      "P": 262264124,
+      "TMVR": 3223743957,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 498257151119,
+      "M": 22125786821,
+      "R": 9664396182,
+      "T": 85347569604,
+      "V": 28945529909,
+      "foret": 146083282516,
+      "foret_apres_g": 83807127213
+     },
+     "fins_par_ordre_ns": [
+      [
+       13297887710,
+       13611755826,
+       13665387756,
+       0,
+       13719768295
+      ],
+      [
+       13264471240,
+       14159938521,
+       14340926979,
+       14395804188,
+       14521141217
+      ],
+      [
+       12696138255,
+       14635080356,
+       15183968891,
+       15339867839,
+       15559347847
+      ],
+      [
+       11271676310,
+       14952117153,
+       15632839546,
+       16166823611,
+       16299003700
+      ],
+      [
+       8423820008,
+       14050577442,
+       14994106353,
+       15937870613,
+       16029450782
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1607414397,
+      "tables": 939500301
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 15934326841
+     },
+     "kmax": 5,
+     "liberation_ns": 1989339861,
+     "memoire_octets": {
+      "C": [
+       31874138112,
+       31874138112
+      ],
+      "P": [
+       225656832,
+       230768640
+      ],
+      "tour": [
+       67577667584,
+       83622446771
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 87152692652,
+     "pic_octets": 83622446771,
+     "recouvrement": {
+      "admis_octets": 61405312432,
+      "fin_g_ns": 13297887710,
+      "fin_ns": 16521631667,
+      "noyau_arrets": 15,
+      "noyau_reprises": 20,
+      "ouverture_ns": 1607414397,
+      "queue_ns": 3223743957,
+      "tour_ns": 16802264505
+     },
+     "rss_max_octets": 85552877568,
+     "sites": 3589247,
+     "status": "ok",
+     "threads": 48,
+     "trame": "forinst_scion_plot61",
+     "voie": "device",
+     "wall_ns": 21659181104
+    }
+   ],
+   "pic_nvidia_smi_mio": 83721,
+   "prevision_s": 35.3,
+   "raison": "",
+   "secondes": 40.2,
+   "sites": 3589247,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "forinst_tuwien_train",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_tuwien_train",
+   "open_ns": 116817168,
+   "passes": [
+    {
+     "appareil_octets": 74838100,
+     "c_ns": {
+      "emission": 705630471,
+      "feuilles": 2548734315,
+      "fin_etage": 6205122798,
+      "parcours": 467709387,
+      "publication": 7330,
+      "transferts": 2606453965
+     },
+     "coord_bits": 21,
+     "cpu_ns": 1141975876000,
+     "epinglee_octets": 67108864,
+     "etapes_ns": {
+      "C": 14747494513,
+      "G": 16630737545,
+      "P": 422563386,
+      "TMVR": 3962612601,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 625456873439,
+      "M": 27097944885,
+      "R": 12050547139,
+      "T": 112120443005,
+      "V": 47078160618,
+      "foret": 198347095647,
+      "foret_apres_g": 115665054944
+     },
+     "fins_par_ordre_ns": [
+      [
+       16630737545,
+       17128536390,
+       17236238139,
+       0,
+       17309481618
+      ],
+      [
+       16582023565,
+       17746932344,
+       17997960011,
+       18107146770,
+       18415807177
+      ],
+      [
+       15844602353,
+       18483724377,
+       19042678211,
+       19371585838,
+       20326694258
+      ],
+      [
+       14015763281,
+       18578392926,
+       19395909877,
+       20204018419,
+       20293173149
+      ],
+      [
+       10352022437,
+       17369454618,
+       18475829327,
+       19841431763,
+       19959299112
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1862513072,
+      "tables": 1130592039
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 19572076018
+     },
+     "kmax": 5,
+     "liberation_ns": 2182035520,
+     "memoire_octets": {
+      "C": [
+       36891443200,
+       52365279336
+      ],
+      "P": [
+       388055040,
+       388055040
+      ],
+      "tour": [
+       78413479936,
+       97526785856
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 48185391396,
+     "pic_octets": 97526785856,
+     "recouvrement": {
+      "admis_octets": 73823713318,
+      "fin_g_ns": 16630737545,
+      "fin_ns": 20593350146,
+      "noyau_arrets": 17,
+      "noyau_reprises": 22,
+      "ouverture_ns": 1862513072,
+      "queue_ns": 3962612601,
+      "tour_ns": 20944768862
+     },
+     "rss_max_octets": 98825695232,
+     "sites": 6236167,
+     "status": "ok",
+     "threads": 48,
+     "trame": "forinst_tuwien_train",
+     "voie": "device",
+     "wall_ns": 36114827471
+    }
+   ],
+   "pic_nvidia_smi_mio": 46541,
+   "prevision_s": 110.8,
+   "raison": "",
+   "secondes": 58.4,
+   "sites": 6236167,
+   "voie": "appareil"
+  },
+  {
+   "code": 0,
+   "empreinte": false,
+   "etat": "ok",
+   "etiquette": "ign_marseille_0891_6248",
+   "fils": 48,
+   "k": 5,
+   "nom": "ign_marseille_0891_6248",
+   "open_ns": 117315606,
+   "passes": [
+    {
+     "appareil_octets": 59084130680,
+     "c_ns": {
+      "emission": 398858829,
+      "feuilles": 1085947140,
+      "fin_etage": 813197598,
+      "parcours": 293051123,
+      "publication": 70534179,
+      "transferts": 293682503
+     },
+     "coord_bits": 21,
+     "cpu_ns": 436713028000,
+     "epinglee_octets": 32882448,
+     "etapes_ns": {
+      "C": 3266170235,
+      "G": 6669404906,
+      "P": 451537021,
+      "TMVR": 2961796302,
+      "raccord": 0
+     },
+     "etapes_schema": "recouvert",
+     "fenetres_ns": {
+      "G": 193349752009,
+      "M": 17915718927,
+      "R": 12435750438,
+      "T": 97176657938,
+      "V": 30697577714,
+      "foret": 158225705017,
+      "foret_apres_g": 88928138568
+     },
+     "fins_par_ordre_ns": [
+      [
+       6669404906,
+       7147484355,
+       7253429203,
+       0,
+       7349054671
+      ],
+      [
+       6630728617,
+       7496436127,
+       7696355633,
+       7781230141,
+       7991225546
+      ],
+      [
+       6240235966,
+       7872286479,
+       8265866080,
+       8602691882,
+       8937348404
+      ],
+      [
+       5493014044,
+       8194107501,
+       8642408191,
+       8872973886,
+       9467941802
+      ],
+      [
+       4301208071,
+       8051715645,
+       8633083081,
+       9196421958,
+       9383945934
+      ]
+     ],
+     "g_ns": {
+      "ouverture": 1188673113,
+      "tables": 672172984
+     },
+     "hors_mur_ns": {
+      "empreinte": 0,
+      "validation": 14041912325
+     },
+     "kmax": 5,
+     "liberation_ns": 1222139062,
+     "memoire_octets": {
+      "C": [
+       17594924816,
+       17594924816
+      ],
+      "P": [
+       413827072,
+       423198720
+      ],
+      "tour": [
+       43437326096,
+       57131999350
+      ]
+     },
+     "pass": 0,
+     "phase": "full",
+     "pic_appareil_octets": 59084130680,
+     "pic_octets": 57131999350,
+     "recouvrement": {
+      "admis_octets": 47015428082,
+      "fin_g_ns": 6669404906,
+      "fin_ns": 9631201208,
+      "noyau_arrets": 11,
+      "noyau_reprises": 16,
+      "ouverture_ns": 1188673113,
+      "queue_ns": 2961796302,
+      "tour_ns": 9817293223
+     },
+     "rss_max_octets": 58141151232,
+     "sites": 6709045,
+     "status": "ok",
+     "threads": 48,
+     "trame": "ign_marseille_0891_6248",
+     "voie": "device",
+     "wall_ns": 13535000969
+    }
+   ],
+   "pic_nvidia_smi_mio": 56973,
+   "prevision_s": 101.6,
+   "raison": "",
+   "secondes": 29.4,
+   "sites": 6709045,
+   "voie": "appareil"
+  },
+  {
+   "code": 2,
+   "empreinte": false,
+   "etat": "refus",
+   "etiquette": "forinst_nibio_plot12",
+   "fils": 48,
+   "k": 5,
+   "nom": "forinst_nibio_plot12",
+   "open_ns": 115177897,
+   "passes": [],
+   "pic_nvidia_smi_mio": 47409,
+   "prevision_s": 64.5,
+   "raison": "resource_exhausted/memory_budget",
+   "secondes": 29.9,
+   "sites": 7825857,
+   "voie": "appareil"
+  }
+ ],
+ "controles": [],
+ "criteres": {
+  "B1": {
+   "detail": [
+    "boreas_202011261358_f4500_n10_sans_sol : 3.232 s par million",
+    "boreas_202011261358_f4500_n10 : 2.893 s par million",
+    "ign_marseille_0891_6248_sans_sol : 2.097 s par million",
+    "forinst_scion_plot61_sans_sol : 8.302 s par million",
+    "eth3d_meadow_scan1 : 2.184 s par million",
+    "forinst_scion_plot61 : 6.034 s par million",
+    "forinst_tuwien_train : 5.791 s par million",
+    "ign_marseille_0891_6248 : 2.017 s par million",
+    "forinst_tuwien_train_sans_sol : refus (resource_exhausted/memory_budget)",
+    "forinst_nibio_plot12_sans_sol : refus (resource_exhausted/memory_budget)",
+    "boreas_202011261358_f4500_n50_sans_sol : refus (resource_exhausted/memory_budget)",
+    "forinst_nibio_plot12 : refus (resource_exhausted/memory_budget)",
+    "boreas_202011261358_f4500_n50 : refus tolere au-dela de 10 millions de sites (resource_exhausted/memory_budget)"
+   ],
+   "etat": "non tenu"
+  },
+  "B2": {
+   "detail": [
+    "forinst_tuwien_train_sans_sol : refus (resource_exhausted/memory_budget)",
+    "forinst_nibio_plot12_sans_sol : refus (resource_exhausted/memory_budget)",
+    "boreas_202011261358_f4500_n50_sans_sol : refus (resource_exhausted/memory_budget)",
+    "forinst_nibio_plot12 : refus (resource_exhausted/memory_budget)"
+   ],
+   "etat": "non tenu"
+  },
+  "B3": {
+   "detail": [],
+   "etat": "non evalue"
+  },
+  "B4": {
+   "detail": [
+    "boreas_202011261358_f4500_n10_sans_sol (appareil) : 23.953 s par million",
+    "ign_marseille_0891_6248_sans_sol (appareil) : 14.741 s par million"
+   ],
+   "etat": "non tenu"
+  }
+ },
+ "duree_s": 743.8,
+ "empreintes": {
+  "boreas_202011261358_f4500_n10_sans_sol:K10": [
+   "04061b6d755790066e94f5766146c644f19d868fa4dc4d0a8ea52e62a8e218b0"
+  ],
+  "boreas_202011261358_f4500_n10_sans_sol:K5": [
+   "49f90d23ad065e63d9a66b18a1000b882cb1585b6e4ef908ffb4f766a946bd72"
+  ],
+  "boreas_202011261358_f4500_n1:K5": [
+   "52c5cf71ee01007d52e40178704b2a0daea6d1ba120114b7e0e006adaefa0a0f"
+  ],
+  "boreas_202011261358_f4500_n1_sans_sol:K5": [
+   "f2ec1106e2745d2361a89e21a7ee4a283c2bb0fbed3fe7058c9b2dc6d27ecf3d"
+  ]
+ },
+ "environnement": {
+  "apres": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463736 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  },
+  "avant": {
+   "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+   "fils_hote": 48,
+   "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.178.04, Enabled, 97887 MiB",
+   "gpu_apps": "",
+   "memoire_hote": "185463736 kB",
+   "noyau": "6.8.0-1070-gcp",
+   "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0"
+  }
+ },
+ "mesure": "MES-B",
+ "parametres": {
+  "argv": [
+   "--src",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/src",
+   "--travail",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/build/b",
+   "--donnees",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/data",
+   "--sortie",
+   "$HOME/ehgp-v12/ehgp-v12.uxUJyBZFyc/results/cmd/001_mes_b_l1/files/b",
+   "--cas",
+   "boreas_202011261358_f4500_n1_sans_sol:5:appareil:2,boreas_202011261358_f4500_n1:5:appareil:2,boreas_202011261358_f4500_n10_sans_sol:5:appareil:2,boreas_202011261358_f4500_n10:5:appareil:2,ign_marseille_0891_6248_sans_sol:5:appareil:2,forinst_scion_plot61_sans_sol:5:appareil:2,forinst_tuwien_train_sans_sol:5:appareil:2,eth3d_meadow_scan1:5:appareil:2,forinst_nibio_plot12_sans_sol:5:appareil:2,boreas_202011261358_f4500_n50_sans_sol:5:appareil:2,boreas_202011261358_f4500_n50:5:appareil:2,boreas_202011261358_f4500_n10_sans_sol:10:appareil:1,ign_marseille_0891_6248_sans_sol:10:appareil:1,forinst_scion_plot61:5:appareil:1,forinst_tuwien_train:5:appareil:1,ign_marseille_0891_6248:5:appareil:1,forinst_nibio_plot12:5:appareil:1",
+   "--series",
+   "boreas_202011261358_f4500_n1_sans_sol,boreas_202011261358_f4500_n10_sans_sol,boreas_202011261358_f4500_n50_sans_sol;boreas_202011261358_f4500_n1,boreas_202011261358_f4500_n10,boreas_202011261358_f4500_n50",
+   "--fils",
+   "48",
+   "--budget-gio",
+   "160",
+   "--budget-appareil-gio",
+   "88",
+   "--delai-global",
+   "2800",
+   "--empreinte-max-sites",
+   "1600000",
+   "--jobs",
+   "44"
+  ],
+  "budget_appareil_octets": 94489280512,
+  "budget_octets": 171798691840,
+  "delai_global_s": 2800.0,
+  "fils": 48,
+  "schema": "recouvert",
+  "series": [
+   [
+    "boreas_202011261358_f4500_n1_sans_sol",
+    "boreas_202011261358_f4500_n10_sans_sol",
+    "boreas_202011261358_f4500_n50_sans_sol"
+   ],
+   [
+    "boreas_202011261358_f4500_n1",
+    "boreas_202011261358_f4500_n10",
+    "boreas_202011261358_f4500_n50"
+   ]
+  ]
+ },
+ "provenance": {
+  "cmake": [
+   "CMAKE_BUILD_TYPE:STRING=Release",
+   "CMAKE_CUDA_COMPILER:UNINITIALIZED=/usr/local/cuda/bin/nvcc",
+   "CMAKE_CUDA_FLAGS:STRING=",
+   "CMAKE_CUDA_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+   "CMAKE_CXX_FLAGS:STRING=",
+   "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+   "MHGP12_COORD_BITS:STRING=21",
+   "MHGP12_ENABLE_CUDA:BOOL=ON",
+   "MHGP12_JUG_EMST:FILEPATH=",
+   "MHGP12_MARCH:STRING=",
+   "MHGP12_MODULES:STRING=",
+   "MHGP12_MUTANT_JOBS:STRING=0",
+   "MHGP12_POISON:BOOL=OFF",
+   "MHGP12_REFERENCE_SHARDS:STRING=16",
+   "MHGP12_SANITIZE:BOOL=OFF",
+   "MHGP12_TOWER_DUMPS:PATH=",
+   "MHGP12_TSAN:BOOL=OFF",
+   "MHGP12_V10_FROZEN_DIR:PATH=",
+   "MHGP12_V11_CATALOGUE_DIR:PATH=",
+   "MHGP12_V11_TOWER_DIR:PATH="
+  ],
+  "manifeste_sha256": "f57f3d0b67924ed8808eb4d69f0b2e521d3b4480b336b63306e8d8e865cec333",
+  "pilote_sha256": "9eb044087bfd95443eb5149bd25a12170158769d4bba07ad47681d9f07a25f32",
+  "sonde_sha256": "d35a809d9e2fbb31bfb6ee66589dd554900128ce1319b0dd54e3de662374b9db"
+ },
+ "regime": "b",
+ "verdict": "non tenu"
+}
