@@ -1,0 +1,40 @@
+{
+  "source_commit": "2aaed1847e63ff86550db1fb1ba6e36313aa58bc",
+  "status": "proposal_only_no_native_execution",
+  "dependency": "../a6c_admission_proposition/proposition.patch",
+  "sources": {
+    "tests/tower/pipeline_unit.cpp": {
+      "before_sha256": "543adab184347a507c83003ea9ccf947b405fe3544c0812105d5525d188a829a",
+      "after_sha256": "28603b14f71012dbcd4b872322eb1df58980f7861f709776e99708557be18a74"
+    },
+    "tests/tower/pipeline_fault.cpp": {
+      "before_sha256": "4331a1d4d16317fa55ebfeaee899264826c2e4f7cfe80f0b6f2548af0e630199",
+      "after_sha256": "f845d0213b6a4cea5bfce8ccce9218c3048aa29edaf855a42528b5a1c9eb95de"
+    }
+  },
+  "patch_sha256": "df8d59d85d0b3897975257d54d83d48b7ea0d867d7063b752d034c05e51aa51c",
+  "dependency_sha256": "e2c844b77a0a283d98169292ab8d007049fa7782a7fb0d2b26f2536a98ced7b8",
+  "context_sha256": {
+    "src/tower/pipeline.cpp": "36d4361297d7c45aa58b11ba585c4be145ab82ac2de29ab31f76d99bf9b7134e",
+    "src/tower/pipeline.hpp": "806468f4ba0c7a99a9d6965bc6cfdde7a1ab3d6f759bfdcac47a563ddf0aa435",
+    "src/tower/forest_births.cpp": "0cd7b8350d43d57bd4d375e33b869e9528bbf849acf2832c6b8e8558fb927bdc",
+    "src/tower/forest_build.cpp": "675593396ec74c3ba1bd3b68024769ccaecf498597cb4b61d813ff547db9ba02",
+    "src/tower/pipeline_steps.cpp": "745f6fbb1ad05ff59fa6f48db7a7ff7453f9197314a02f741b6669215698eadd",
+    "src/tower/pipeline_run.cpp": "37458b82a6f7aedf46ca199260592e89c194c2140b404d3c23ac40db5e1cb419",
+    "src/core/status.hpp": "d81b3e8aab647c97fe97fa7d91081efa28ab88cdac8706cafdd825b17e4046ea",
+    "src/core/buffer.hpp": "8e4d84665e90308ee9572a729731711bb419e3a565fd4dd11b5bd56ab6a92401",
+    "tests/tower/tests.cmake": "ad12cd6666fb1a2ac31aaba9a6d11b8d4a38abfe1cd05be37dfd95e12a4a3c31",
+    "tests/support/test.hpp": "bc5b8c3a46e38678721192eb5a2212b9a0fe8a3fdd9cf4f45d6ac58d969ce722",
+    "src/tower/forest_kernel.cpp": "debebf4b07a20efac28172e2b4b46369f4e37109a3a7ca1c296bc254a99b43d7",
+    "src/tower/populations.cpp": "1cf73b2c32aeb7c7859d2a5484afbe0b91c5823a721d3f0cf1e68eb6798c98f5",
+    "src/tower/radix.cpp": "bdd602968c8b2e886e833686ae68edf74f35144389a59a306a361e0bf96d62dd",
+    "src/tower/stage.cpp": "7ee10167640865594ecd02133b2e8f29f9c18ebdb850c83582cd875e8ca68b38",
+    "src/tower/forest_stages.cpp": "5ed33d69bb63fcfa2a7c65c0a9fbed41dc00762e9052446fb9b6ef61f0eb2d6f",
+    "src/tower/registry_branches.cpp": "a0a8e045a696124dcc36175fec818e3cad6fa9720dc0bbb0061ca2b4aa125411",
+    "src/index/census_workspace.cpp": "f5acda97dd6b90e94d2c375cbe242e1a458eede2601d9c962e30d72f898c012c",
+    "src/sched/pool.cpp": "3d3985debc8db6c4513c9ed2d8e87cd1ad1ec02a231a7776595da05a8f3b4368",
+    "src/tower/tower.hpp": "3537e228d1d5a07b8bf017ca5f640eab2fb1d0122d1c5c3959e89983c1dbf7a1",
+    "src/core/buffer.cpp": "5c885dbf0e4813f1a8ee653115092536348877e6b93aa5b831d7490fe0d6e756",
+    "cmake/gates.cmake": "b67f964eb11b74e301fa73c2c741a7bd5040e33182f93ccd3ada1311a047021d"
+  }
+}

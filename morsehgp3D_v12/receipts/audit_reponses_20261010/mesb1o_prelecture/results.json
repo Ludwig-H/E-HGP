@@ -1,0 +1,188 @@
+{
+  "commands": [
+    {
+      "cases": [
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n10_sans_sol"
+        },
+        {
+          "backend": "cpu",
+          "k": 5,
+          "passes": 1,
+          "scene": "boreas_202011261358_f4500_n10_sans_sol"
+        }
+      ],
+      "device_budget_gib": 8,
+      "name": "mes_b_flux_identite",
+      "pilot_deadline_seconds": 840,
+      "timeout_seconds": 900
+    },
+    {
+      "cases": [
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n1_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n1"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n10_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n10"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "ign_marseille_0891_6248_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "forinst_scion_plot61_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "forinst_tuwien_train_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "eth3d_meadow_scan1"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "forinst_nibio_plot12_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n50_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 2,
+          "scene": "boreas_202011261358_f4500_n50"
+        },
+        {
+          "backend": "appareil",
+          "k": 10,
+          "passes": 1,
+          "scene": "boreas_202011261358_f4500_n10_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 10,
+          "passes": 1,
+          "scene": "ign_marseille_0891_6248_sans_sol"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 1,
+          "scene": "forinst_scion_plot61"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 1,
+          "scene": "forinst_tuwien_train"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 1,
+          "scene": "ign_marseille_0891_6248"
+        },
+        {
+          "backend": "appareil",
+          "k": 5,
+          "passes": 1,
+          "scene": "forinst_nibio_plot12"
+        }
+      ],
+      "device_budget_gib": 88,
+      "name": "mes_b_l1",
+      "pilot_deadline_seconds": 2800,
+      "timeout_seconds": 2900
+    }
+  ],
+  "current_budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 3800,
+    "guest_seconds": 3300,
+    "oversubscribed": true,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 320,
+    "worker_window_seconds": 2200
+  },
+  "current_commit": "ae8f8107cc5a13356da89addf90808b5aaad9d67",
+  "digest_max_sites": 1600000,
+  "host_budget_gib": 160,
+  "main_cases": 17,
+  "main_full_passes": 28,
+  "main_scenes": 15,
+  "metadata_files_equal": 45,
+  "payload_bytes_read": 0,
+  "planned_first_passes": 19,
+  "planned_full_passes": 31,
+  "planned_processes": 19,
+  "planned_warm_observations": 12,
+  "reference_budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 3800,
+    "guest_seconds": 3300,
+    "oversubscribed": true,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 319,
+    "worker_window_seconds": 2201
+  },
+  "reference_commit": "caf9585e4a89ba101ba86d2d46e77cb340be15bf",
+  "same_pilot_options_and_order": true,
+  "scene_sites": {
+    "boreas_202011261358_f4500_n1": 215665,
+    "boreas_202011261358_f4500_n10": 2153342,
+    "boreas_202011261358_f4500_n10_sans_sol": 1513483,
+    "boreas_202011261358_f4500_n1_sans_sol": 146316,
+    "boreas_202011261358_f4500_n50": 10766998,
+    "boreas_202011261358_f4500_n50_sans_sol": 7857268,
+    "eth3d_meadow_scan1": 6181091,
+    "forinst_nibio_plot12": 7825857,
+    "forinst_nibio_plot12_sans_sol": 7793680,
+    "forinst_scion_plot61": 3589247,
+    "forinst_scion_plot61_sans_sol": 3439371,
+    "forinst_tuwien_train": 6236167,
+    "forinst_tuwien_train_sans_sol": 5199758,
+    "ign_marseille_0891_6248": 6709045,
+    "ign_marseille_0891_6248_sans_sol": 2465285
+  },
+  "schema": "audit.mesb1o_prelecture.v1",
+  "status": "protocol_only_no_results",
+  "threads": 48
+}

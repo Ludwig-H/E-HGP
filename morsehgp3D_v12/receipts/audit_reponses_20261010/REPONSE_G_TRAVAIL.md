@@ -101,8 +101,6 @@ Deux propositions plus petites peuvent précéder la vue virtuelle :
 
 Les deux patches sont **proposés, non intégrés et non mesurés**. Ils touchent
 des unités distinctes et demandent des bras séparés pour attribuer les gains.
-Le préchargement de populations actuellement essayé dans `passes.cpp` peut
-être un autre bras ; l’associer d’emblée masquerait leurs effets respectifs.
 La réduction locale Q1 reste conditionnée au volume réel de représentants
 des coquilles étendues : leur faible nombre de cellules ne borne pas leur coût.
 

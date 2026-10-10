@@ -41,9 +41,10 @@ réels, CPU/GPU, signal à confirmer par un banc avant politique automatique.
 
 **CST-0244/0245 restent ouverts.** [Preuve de borne](../receipts/audit_reponses_20261010/a6c_math/README.md) :
 le supplément N est exigé même chaîne inactive. [Patch isolé proposé](../receipts/audit_reponses_20261010/a6c_admission_proposition/README.md) :
-choix figé avant la borne, bascule tardive refusée ;27 990 cas de modèle, sans qualification native. [Portes](../receipts/audit_reponses_20261010/a6c_portes/README.md) : les petites fixtures
-de budget/pénurie restent OFF ; forcer ON/OFF et tester allocations/refus. La bascule actuelle
-couvre le succès sans limite. Aucun défaut géométrique nouveau démontré, aucun natif exécuté ici.
+choix figé avant la borne, bascule tardive refusée ;27 990 cas de modèle.
+[Patch de portes ON/OFF](../receipts/audit_reponses_20261010/a6c_penurie_proposition/README.md) :
+budget exact/moins un, injections et reprise FUL1 ; grille K2 à cohorte garantie.
+Propositions non intégrées, ni compilées ni exécutées ; aucune clôture native.
 
 **B3b clos :** [admission](../receipts/audit_reponses_20261010/session_b3b_admission/README.md),
 [statistiques](../receipts/audit_reponses_20261010/b3b_stats/README.md) :300 processus/2 100 chaudes,
@@ -65,7 +66,8 @@ profil du lot, pas du produit clés seules. Aucun gain nouveau mesuré.
 
 **G4 :** après l’[arrêt constaté à19:47:39 UTC](../receipts/audit_reponses_20261010/g4_controle_b3b/README.md),
 la session **`mesb1o` est en cours**, source `ae8f8107c` (B3-K), grandes scènes.
-Aucun nouveau résultat admis ; provenance, cohorte et arrêt final à vérifier.
+[Prélecture](../receipts/audit_reponses_20261010/mesb1o_prelecture/README.md) : entrées/options identiques
+à B1t ;31 FULL prévues, CPU première passe seule, au plus12 chaudes. Résultats et arrêt à vérifier.
 
 Massifs inchangés : [record R1 GPU](../receipts/audit_reponses_20261008/session_l2t_admission/README.md)
 Paris sans sol 9,111M, K5 **46,453 s froid**, sans qualification chaude transférée à A6c.

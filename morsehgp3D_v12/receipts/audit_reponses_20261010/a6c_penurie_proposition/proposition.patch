@@ -1,0 +1,339 @@
+--- a/morsehgp3D_v12/tests/tower/pipeline_unit.cpp
++++ b/morsehgp3D_v12/tests/tower/pipeline_unit.cpp
+@@ -10,7 +10,8 @@
+ //   admission    pic de la region (au-dessus de l'usage a l'admission) au plus les octets admis ; quand l'admission
+ //                est la contrainte liante (pics de la chaine et de l'ouverture plus bas), une limite egale a l'usage
+ //                plus les octets admis suffit (aucune allocation de la region refusee) et un octet de moins refuse a
+-//                l'admission (memory_budget) ; rien de retenu apres un succes ou un refus ;
++//                l'admission (memory_budget), chaine forcee OFF/ON avant ouverture ; rien de retenu ;
++//                bascule effective tardive refusee tower_invariant avant reservation ; seuil equivalent admis ;
+ //   refus        limite juste au-dessus des pics de la chaine et de l'ouverture : refus memory_budget avant la
+ //                region, rien de retenu.
+ #include <bit>
+@@ -174,61 +175,114 @@
+   u64 chain_peak = 0, open_peak = 0, used_open = 0, admitted = 0, rise = 0;
+   bool ok = false;
+ };
+-Measured measure(const Points& p, int kmax, sched::Pool& pool) {
++Measured measure(const Points& p, int kmax, sched::Pool& pool, bool engaged = false) {
+   Measured m;
+   MemoryBudget budget(MemoryBudget::kUnlimited);
+   budget.restart_peak();
+   const Chain c = make_chain(p, kmax, budget, pool);
+   if (!c.catalogue) return m;
++  const u64 base = budget.used();
+   m.chain_peak = budget.restart_peak();
+   auto run = std::make_unique<tower::detail::SessionRun>(*c.index, *c.catalogue, budget, pool);
++  run->chain_sites = engaged ? 0 : MemoryBudget::kUnlimited;  // avant ouverture et borne (CST-0244)
+   if (!tower::detail::open_session(*run).ok()) return m;
++  CHECK_EQ(run->diag.chain_orders, engaged ? (u32{1} << run->pipeline->orders) - 1 : 0u);
+   m.used_open = budget.used();
+   m.open_peak = budget.restart_peak();
+   m.admitted = run->diag.admitted_bytes;
+   m.ok = tower::detail::admit_session(*run).ok() && tower::detail::play_session(*run).ok();
+   m.rise = budget.restart_peak() - m.used_open;
++  if (m.ok && engaged) CHECK(run->diag.chain_number_jobs > 0 && run->diag.chain_history_jobs > 0);
++  if (m.ok && !engaged)
++    CHECK(run->diag.chain_number_jobs == 0 && run->diag.chain_history_jobs == 0 && run->diag.hint_jobs == 0);
++  run.reset();
++  CHECK_EQ(budget.used(), base);
+   return m;
+ }
+ 
+-// build_tower sous une limite ; rend l'issue, et controle que rien n'est retenu apres.
+-Outcome under_limit(const Points& p, int kmax, u64 limit, sched::Pool& pool) {
++// Memes trois temps sous limite ; le refus attendu est localise a admit_session, avant ses reservations.
++Outcome under_limit(const Points& p, int kmax, u64 limit, sched::Pool& pool, bool engaged = false,
++                    bool refuse_admission = false) {
+   MemoryBudget budget(limit);
+   const Chain c = make_chain(p, kmax, budget, pool);
+   if (!CHECK(c.catalogue.has_value())) return fail(Reason::tower_invariant);
+   const u64 base = budget.used();
+-  Outcome out;
+-  {
+-    auto tower = build_tower(*c.index, *c.catalogue, budget, pool);
+-    out = tower.ok() ? Outcome{} : tower.outcome();
+-  }
++  const Outcome out = guarded([&]() -> Outcome {
++    auto run = std::make_unique<tower::detail::SessionRun>(*c.index, *c.catalogue, budget, pool);
++    run->chain_sites = engaged ? 0 : MemoryBudget::kUnlimited;
++    const Outcome opened = tower::detail::open_session(*run);
++    if (!CHECK(opened.ok())) return opened;
++    CHECK_EQ(run->diag.chain_orders, engaged ? (u32{1} << run->pipeline->orders) - 1 : 0u);
++    const u64 used = budget.used(), peak = budget.peak();
++    const Outcome admitted = tower::detail::admit_session(*run);
++    if (refuse_admission) {
++      CHECK_EQ(admitted.reason, Reason::memory_budget);
++      CHECK_EQ(budget.used(), used);
++      CHECK_EQ(budget.peak(), peak);
++      return admitted;
++    }
++    MHGP12_TRY(admitted);
++    return tower::detail::play_session(*run);
++  });
+   CHECK_EQ(budget.used(), base);  // transactionnel : rien de retenu, succes ou refus
+   return out;
+ }
+ 
++// Bascule effective tardive : refus avant budget.admit ; changement numerique equivalent : admis.
++void late_switch(const Points& p, sched::Pool& pool, bool engaged) {
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  const Chain c = make_chain(p, 2, budget, pool);
++  if (!CHECK(c.catalogue.has_value())) return;
++  const u64 base = budget.used();
++  {
++    auto run = std::make_unique<tower::detail::SessionRun>(*c.index, *c.catalogue, budget, pool);
++    run->chain_sites = engaged ? 0 : MemoryBudget::kUnlimited;
++    if (!CHECK(tower::detail::open_session(*run).ok())) return;
++    CHECK_EQ(run->diag.chain_orders, engaged ? 3u : 0u);
++    const u64 used = budget.used(), peak = budget.peak();
++    run->chain_sites = engaged ? MemoryBudget::kUnlimited : 0;
++    const Outcome rejected = tower::detail::admit_session(*run);
++    CHECK_EQ(rejected.reason, Reason::tower_invariant);
++    CHECK_EQ(budget.used(), used);
++    CHECK_EQ(budget.peak(), peak);
++    if (rejected.reason == Reason::tower_invariant) {
++      const u64 sites = c.index->cloud().sites();
++      run->chain_sites = engaged ? sites : sites + 1;  // autre seuil, meme decision qu'a l'ouverture
++      if (CHECK(tower::detail::admit_session(*run).ok())) CHECK(tower::detail::play_session(*run).ok());
++      CHECK_EQ(run->diag.chain_orders, engaged ? 3u : 0u);
++    }
++  }
++  CHECK_EQ(budget.used(), base);
++}
++
+ MHGP12_TEST(admission, 60) {
+-  std::mt19937_64 rng(31);
+   auto pool = pool_of(3);
+-  u64 binding = 0;
+-  for (int it = 0; it < 24; ++it) {
+-    const Points p = random_points(rng, 30 + static_cast<u32>(rng() % 200), 1u << 15);
+-    const int kmax = 2 + static_cast<int>(rng() % 4);
+-    const Measured m = measure(p, kmax, *pool);
+-    if (!m.ok) continue;
+-    CHECK(m.rise <= m.admitted);
+-    if (m.rise > m.admitted)
+-      std::printf("admission pic=%llu admis=%llu\n", static_cast<unsigned long long>(m.rise),
+-                  static_cast<unsigned long long>(m.admitted));
+-    // Si l'admission de la region est la contrainte liante, une limite egale a l'usage plus les octets admis suffit
+-    // (aucune allocation de la region refusee), et un octet de moins refuse a l'admission.
+-    const u64 limit = m.used_open + m.admitted;
+-    if (std::max(m.chain_peak, m.open_peak) >= limit) continue;
+-    ++binding;
+-    CHECK(under_limit(p, kmax, limit, *pool).ok());
+-    CHECK_EQ(under_limit(p, kmax, limit - 1, *pool).reason, Reason::memory_budget);
+-  }
+-  CHECK(binding >= 8);
+-  std::printf("admission cas_liants=%llu\n", static_cast<unsigned long long>(binding));
++  for (const bool engaged : {false, true}) {
++    std::mt19937_64 rng(31);
++    u64 binding = 0;
++    for (int it = 0; it < 25; ++it) {
++      const Points p = it == 24 ? grid_points(3, 3, 3, 7)
++                               : random_points(rng, 30 + static_cast<u32>(rng() % 200), 1u << 15);
++      const int kmax = it == 24 ? 2 : 2 + static_cast<int>(rng() % 4);
++      const Measured m = measure(p, kmax, *pool, engaged);
++      if (!CHECK(m.ok)) continue;
++      CHECK(m.rise <= m.admitted);
++      if (m.rise > m.admitted)
++        std::printf("admission pic=%llu admis=%llu\n", static_cast<unsigned long long>(m.rise),
++                    static_cast<unsigned long long>(m.admitted));
++      // Si l'admission de la region est la contrainte liante, une limite egale a l'usage plus les octets admis suffit
++      // (aucune allocation de la region refusee), et un octet de moins refuse a l'admission.
++      const u64 limit = m.used_open + m.admitted;
++      if (std::max(m.chain_peak, m.open_peak) >= limit) continue;
++      ++binding;
++      CHECK(under_limit(p, kmax, limit, *pool, engaged).ok());
++      CHECK_EQ(under_limit(p, kmax, limit - 1, *pool, engaged, true).reason, Reason::memory_budget);
++    }
++    CHECK(binding >= 8);  // au moins huit limites liantes pour CHAQUE voie
++    late_switch(grid_points(3, 3, 3, 7), *pool, engaged);
++    std::printf("admission chaine=%u cas_liants=%llu\n", static_cast<unsigned>(engaged),
++                static_cast<unsigned long long>(binding));
++  }
+ }
+ 
+ MHGP12_TEST(refus, 20) {
+@@ -241,7 +295,7 @@
+     // Limite juste au-dessus de la chaine et de l'ouverture : refus memory_budget avant la region, rien de retenu.
+     const u64 limit = std::max(m.chain_peak, m.open_peak);
+     if (limit >= m.used_open + m.admitted) continue;
+-    CHECK_EQ(under_limit(p, 4, limit, *pool).reason, Reason::memory_budget);
++    CHECK_EQ(under_limit(p, 4, limit, *pool, false, true).reason, Reason::memory_budget);
+   }
+ }
+ 
+--- a/morsehgp3D_v12/tests/tower/pipeline_fault.cpp
++++ b/morsehgp3D_v12/tests/tower/pipeline_fault.cpp
+@@ -6,7 +6,7 @@
+ //                std::bad_alloc tour a tour : refus memory_budget, budget rendu, aucune terminaison ; puis le temoin
+ //                reussit avec la meme empreinte FUL1 ;
+ //   penurie    : la k-ieme allocation sans exception (tampons du budget, espaces de census) echoue tour a tour pendant
+-//                build_tower, a un fil (ordre des allocations fixe : toutes) et a trois fils (un echantillon) : refus
++//                SessionRun force OFF/ON avant ouverture ; grille K2, un fil (toutes), trois fils (echantillon) : refus
+ //                memory_budget ou succes au-dela de la derniere, budget rendu, aucune terminaison ni attente sans fin.
+ #include <atomic>
+ #include <cstdlib>
+@@ -21,6 +21,7 @@
+ #include "io/io.hpp"
+ #include "sched/sched.hpp"
+ #include "test.hpp"
++#include "tower/pipeline.hpp"
+ #include "tower/tower.hpp"
+ 
+ namespace {
+@@ -65,17 +66,20 @@
+   return std::move(made).take();
+ }
+ 
+-// Nuage aleatoire de n sites distincts, index et catalogue a K (memoire du budget donne).
++// Nuage aleatoire ou grille de n sites distincts, index et catalogue a K (memoire du budget donne).
+ struct Chain {
+   std::optional<GlobalIndex> index;
+   std::optional<Catalogue> catalogue;
+ };
+-Chain make_chain(u32 n, int kmax, u64 seed, MemoryBudget& budget, sched::Pool& pool) {
++Chain make_chain(u32 n, int kmax, u64 seed, MemoryBudget& budget, sched::Pool& pool, bool grid = false) {
+   std::mt19937_64 rng(seed);
+   std::vector<u32> x, y, z;
+   std::vector<PointId> ids;
+   while (x.size() < n) {
+-    const u32 a = static_cast<u32>(rng() % 4096), b = static_cast<u32>(rng() % 4096), c = static_cast<u32>(rng() % 4096);
++    const u32 site = static_cast<u32>(x.size());
++    const u32 a = grid ? 1000 + 7 * (site % 3) : static_cast<u32>(rng() % 4096);
++    const u32 b = grid ? 2000 + 7 * ((site / 3) % 3) : static_cast<u32>(rng() % 4096);
++    const u32 c = grid ? 3000 + 7 * (site / 9) : static_cast<u32>(rng() % 4096);
+     bool seen = false;
+     for (std::size_t i = 0; i < x.size() && !seen; ++i) seen = x[i] == a && y[i] == b && z[i] == c;
+     if (seen) continue;
+@@ -106,22 +110,49 @@
+   return std::string(hex.data(), hex.size());
+ }
+ 
++// Une erreur du calcul d'empreinte rend la sentinelle "refus" : jamais une empreinte de reference valable.
++bool valid_digest_hex(const std::string& value) noexcept {
++  if (value.size() != 64) return false;
++  for (const char c : value)
++    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
++  return true;
++}
++
++// Adaptateur de porte : seuil interne fixe avant ouverture (CST-0244), corps des trois temps du produit.
++// La porte allocation conserve build_tower public ; seule penurie emploie cet adaptateur ON/OFF.
++Result<Tower> forced_tower(const Chain& c, MemoryBudget& budget, sched::Pool& pool, u64 chain_sites,
++                           TowerDiagnostics* diag) noexcept {
++  return guarded([&]() -> Result<Tower> {
++    auto run = std::make_unique<tower::detail::SessionRun>(*c.index, *c.catalogue, budget, pool);
++    run->chain_sites = chain_sites;
++    MHGP12_TRY(tower::detail::open_session(*run));
++    MHGP12_TRY(tower::detail::admit_session(*run));
++    MHGP12_TRY(tower::detail::play_session(*run));
++    if (diag != nullptr) *diag = run->diag;
++    return Tower{std::move(run->opened.out), std::move(run->forest->forests)};
++  });
++}
++
+ // Une Session sous injection ; rend son issue (et l'empreinte au succes) et compte les new qui levent et sans exception
+-// appeles par build_tower SEUL (l'empreinte, calculee ensuite hors injection, alloue aussi). Le budget doit revenir a
++// appeles par la Session seule (publique ou forcee ; l'empreinte vient ensuite hors injection). Le budget revient a
+ // base.
+ struct Calls {
+   unsigned long long throwing = 0, nothrow = 0;
+ };
+-Outcome attempt(const Chain& c, MemoryBudget& budget, sched::Pool& pool, std::string* digest, Calls* calls = nullptr) {
++Outcome attempt(const Chain& c, MemoryBudget& budget, sched::Pool& pool, std::string* digest, Calls* calls = nullptr,
++                std::optional<u64> chain_sites = std::nullopt, TowerDiagnostics* diag = nullptr) {
+   Outcome out;
+   {
+     const Calls before{throwing_calls.load(), nothrow_calls.load()};
+-    auto tower = build_tower(*c.index, *c.catalogue, budget, pool);
++    auto tower = chain_sites ? forced_tower(c, budget, pool, *chain_sites, diag)
++                            : build_tower(*c.index, *c.catalogue, budget, pool, diag);
+     throwing_left.store(-1);
+     nothrow_left.store(-1);
+     if (calls != nullptr) *calls = Calls{throwing_calls.load() - before.throwing, nothrow_calls.load() - before.nothrow};
+     if (tower.ok() && digest != nullptr) *digest = digest_of(c, tower.value());
+     out = tower.ok() ? Outcome{} : tower.outcome();
++    // Hors injection et hors mesure des new : deux sentinelles "refus" ne prouvent pas une reprise FUL1.
++    if (out.ok() && digest != nullptr && !valid_digest_hex(*digest)) out = fail(Reason::tower_invariant);
+   }
+   return out;
+ }
+@@ -149,13 +180,14 @@
+   CHECK(again == expected);
+ }
+ 
+-// Balayage des allocations sans exception de build_tower (toutes, ou un echantillon regulier) ; rend les refus.
+-u64 sweep(const Chain& c, MemoryBudget& budget, sched::Pool& pool, unsigned long long total, u64 step) {
++// Balayage des allocations sans exception de la Session forcee (toutes ou un echantillon) ; rend les refus.
++u64 sweep(const Chain& c, MemoryBudget& budget, sched::Pool& pool, unsigned long long total, u64 step,
++          u64 chain_sites) {
+   const u64 base = budget.used();
+   u64 refusals = 0;
+   for (unsigned long long k = 0; k < total; k += step) {
+     nothrow_left.store(static_cast<long long>(k));
+-    const Outcome o = attempt(c, budget, pool, nullptr);
++    const Outcome o = attempt(c, budget, pool, nullptr, nullptr, chain_sites);
+     if (!o.ok()) {
+       CHECK_EQ(o.reason, Reason::memory_budget);
+       ++refusals;
+@@ -166,24 +198,45 @@
+ }
+ 
+ MHGP12_TEST(penurie, 200) {
+-  MemoryBudget budget(MemoryBudget::kUnlimited);
++  MemoryBudget budget(MemoryBudget::kUnlimited);  // sans cache : chaque Buffer neuf atteint l'injecteur
+   auto single = pool_of(1);
+   auto three = pool_of(3);
+-  const Chain c = make_chain(60, 4, 9, budget, *three);
++  // 3x3x3, pas 7, K2 : 54 paires axiales adjacentes, centres distincts, meme rayon 7/2.
++  // Une cohorte K2 > 1 engage les tampons Sphere/local de number_births_range.
++  const Chain c = make_chain(27, 2, 9, budget, *three, true);
+   REQUIRE(c.catalogue.has_value());
++  const u64 base = budget.used();
+   std::string expected;
+-  Calls calls;
+-  REQUIRE(attempt(c, budget, *single, &expected, &calls).ok());
+-  const unsigned long long total = calls.nothrow;
+-  CHECK(total >= 100);
+-  // Un fil : l'ordre des allocations est fixe ; chacune, tour a tour, rend un refus memory_budget.
+-  CHECK_EQ(sweep(c, budget, *single, total, 1), total);
+-  // Trois fils : un echantillon (l'allocation visee depend de l'entrelacement) ; refus ou succes, jamais de reste.
+-  sweep(c, budget, *three, total, std::max<u64>(1, total / 40));
+-  std::string again;
+-  CHECK(attempt(c, budget, *three, &again).ok());
+-  CHECK(again == expected);
+-  std::printf("penurie allocations=%llu\n", total);
++  REQUIRE(attempt(c, budget, *single, &expected).ok());  // temoin public, OFF sous le seuil
++  CHECK_EQ(budget.used(), base);
++  for (const u64 chain_sites : {MemoryBudget::kUnlimited, u64{0}}) {
++    std::string got;
++    Calls calls, parallel_calls;
++    TowerDiagnostics diag;
++    REQUIRE(attempt(c, budget, *single, &got, &calls, chain_sites, &diag).ok());
++    CHECK(got == expected);
++    CHECK_EQ(budget.used(), base);
++    CHECK_EQ(diag.chain_orders, chain_sites == 0 ? 3u : 0u);
++    CHECK(diag.forest.work[1].max_cohort > 1);  // ordre K2, bit 1 du masque ON
++    if (chain_sites == 0) CHECK(diag.chain_number_jobs > 0 && diag.chain_history_jobs > 0);
++    else CHECK(diag.chain_number_jobs == 0 && diag.chain_history_jobs == 0 && diag.hint_jobs == 0);
++    const unsigned long long total = calls.nothrow;
++    CHECK(total > 0);
++    // Un fil : TOUTES les allocations, y compris Sphere/local de N engage par cette cohorte.
++    CHECK_EQ(sweep(c, budget, *single, total, 1, chain_sites), total);
++    REQUIRE(attempt(c, budget, *three, &got, &parallel_calls, chain_sites).ok());
++    CHECK(got == expected);
++    CHECK_EQ(budget.used(), base);
++    // Trois fils : compte propre a cette largeur ; echantillon, l'ordre depend de l'entrelacement.
++    const unsigned long long parallel = parallel_calls.nothrow;
++    CHECK(parallel > 0);
++    sweep(c, budget, *three, parallel, std::max<u64>(1, parallel / 40), chain_sites);
++    CHECK(attempt(c, budget, *three, &got, nullptr, chain_sites).ok());
++    CHECK(got == expected);
++    CHECK_EQ(budget.used(), base);
++    std::printf("penurie chaine=%u allocations_1fil=%llu allocations_3fils=%llu\n",
++                static_cast<unsigned>(chain_sites == 0), total, parallel);
++  }
+ }
+ 
+ }  // namespace
